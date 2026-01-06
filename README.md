@@ -1,0 +1,298 @@
+
+# momoto-ui
+
+> **A design system & UI surface powered by Momoto Color Intelligence.**
+> Momoto decides. Momoto UI renders.
+
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18.0+-61DAFB.svg)](https://reactjs.org/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+---
+
+## Overview
+
+`momoto-ui` is a **UI and design system layer** that **consumes decisions from the Momoto Color Intelligence Engine** and applies them to real interfaces.
+
+It does **not decide color rules**, calculate contrast, or enforce policies.
+Those responsibilities belong to **Momoto Core**.
+
+`momoto-ui` focuses on:
+
+* Rendering accessible UI
+* Applying color decisions consistently
+* Providing framework adapters and components
+* Bridging design systems with intelligent color governance
+
+---
+
+## Relationship with Momoto
+
+| Layer         | Responsibility                                                 |
+| ------------- | -------------------------------------------------------------- |
+| **Momoto**    | Color perception, contrast, accessibility, policies, AI safety |
+| **Momoto UI** | Components, themes, tokens, rendering, framework bindings      |
+
+> If Momoto is the **decision engine**,
+> **Momoto UI is the execution surface**.
+
+---
+
+## Key Features
+
+* 🎨 **Powered by Momoto** — consumes perceptual color decisions
+* ♿ **Accessibility by construction** — no manual contrast guessing
+* 🧩 **Design-system ready** — tokens, themes, components
+* 🧱 **Hexagonal UI Architecture** — adapters over decisions
+* ⚛️ **React-first**, framework-agnostic core
+* 🌗 **Dark / Light mode without breaking brand**
+* ❌ **Zero hardcoded colors**
+
+---
+
+## Architecture (UI Layer)
+
+```
+┌────────────────────────────────────────────────────────────────────┐
+│                          UI ADAPTERS                                │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐  │
+│  │   React     │ │    CSS      │ │  Tailwind   │ │ Components  │  │
+│  │ ThemeProvider│ │ Variables  │ │   Config    │ │  Primitives │  │
+│  └──────┬──────┘ └──────┬──────┘ └──────┬──────┘ └──────┬──────┘  │
+└─────────┼────────────────┼────────────────┼────────────────┼──────┘
+          │                │                │                │
+          ▼                ▼                ▼                ▼
+┌────────────────────────────────────────────────────────────────────┐
+│                      APPLICATION (UI USE CASES)                     │
+│  ┌─────────────────────┐ ┌─────────────────────┐                  │
+│  │ ApplyThemeDecisions │ │ SyncDesignTokens     │                  │
+│  └──────────┬──────────┘ └──────────┬──────────┘                  │
+│             │                         │                             │
+│             ▼                         ▼                             │
+│        ┌──────────────────────────────────────────┐                │
+│        │      Momoto Integration Layer             │                │
+│        │  (Theme decisions, contrast modes, etc.)  │                │
+│        └──────────────────────────────────────────┘                │
+└────────────────────────────────────────────────────────────────────┘
+                             │
+                             ▼
+┌────────────────────────────────────────────────────────────────────┐
+│                         MOMOTO CORE (External)                      │
+│   Color Intelligence • APCA • OKLCH • Policies • AI Guards           │
+└────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Installation
+
+```bash
+npm install momoto momoto-ui
+```
+
+> `momoto-ui` **requires `momoto`** as its decision engine.
+
+---
+
+## Quick Start
+
+### 1. Create a Theme from Momoto Decisions
+
+```ts
+import { analyzeBrandColor } from 'momoto';
+import { createTheme } from 'momoto-ui';
+
+const analysis = analyzeBrandColor('#3B82F6');
+
+const theme = createTheme({
+  id: 'brand-light',
+  mode: 'light',
+  colors: analysis,
+});
+```
+
+---
+
+### 2. React Theme Provider
+
+```tsx
+import { ThemeProvider, useTheme } from 'momoto-ui/react';
+
+function App() {
+  return (
+    <ThemeProvider theme={theme} followSystem>
+      <Dashboard />
+    </ThemeProvider>
+  );
+}
+
+function Dashboard() {
+  const { colors, contrastMode } = useTheme();
+
+  return (
+    <div
+      style={{
+        background: colors.surface.primary,
+        color: colors.text.primary,
+      }}
+    >
+      Contrast mode: {contrastMode}
+    </div>
+  );
+}
+```
+
+---
+
+### 3. Components Consume Decisions (Not Hex Values)
+
+```tsx
+import { Button } from 'momoto-ui/components';
+
+<Button variant="primary">
+  Save changes
+</Button>
+```
+
+Internally, the component resolves:
+
+* background
+* text color
+* hover / focus
+* disabled state
+
+All from **Momoto decisions**, not hardcoded styles.
+
+---
+
+### 4. Tailwind Integration
+
+```ts
+import { createTailwindConfig } from 'momoto-ui/tailwind';
+
+export default createTailwindConfig({
+  theme,
+  prefix: 'brand-',
+  cssVariables: true,
+});
+```
+
+---
+
+### 5. Design Token Export
+
+```ts
+import { exportTokens } from 'momoto-ui/tokens';
+
+const tokens = exportTokens(theme, {
+  format: 'w3c',
+  namespace: 'brand',
+});
+```
+
+---
+
+## Core Concepts
+
+### Color Is a Decision
+
+Momoto UI never answers:
+
+> “What color should this be?”
+
+It asks:
+
+> “What did Momoto decide for this role?”
+
+---
+
+### Token Roles (Not Raw Colors)
+
+```ts
+theme.colors.text.primary
+theme.colors.surface.secondary
+theme.colors.border.muted
+theme.colors.intent.danger
+```
+
+Roles are stable.
+Values are **computed, validated, explainable**.
+
+---
+
+### Dark Mode Without Guessing
+
+```ts
+const { toggleDark } = useTheme();
+toggleDark();
+```
+
+No manual overrides.
+No duplicated palettes.
+No broken contrast.
+
+---
+
+## Best Practices
+
+### ❌ Don’t Hardcode Colors
+
+```ts
+background: '#3B82F6'
+```
+
+### ✅ Consume Decisions
+
+```ts
+background: theme.colors.intent.primary
+```
+
+---
+
+### ❌ Don’t Adjust Colors Manually
+
+```ts
+color.darken(10)
+```
+
+### ✅ Let Momoto Decide
+
+```ts
+theme.colors.text.onPrimary
+```
+
+---
+
+## When to Use momoto-ui
+
+✅ Design systems
+✅ CRMs / Dashboards
+✅ AI-assisted UI
+✅ Multi-brand platforms
+✅ Accessibility-critical products
+
+---
+
+## When NOT to Use It
+
+❌ Static marketing pages
+❌ One-off components
+❌ Decorative-only UI
+
+---
+
+## Philosophy
+
+> Color is not styling.
+> Color is responsibility.
+
+**Momoto decides.
+Momoto UI renders.**
+
+---
+
+## License
+
+MIT © 2026 Zuclubit
+
+---
