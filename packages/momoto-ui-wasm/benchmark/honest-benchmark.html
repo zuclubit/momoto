@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Momoto Performance Benchmark v2 (Honest Edition)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 2rem;
+      line-height: 1.6;
+      font-size: 13px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: #4ec9b0;
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+      text-align: center;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #dcdcaa;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+
+    .warning-box {
+      background: #5a1d1d;
+      border-left: 4px solid #f48771;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      border-radius: 4px;
+    }
+
+    .warning-box h3 {
+      color: #f48771;
+      margin-bottom: 0.5rem;
+    }
+
+    .info {
+      background: #252526;
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid #569cd6;
+    }
+
+    .controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: #0e639c;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 1rem;
+      transition: background 0.2s;
+      font-weight: bold;
+    }
+
+    button:hover:not(:disabled) {
+      background: #1177bb;
+    }
+
+    button:disabled {
+      background: #3e3e3e;
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    button.danger {
+      background: #d32f2f;
+    }
+
+    button.danger:hover:not(:disabled) {
+      background: #f44336;
+    }
+
+    .status {
+      padding: 0.75rem 1rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      display: none;
+      font-weight: bold;
+    }
+
+    .status.running {
+      display: block;
+      background: #264f78;
+      border-left: 4px solid #569cd6;
+    }
+
+    .status.complete {
+      display: block;
+      background: #1e3a1e;
+      border-left: 4px solid #4ec9b0;
+    }
+
+    .status.error {
+      display: block;
+      background: #5a1d1d;
+      border-left: 4px solid #f48771;
+    }
+
+    .progress {
+      height: 6px;
+      background: #3e3e3e;
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 1rem 0;
+      display: none;
+    }
+
+    .progress.active {
+      display: block;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #569cd6, #4ec9b0);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    #console {
+      background: #1a1a1a;
+      padding: 1.5rem;
+      border-radius: 4px;
+      border: 1px solid #3e3e3e;
+      min-height: 400px;
+      max-height: 80vh;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .console-line {
+      margin: 2px 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .console-line.success {
+      color: #4ec9b0;
+    }
+
+    .console-line.warning {
+      color: #dcdcaa;
+    }
+
+    .console-line.error {
+      color: #f48771;
+    }
+
+    .console-line.info {
+      color: #569cd6;
+    }
+
+    .console-line.dim {
+      color: #858585;
+    }
+
+    .summary-box {
+      background: #252526;
+      border: 2px solid #4ec9b0;
+      padding: 1.5rem;
+      margin-top: 1rem;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .summary-box.visible {
+      display: block;
+    }
+
+    .summary-box h3 {
+      color: #4ec9b0;
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .summary-item {
+      background: #1e1e1e;
+      padding: 1rem;
+      border-radius: 4px;
+      border-left: 3px solid #569cd6;
+    }
+
+    .summary-item.pass {
+      border-left-color: #4ec9b0;
+    }
+
+    .summary-item.fail {
+      border-left-color: #f48771;
+    }
+
+    .summary-item .label {
+      color: #858585;
+      font-size: 0.9rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .summary-item .value {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #d4d4d4;
+    }
+
+    .summary-item .status {
+      display: inline-block;
+      margin-top: 0.3rem;
+      font-size: 0.9rem;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    .summary-item .status.pass {
+      background: #1e3a1e;
+      color: #4ec9b0;
+    }
+
+    .summary-item .status.fail {
+      background: #5a1d1d;
+      color: #f48771;
+    }
+
+    .footer {
+      margin-top: 2rem;
+      text-align: center;
+      color: #858585;
+      font-size: 0.9rem;
+    }
+
+    .footer a {
+      color: #569cd6;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔬 Momoto Performance Benchmark v2</h1>
+    <div class="subtitle">Honest Edition - Anti-JIT Optimizations</div>
+
+    <div class="warning-box">
+      <h3>⚠️ This is the HONEST benchmark</h3>
+      <p>This benchmark uses anti-optimization techniques to ensure accurate measurements:</p>
+      <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+        <li>All results flow through globalThis.__benchSink (prevents dead code elimination)</li>
+        <li>Variable inputs per iteration (prevents constant folding)</li>
+        <li>Statistical analysis (median, not average)</li>
+        <li>Automatic sanity checks (flags suspicious results)</li>
+      </ul>
+      <p style="margin-top: 0.5rem;"><strong>If something fails, it WILL say FAIL.</strong> No maquillaje.</p>
+    </div>
+
+    <div class="info">
+      <p><strong>Environment Detection:</strong></p>
+      <p id="envInfo">Loading...</p>
+    </div>
+
+    <div class="controls">
+      <button id="runAll">Run All Benchmarks</button>
+      <button id="runBaseline">1. Baseline Checks</button>
+      <button id="runLUT">2. LUT Performance</button>
+      <button id="runBatch">3. Batch Scaling</button>
+      <button id="runComparison">4. Batch vs Individual</button>
+      <button id="clearConsole" class="danger">Clear Console</button>
+    </div>
+
+    <div class="progress" id="progress">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="status" id="status"></div>
+
+    <div id="console"></div>
+
+    <div class="summary-box" id="summary">
+      <h3>📊 Performance Summary</h3>
+      <div class="summary-grid" id="summaryGrid"></div>
+    </div>
+
+    <div class="footer">
+      <p>Momoto Performance Benchmark v2.0 (Honest Edition)</p>
+      <p>Powered by <a href="https://github.com/momoto/momoto" target="_blank">Momoto</a></p>
+    </div>
+  </div>
+
+  <!-- Load benchmark modules -->
+  <script src="benchmark-harness.js"></script>
+  <script src="benchmarks/baseline.js"></script>
+  <script src="benchmarks/lut-performance.js"></script>
+  <script src="benchmarks/batch-scaling.js"></script>
+
+  <script type="module">
+    import init, {
+      BatchMaterialInput,
+      BatchEvaluator,
+      MaterialContext,
+      fresnelFast,
+      beerLambertFast,
+      totalLutMemory,
+    } from '../momoto_wasm.js';
+
+    // ========================================================================
+    // GLOBALS
+    // ========================================================================
+
+    let wasmInitialized = false;
+    const harness = window.BenchmarkHarness;
+    const baselineBench = window.BaselineBenchmarks;
+    const lutBench = window.LUTBenchmarks;
+    const batchBench = window.BatchScalingBenchmarks;
+
+    // Results storage
+    let benchmarkResults = {
+      baseline: null,
+      lut: null,
+      batchScaling: null,
+      batchVsIndividual: null,
+    };
+
+    // ========================================================================
+    // UI UTILITIES
+    // ========================================================================
+
+    const consoleEl = document.getElementById('console');
+    const statusEl = document.getElementById('status');
+    const progressEl = document.getElementById('progress');
+    const progressBarEl = document.getElementById('progressBar');
+    const summaryEl = document.getElementById('summary');
+    const summaryGridEl = document.getElementById('summaryGrid');
+
+    function log(text, className = '') {
+      const line = document.createElement('div');
+      line.className = `console-line ${className}`;
+      line.textContent = text;
+      consoleEl.appendChild(line);
+      consoleEl.scrollTop = consoleEl.scrollHeight;
+    }
+
+    function setStatus(text, type = 'running') {
+      statusEl.textContent = text;
+      statusEl.className = `status ${type}`;
+    }
+
+    function setProgress(percent) {
+      progressEl.classList.add('active');
+      progressBarEl.style.width = `${Math.min(100, Math.max(0, percent))}%`;
+    }
+
+    function hideProgress() {
+      progressEl.classList.remove('active');
+    }
+
+    function clearConsole() {
+      consoleEl.innerHTML = '';
+    }
+
+    // Override console.log to capture output
+    const originalLog = console.log;
+    console.log = function(...args) {
+      const text = args.join(' ');
+      log(text);
+      originalLog.apply(console, args);
+    };
+
+    // ========================================================================
+    // ENVIRONMENT DETECTION
+    // ========================================================================
+
+    function detectEnvironment() {
+      const ua = navigator.userAgent;
+      let browser = 'Unknown';
+
+      if (ua.includes('Chrome')) browser = 'Chrome';
+      else if (ua.includes('Firefox')) browser = 'Firefox';
+      else if (ua.includes('Safari')) browser = 'Safari';
+      else if (ua.includes('Edge')) browser = 'Edge';
+
+      const cores = navigator.hardwareConcurrency || 'Unknown';
+      const memory = navigator.deviceMemory ? `${navigator.deviceMemory}GB` : 'Unknown';
+
+      document.getElementById('envInfo').innerHTML = `
+        Browser: ${browser} | CPU Cores: ${cores} | Memory: ${memory}
+        <br>Timer Resolution: ${performance.now() ? 'High' : 'Low'}
+      `;
+    }
+
+    // ========================================================================
+    // BENCHMARK RUNNERS
+    // ========================================================================
+
+    async function initialize() {
+      if (wasmInitialized) return true;
+
+      try {
+        setStatus('Initializing WASM...', 'running');
+        await init();
+        wasmInitialized = true;
+        setStatus('WASM initialized', 'complete');
+        return true;
+      } catch (error) {
+        setStatus(`Failed to initialize WASM: ${error.message}`, 'error');
+        log(`ERROR: ${error.message}`, 'error');
+        return false;
+      }
+    }
+
+    async function runBaselineChecks() {
+      if (!await initialize()) return;
+
+      setStatus('Running baseline sanity checks...', 'running');
+      setProgress(10);
+
+      benchmarkResults.baseline = baselineBench.runBaselineChecks(harness);
+
+      setProgress(100);
+      hideProgress();
+
+      if (benchmarkResults.baseline.healthy) {
+        setStatus('✓ Baseline checks complete - all healthy', 'complete');
+      } else {
+        setStatus('⚠️ Baseline checks complete - some warnings', 'error');
+      }
+    }
+
+    async function runLUTBenchmarks() {
+      if (!await initialize()) return;
+
+      setStatus('Running LUT performance benchmarks...', 'running');
+      setProgress(10);
+
+      benchmarkResults.lut = lutBench.runLUTBenchmarks(
+        harness,
+        fresnelFast,
+        beerLambertFast,
+        totalLutMemory
+      );
+
+      setProgress(100);
+      hideProgress();
+
+      if (benchmarkResults.lut.allPassed) {
+        setStatus('✓ LUT benchmarks complete - all targets met', 'complete');
+      } else {
+        setStatus('✗ LUT benchmarks complete - some targets not met', 'error');
+      }
+    }
+
+    async function runBatchScalingBenchmarks() {
+      if (!await initialize()) return;
+
+      setStatus('Running batch scaling benchmarks...', 'running');
+      setProgress(10);
+
+      benchmarkResults.batchScaling = batchBench.runBatchScalingBenchmarks(
+        harness,
+        BatchMaterialInput,
+        BatchEvaluator,
+        MaterialContext
+      );
+
+      setProgress(100);
+      hideProgress();
+
+      if (benchmarkResults.batchScaling.target.passed) {
+        setStatus('✓ Batch scaling complete - target met', 'complete');
+      } else {
+        setStatus('✗ Batch scaling complete - target not met', 'error');
+      }
+    }
+
+    async function runBatchVsIndividualBenchmarks() {
+      if (!await initialize()) return;
+
+      setStatus('Running batch vs individual comparison...', 'running');
+      setProgress(10);
+
+      benchmarkResults.batchVsIndividual = batchBench.runBatchVsIndividualBenchmarks(
+        harness,
+        BatchMaterialInput,
+        BatchEvaluator,
+        MaterialContext
+      );
+
+      setProgress(100);
+      hideProgress();
+
+      if (benchmarkResults.batchVsIndividual.passed) {
+        setStatus('✓ Batch vs Individual complete - target met', 'complete');
+      } else {
+        setStatus('✗ Batch vs Individual complete - target not met', 'error');
+      }
+    }
+
+    async function runAllBenchmarks() {
+      if (!await initialize()) return;
+
+      clearConsole();
+      summaryEl.classList.remove('visible');
+
+      log('═'.repeat(80), 'info');
+      log('MOMOTO PERFORMANCE BENCHMARK v2 (Honest Edition)', 'success');
+      log('═'.repeat(80), 'info');
+      log('');
+
+      try {
+        // 1. Baseline
+        setStatus('Running baseline checks...', 'running');
+        setProgress(5);
+        await runBaselineChecks();
+
+        // 2. LUT
+        setStatus('Running LUT benchmarks...', 'running');
+        setProgress(25);
+        await runLUTBenchmarks();
+
+        // 3. Batch Scaling
+        setStatus('Running batch scaling benchmarks...', 'running');
+        setProgress(50);
+        await runBatchScalingBenchmarks();
+
+        // 4. Batch vs Individual
+        setStatus('Running batch vs individual benchmarks...', 'running');
+        setProgress(75);
+        await runBatchVsIndividualBenchmarks();
+
+        // Show summary
+        setProgress(100);
+        showSummary();
+
+        hideProgress();
+        setStatus('✓ All benchmarks complete!', 'complete');
+
+      } catch (error) {
+        hideProgress();
+        setStatus(`✗ Benchmark failed: ${error.message}`, 'error');
+        log(`\nFATAL ERROR: ${error.message}`, 'error');
+        log(error.stack, 'dim');
+      }
+    }
+
+    function showSummary() {
+      if (!benchmarkResults.lut || !benchmarkResults.batchScaling || !benchmarkResults.batchVsIndividual) {
+        return;
+      }
+
+      const lut = benchmarkResults.lut;
+      const batch = benchmarkResults.batchScaling;
+      const comparison = benchmarkResults.batchVsIndividual;
+
+      summaryGridEl.innerHTML = `
+        <div class="summary-item ${lut.targets.fresnelFast.passed ? 'pass' : 'fail'}">
+          <div class="label">Fresnel LUT</div>
+          <div class="value">${harness.formatTime(lut.results.fresnelFast.median_ms)}</div>
+          <div class="status ${lut.targets.fresnelFast.passed ? 'pass' : 'fail'}">
+            ${lut.targets.fresnelFast.status}
+          </div>
+        </div>
+
+        <div class="summary-item ${lut.targets.beerLambertFast.passed ? 'pass' : 'fail'}">
+          <div class="label">Beer-Lambert LUT</div>
+          <div class="value">${harness.formatTime(lut.results.beerLambertFast.median_ms)}</div>
+          <div class="status ${lut.targets.beerLambertFast.passed ? 'pass' : 'fail'}">
+            ${lut.targets.beerLambertFast.status}
+          </div>
+        </div>
+
+        <div class="summary-item ${lut.targets.lutMemory ? 'pass' : 'fail'}">
+          <div class="label">LUT Memory</div>
+          <div class="value">${(lut.results.lutMemory / 1024).toFixed(1)} KB</div>
+          <div class="status ${lut.targets.lutMemory ? 'pass' : 'fail'}">
+            ${lut.targets.lutMemory ? 'PASS' : 'FAIL'}
+          </div>
+        </div>
+
+        <div class="summary-item ${batch.target.passed ? 'pass' : 'fail'}">
+          <div class="label">Batch Scaling</div>
+          <div class="value">${batch.scalingFactor.toFixed(1)}x</div>
+          <div class="status ${batch.target.passed ? 'pass' : 'fail'}">
+            ${batch.target.status}
+          </div>
+        </div>
+
+        <div class="summary-item ${comparison.passed ? 'pass' : 'fail'}">
+          <div class="label">Overall Speedup (100)</div>
+          <div class="value">${comparison.speedup100.toFixed(1)}x</div>
+          <div class="status ${comparison.passed ? 'pass' : 'fail'}">
+            ${comparison.passed ? 'PASS' : 'FAIL'}
+          </div>
+        </div>
+
+        <div class="summary-item ${lut.allPassed && batch.target.passed && comparison.passed ? 'pass' : 'fail'}">
+          <div class="label">Overall Status</div>
+          <div class="value">${lut.allPassed && batch.target.passed && comparison.passed ? '✓ PASS' : '✗ FAIL'}</div>
+          <div class="status ${lut.allPassed && batch.target.passed && comparison.passed ? 'pass' : 'fail'}">
+            ${lut.allPassed && batch.target.passed && comparison.passed ? 'All targets met' : 'Some targets not met'}
+          </div>
+        </div>
+      `;
+
+      summaryEl.classList.add('visible');
+    }
+
+    // ========================================================================
+    // EVENT LISTENERS
+    // ========================================================================
+
+    document.getElementById('runAll').addEventListener('click', runAllBenchmarks);
+    document.getElementById('runBaseline').addEventListener('click', async () => {
+      clearConsole();
+      await runBaselineChecks();
+    });
+    document.getElementById('runLUT').addEventListener('click', async () => {
+      clearConsole();
+      await runLUTBenchmarks();
+    });
+    document.getElementById('runBatch').addEventListener('click', async () => {
+      clearConsole();
+      await runBatchScalingBenchmarks();
+    });
+    document.getElementById('runComparison').addEventListener('click', async () => {
+      clearConsole();
+      await runBatchVsIndividualBenchmarks();
+    });
+    document.getElementById('clearConsole').addEventListener('click', () => {
+      clearConsole();
+      summaryEl.classList.remove('visible');
+      statusEl.className = 'status';
+      hideProgress();
+    });
+
+    // ========================================================================
+    // INITIALIZATION
+    // ========================================================================
+
+    detectEnvironment();
+    log('Ready! Click "Run All Benchmarks" to start.', 'info');
+    log('This benchmark uses anti-optimization techniques for honest results.', 'dim');
+    log('');
+  </script>
+</body>
+</html>

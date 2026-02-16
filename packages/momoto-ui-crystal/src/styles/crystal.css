@@ -1,0 +1,374 @@
+/**
+ * Momoto Crystal Design System 2025
+ * Core CSS Styles & Design Tokens
+ *
+ * Based on Apple HIG principles with glass/crystal aesthetic
+ * All colors use OKLCH for perceptual uniformity
+ */
+
+/* ============================================================================
+   DESIGN TOKENS
+   ============================================================================ */
+
+:root {
+  /* Color Palette - RGB Fallbacks + OKLCH */
+  /* Neutrals */
+  --crystal-surface: #FAFAFA;
+  --crystal-surface: oklch(0.98 0.005 240);
+  --crystal-canvas: #F5F5F7;
+  --crystal-canvas: oklch(0.96 0.008 240);
+  --crystal-glass: rgba(255, 255, 255, 0.7);
+  --crystal-glass-border: rgba(255, 255, 255, 0.3);
+  --crystal-text-primary: #262626;
+  --crystal-text-primary: oklch(0.15 0.01 240);
+  --crystal-text-secondary: #737373;
+  --crystal-text-secondary: oklch(0.45 0.02 240);
+  --crystal-text-tertiary: #A3A3A3;
+  --crystal-text-tertiary: oklch(0.60 0.02 240);
+  --crystal-border: #E5E5E5;
+  --crystal-border: oklch(0.88 0.01 240);
+  --crystal-divider: #F0F0F0;
+  --crystal-divider: oklch(0.92 0.005 240);
+
+  /* Semantic Colors */
+  --crystal-primary: #3B82F6;
+  --crystal-primary: oklch(0.55 0.14 240);
+  --crystal-primary-hover: #60A5FA;
+  --crystal-primary-hover: oklch(0.60 0.14 240);
+  --crystal-primary-active: #2563EB;
+  --crystal-primary-active: oklch(0.47 0.14 240);
+  --crystal-success: #10B981;
+  --crystal-success: oklch(0.50 0.12 140);
+  --crystal-error: #EF4444;
+  --crystal-error: oklch(0.52 0.18 25);
+  --crystal-warning: #F59E0B;
+  --crystal-warning: oklch(0.60 0.16 60);
+  --crystal-info: #3B82F6;
+  --crystal-info: oklch(0.55 0.14 240);
+
+  /* Elevation Shadows */
+  --shadow-0: none;
+  --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.10), 0 2px 4px rgba(0, 0, 0, 0.08);
+  --shadow-3: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.10);
+  --shadow-4: 0 16px 48px rgba(0, 0, 0, 0.14), 0 8px 16px rgba(0, 0, 0, 0.12);
+  --shadow-5: 0 24px 64px rgba(0, 0, 0, 0.16), 0 12px 24px rgba(0, 0, 0, 0.14);
+
+  /* Blur Effects */
+  --blur-sm: 10px;
+  --blur-md: 20px;
+  --blur-lg: 30px;
+  --blur-xl: 40px;
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* Spacing Scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* Typography */
+  --font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 30px;
+  --font-size-4xl: 36px;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Line Height */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* Animation */
+  --duration-instant: 100ms;
+  --duration-fast: 200ms;
+  --duration-normal: 300ms;
+  --duration-slow: 400ms;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Z-Index Scale */
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-fixed: 1200;
+  --z-modal-backdrop: 1300;
+  --z-modal: 1400;
+  --z-popover: 1500;
+  --z-tooltip: 1600;
+}
+
+/* Dark Mode Tokens */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --crystal-surface: #2C2C2E;
+    --crystal-surface: oklch(0.18 0.01 240);
+    --crystal-canvas: #1C1C1E;
+    --crystal-canvas: oklch(0.12 0.01 240);
+    --crystal-glass: rgba(255, 255, 255, 0.1);
+    --crystal-glass-border: rgba(255, 255, 255, 0.15);
+    --crystal-text-primary: #F5F5F7;
+    --crystal-text-primary: oklch(0.95 0.005 240);
+    --crystal-text-secondary: #B3B3B3;
+    --crystal-text-secondary: oklch(0.70 0.02 240);
+    --crystal-text-tertiary: #8C8C8C;
+    --crystal-text-tertiary: oklch(0.55 0.02 240);
+    --crystal-border: #3A3A3C;
+    --crystal-border: oklch(0.25 0.01 240);
+    --crystal-divider: #2C2C2E;
+    --crystal-divider: oklch(0.20 0.005 240);
+
+    --crystal-primary: #60A5FA;
+    --crystal-primary: oklch(0.65 0.18 240);
+    --crystal-primary-hover: #93C5FD;
+    --crystal-primary-hover: oklch(0.70 0.18 240);
+    --crystal-primary-active: #3B82F6;
+    --crystal-primary-active: oklch(0.57 0.18 240);
+  }
+}
+
+/* ============================================================================
+   BASE STYLES
+   ============================================================================ */
+
+.crystal-reset {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================================
+   GLASS SURFACES
+   ============================================================================ */
+
+.crystal-glass {
+  background: var(--crystal-glass);
+  backdrop-filter: blur(var(--blur-md)) saturate(1.2);
+  border: 1px solid var(--crystal-glass-border);
+}
+
+.crystal-glass-heavy {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(var(--blur-lg)) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.crystal-glass-light {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(var(--blur-sm)) saturate(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================================================
+   ELEVATION SYSTEM
+   ============================================================================ */
+
+.crystal-elevation-0 { box-shadow: var(--shadow-0); }
+.crystal-elevation-1 { box-shadow: var(--shadow-1); }
+.crystal-elevation-2 { box-shadow: var(--shadow-2); }
+.crystal-elevation-3 { box-shadow: var(--shadow-3); }
+.crystal-elevation-4 { box-shadow: var(--shadow-4); }
+.crystal-elevation-5 { box-shadow: var(--shadow-5); }
+
+/* ============================================================================
+   BUTTON BASE
+   ============================================================================ */
+
+.crystal-button-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  transition: all var(--duration-fast) var(--ease);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.crystal-button-base:focus {
+  outline: none;
+}
+
+.crystal-button-base:focus-visible {
+  outline: 2px solid var(--crystal-primary);
+  outline-offset: 2px;
+}
+
+.crystal-button-base:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Button Sizes */
+.crystal-button-sm {
+  height: 32px;
+  padding: 0 var(--space-3);
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-sm);
+}
+
+.crystal-button-md {
+  height: 40px;
+  padding: 0 var(--space-4);
+  font-size: var(--font-size-base);
+  border-radius: var(--radius-md);
+}
+
+.crystal-button-lg {
+  height: 48px;
+  padding: 0 var(--space-6);
+  font-size: var(--font-size-lg);
+  border-radius: var(--radius-lg);
+}
+
+/* ============================================================================
+   INPUT BASE
+   ============================================================================ */
+
+.crystal-input-base {
+  display: block;
+  width: 100%;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--crystal-text-primary);
+  background: var(--crystal-glass);
+  border: 1px solid var(--crystal-border);
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--ease);
+  outline: none;
+}
+
+.crystal-input-base::placeholder {
+  color: var(--crystal-text-tertiary);
+}
+
+.crystal-input-base:hover {
+  border-color: var(--crystal-text-secondary);
+}
+
+.crystal-input-base:focus {
+  border-color: var(--crystal-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.crystal-input-base:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Input Sizes */
+.crystal-input-sm {
+  height: 32px;
+  padding: 0 var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
+.crystal-input-md {
+  height: 40px;
+  padding: 0 var(--space-4);
+  font-size: var(--font-size-base);
+}
+
+.crystal-input-lg {
+  height: 48px;
+  padding: 0 var(--space-5);
+  font-size: var(--font-size-lg);
+}
+
+/* ============================================================================
+   CARD BASE
+   ============================================================================ */
+
+.crystal-card-base {
+  display: block;
+  background: var(--crystal-glass);
+  border: 1px solid var(--crystal-glass-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  backdrop-filter: blur(var(--blur-md)) saturate(1.2);
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.crystal-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2);
+}
+
+.crystal-card-interactive {
+  cursor: pointer;
+}
+
+.crystal-card-interactive:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-1);
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================ */
+
+/* Text Colors */
+.crystal-text-primary { color: var(--crystal-text-primary); }
+.crystal-text-secondary { color: var(--crystal-text-secondary); }
+.crystal-text-tertiary { color: var(--crystal-text-tertiary); }
+
+/* Background Colors */
+.crystal-bg-surface { background: var(--crystal-surface); }
+.crystal-bg-canvas { background: var(--crystal-canvas); }
+
+/* Border Radius */
+.crystal-rounded-sm { border-radius: var(--radius-sm); }
+.crystal-rounded-md { border-radius: var(--radius-md); }
+.crystal-rounded-lg { border-radius: var(--radius-lg); }
+.crystal-rounded-xl { border-radius: var(--radius-xl); }
+.crystal-rounded-2xl { border-radius: var(--radius-2xl); }
+.crystal-rounded-full { border-radius: var(--radius-full); }
+
+/* Spacing */
+.crystal-p-1 { padding: var(--space-1); }
+.crystal-p-2 { padding: var(--space-2); }
+.crystal-p-3 { padding: var(--space-3); }
+.crystal-p-4 { padding: var(--space-4); }
+.crystal-p-5 { padding: var(--space-5); }
+.crystal-p-6 { padding: var(--space-6); }
+.crystal-p-8 { padding: var(--space-8); }
+
+.crystal-m-1 { margin: var(--space-1); }
+.crystal-m-2 { margin: var(--space-2); }
+.crystal-m-3 { margin: var(--space-3); }
+.crystal-m-4 { margin: var(--space-4); }
+.crystal-m-5 { margin: var(--space-5); }
+.crystal-m-6 { margin: var(--space-6); }
+.crystal-m-8 { margin: var(--space-8); }

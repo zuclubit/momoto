@@ -1,0 +1,261 @@
+/**
+ * Crystal Input Styles
+ * Glass effect input fields
+ */
+
+/* ============================================================================
+   INPUT WRAPPER
+   ============================================================================ */
+
+.crystal-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.crystal-input-full-width {
+  width: 100%;
+}
+
+.crystal-input-disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* ============================================================================
+   LABEL
+   ============================================================================ */
+
+.crystal-input-label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--crystal-text-primary);
+  margin-bottom: var(--space-1);
+}
+
+/* ============================================================================
+   INPUT CONTAINER
+   ============================================================================ */
+
+.crystal-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--crystal-glass);
+  border: 1px solid var(--crystal-border);
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--ease);
+  backdrop-filter: blur(var(--blur-md)) saturate(1.2);
+}
+
+.crystal-input-container:hover {
+  border-color: var(--crystal-text-secondary);
+  background: var(--crystal-glass-heavy);
+}
+
+.crystal-input-focused {
+  border-color: var(--crystal-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background: var(--crystal-glass-heavy);
+}
+
+/* ============================================================================
+   INPUT FIELD
+   ============================================================================ */
+
+.crystal-input-base {
+  flex: 1;
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-family);
+  color: var(--crystal-text-primary);
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.crystal-input-base::placeholder {
+  color: var(--crystal-text-tertiary);
+}
+
+.crystal-input-base:disabled {
+  cursor: not-allowed;
+}
+
+/* Input Sizes */
+.crystal-input-sm {
+  height: 32px;
+  padding: 0 var(--space-3);
+}
+
+.crystal-input-field-sm {
+  font-size: var(--font-size-sm);
+  padding: 0 var(--space-3);
+}
+
+.crystal-input-md {
+  height: 40px;
+  padding: 0 var(--space-4);
+}
+
+.crystal-input-field-md {
+  font-size: var(--font-size-base);
+  padding: 0 var(--space-4);
+}
+
+.crystal-input-lg {
+  height: 48px;
+  padding: 0 var(--space-5);
+}
+
+.crystal-input-field-lg {
+  font-size: var(--font-size-lg);
+  padding: 0 var(--space-5);
+}
+
+/* With Icons */
+.crystal-input-with-icon-left .crystal-input-base {
+  padding-left: var(--space-2);
+}
+
+.crystal-input-with-icon-right .crystal-input-base {
+  padding-right: var(--space-2);
+}
+
+/* ============================================================================
+   VARIANTS
+   ============================================================================ */
+
+/* Default */
+.crystal-input-default {
+  border-color: var(--crystal-border);
+}
+
+/* Error */
+.crystal-input-error {
+  border-color: var(--crystal-error);
+}
+
+.crystal-input-error.crystal-input-focused {
+  border-color: var(--crystal-error);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* Success */
+.crystal-input-success {
+  border-color: var(--crystal-success);
+}
+
+.crystal-input-success.crystal-input-focused {
+  border-color: var(--crystal-success);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+
+/* ============================================================================
+   ICONS
+   ============================================================================ */
+
+.crystal-input-icon-left,
+.crystal-input-icon-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--crystal-text-tertiary);
+  transition: color var(--duration-fast) var(--ease);
+  flex-shrink: 0;
+}
+
+.crystal-input-icon-left {
+  margin-left: var(--space-3);
+  margin-right: var(--space-2);
+}
+
+.crystal-input-icon-right {
+  margin-right: var(--space-3);
+  margin-left: var(--space-2);
+}
+
+.crystal-input-focused .crystal-input-icon-left,
+.crystal-input-focused .crystal-input-icon-right {
+  color: var(--crystal-text-secondary);
+}
+
+/* Password Toggle */
+.crystal-input-password-toggle {
+  all: unset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--crystal-text-tertiary);
+  transition: color var(--duration-fast) var(--ease);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1);
+}
+
+.crystal-input-password-toggle:hover {
+  color: var(--crystal-text-secondary);
+  background: var(--crystal-glass-light);
+}
+
+.crystal-input-password-toggle:focus-visible {
+  outline: 2px solid var(--crystal-primary);
+  outline-offset: 2px;
+  color: var(--crystal-primary);
+}
+
+/* ============================================================================
+   MESSAGE (Helper / Error / Success)
+   ============================================================================ */
+
+.crystal-input-message {
+  font-size: var(--font-size-sm);
+  color: var(--crystal-text-secondary);
+  margin: 0;
+  line-height: var(--line-height-normal);
+}
+
+.crystal-input-message-error {
+  color: var(--crystal-error);
+}
+
+.crystal-input-message-success {
+  color: var(--crystal-success);
+}
+
+/* ============================================================================
+   ACCESSIBILITY
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .crystal-input-container,
+  .crystal-input-base,
+  .crystal-input-icon-left,
+  .crystal-input-icon-right,
+  .crystal-input-password-toggle {
+    transition: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .crystal-input-container {
+    border-width: 2px;
+  }
+
+  .crystal-input-error {
+    border-width: 2px;
+  }
+
+  .crystal-input-success {
+    border-width: 2px;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+.crystal-input-base:focus-visible {
+  outline: 2px solid var(--crystal-primary);
+  outline-offset: -2px;
+  border-radius: var(--radius-sm);
+}

@@ -1,0 +1,343 @@
+/**
+ * Glass Button Styles - Apple Liquid Glass 2026
+ *
+ * True multi-layer glass composition powered by Momoto WASM
+ * All colors calculated using perceptual color science
+ *
+ * Features:
+ * - Highlight, base, and shadow layers
+ * - Adaptive backdrop blur with saturation boost
+ * - Physically-based reflectivity
+ * - Specular highlights for realism
+ * - Smooth, natural transitions
+ */
+
+/* ============================================================================
+   BASE GLASS BUTTON
+   ============================================================================ */
+
+.glass-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  /* Typography */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: center;
+  white-space: nowrap;
+  user-select: none;
+
+  /* Base glass surface */
+  background: var(--glass-bg);
+  color: var(--glass-text);
+  border: 1px solid color-mix(in oklch, var(--glass-bg) 80%, transparent);
+  border-radius: 10px;
+
+  /* Liquid Glass effect - multi-layer */
+  backdrop-filter:
+    blur(var(--glass-blur))
+    saturate(calc(1 + var(--glass-opacity) * 0.5));
+  -webkit-backdrop-filter:
+    blur(var(--glass-blur))
+    saturate(calc(1 + var(--glass-opacity) * 0.5));
+
+  /* Glass depth with shadows */
+  box-shadow:
+    /* Outer glow (reflectivity) */
+    0 0 calc(var(--glass-reflectivity) * 20px)
+      color-mix(in oklch, var(--glass-highlight) 15%, transparent),
+    /* Elevation shadow */
+    0 2px 8px rgba(0, 0, 0, calc(0.08 * var(--glass-opacity))),
+    0 1px 2px rgba(0, 0, 0, calc(0.04 * var(--glass-opacity))),
+    /* Inner highlight (specular) */
+    inset 0 1px 0 color-mix(in oklch, var(--glass-highlight) calc(var(--glass-specular) * 100%), transparent),
+    /* Inner shadow (depth) */
+    inset 0 -1px 1px rgba(0, 0, 0, calc(0.03 * var(--glass-opacity)));
+
+  /* Interaction */
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Prevent text selection */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ============================================================================
+   MULTI-LAYER GLASS COMPOSITION
+   ============================================================================ */
+
+/* Top layer: Specular highlight */
+.glass-button-highlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(
+    to bottom,
+    var(--glass-highlight),
+    transparent
+  );
+  opacity: calc(var(--glass-specular) * 0.2);
+  border-radius: inherit;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+/* Bottom layer: Shadow for depth */
+.glass-button-shadow {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(
+    to top,
+    var(--glass-shadow),
+    transparent
+  );
+  opacity: calc(var(--glass-opacity) * 0.08);
+  border-radius: inherit;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+/* Content layer */
+.glass-button-content {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ============================================================================
+   INTERACTIVE STATES
+   ============================================================================ */
+
+/* Hover - increase glass reflectivity and elevation */
+.glass-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+
+  box-shadow:
+    /* Stronger outer glow */
+    0 0 calc(var(--glass-reflectivity) * 30px)
+      color-mix(in oklch, var(--glass-highlight) 25%, transparent),
+    /* Elevated shadow */
+    0 4px 12px rgba(0, 0, 0, calc(0.12 * var(--glass-opacity))),
+    0 2px 4px rgba(0, 0, 0, calc(0.06 * var(--glass-opacity))),
+    /* Stronger inner highlight */
+    inset 0 1px 0 color-mix(in oklch, var(--glass-highlight) calc(var(--glass-specular) * 120%), transparent),
+    /* Inner shadow */
+    inset 0 -1px 1px rgba(0, 0, 0, calc(0.04 * var(--glass-opacity)));
+}
+
+.glass-button:hover:not(:disabled) .glass-button-highlight {
+  opacity: calc(var(--glass-specular) * 0.35);
+}
+
+.glass-button:hover:not(:disabled) .glass-button-shadow {
+  opacity: calc(var(--glass-opacity) * 0.12);
+}
+
+/* Active - compress glass */
+.glass-button:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+
+  box-shadow:
+    /* Reduced glow */
+    0 0 calc(var(--glass-reflectivity) * 10px)
+      color-mix(in oklch, var(--glass-highlight) 10%, transparent),
+    /* Pressed shadow */
+    0 1px 3px rgba(0, 0, 0, calc(0.10 * var(--glass-opacity))),
+    /* Deeper inner shadow */
+    inset 0 1px 2px rgba(0, 0, 0, calc(0.08 * var(--glass-opacity)));
+}
+
+.glass-button:active:not(:disabled) .glass-button-highlight {
+  opacity: calc(var(--glass-specular) * 0.1);
+}
+
+.glass-button:active:not(:disabled) .glass-button-shadow {
+  opacity: calc(var(--glass-opacity) * 0.15);
+}
+
+/* Focus - accessibility ring with glass effect */
+.glass-button:focus-visible {
+  outline: none;
+  box-shadow:
+    /* Focus ring with glass glow */
+    0 0 0 3px color-mix(in oklch, var(--glass-base) 40%, transparent),
+    0 0 0 1px var(--glass-bg),
+    /* Base shadows */
+    0 0 calc(var(--glass-reflectivity) * 20px)
+      color-mix(in oklch, var(--glass-highlight) 15%, transparent),
+    0 2px 8px rgba(0, 0, 0, calc(0.08 * var(--glass-opacity))),
+    0 1px 2px rgba(0, 0, 0, calc(0.04 * var(--glass-opacity))),
+    inset 0 1px 0 color-mix(in oklch, var(--glass-highlight) calc(var(--glass-specular) * 100%), transparent),
+    inset 0 -1px 1px rgba(0, 0, 0, calc(0.03 * var(--glass-opacity)));
+}
+
+/* Disabled - frosted glass effect */
+.glass-button:disabled,
+.glass-button-disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, calc(0.04 * var(--glass-opacity))),
+    inset 0 1px 0 color-mix(in oklch, var(--glass-highlight) calc(var(--glass-specular) * 50%), transparent);
+}
+
+.glass-button:disabled .glass-button-highlight,
+.glass-button-disabled .glass-button-highlight {
+  opacity: calc(var(--glass-specular) * 0.1);
+}
+
+.glass-button:disabled .glass-button-shadow,
+.glass-button-disabled .glass-button-shadow {
+  opacity: calc(var(--glass-opacity) * 0.05);
+}
+
+/* Loading - pulse effect */
+.glass-button-loading {
+  cursor: wait;
+}
+
+.glass-button-loading .glass-button-highlight {
+  animation: glass-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes glass-shimmer {
+  0%, 100% {
+    opacity: calc(var(--glass-specular) * 0.2);
+  }
+  50% {
+    opacity: calc(var(--glass-specular) * 0.4);
+  }
+}
+
+/* ============================================================================
+   SIZES
+   ============================================================================ */
+
+.glass-button-sm {
+  padding: 0.375rem 0.875rem;
+  font-size: 0.875rem;
+  border-radius: 8px;
+  min-height: 32px;
+}
+
+.glass-button-md {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.9375rem;
+  border-radius: 10px;
+  min-height: 40px;
+}
+
+.glass-button-lg {
+  padding: 0.75rem 1.75rem;
+  font-size: 1rem;
+  border-radius: 12px;
+  min-height: 48px;
+}
+
+/* ============================================================================
+   LAYOUT
+   ============================================================================ */
+
+.glass-button-full-width {
+  width: 100%;
+  display: flex;
+}
+
+.glass-button-with-icon {
+  gap: 0.5rem;
+}
+
+.glass-button-icon,
+.glass-button-icon-right {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.glass-button-icon svg,
+.glass-button-icon-right svg {
+  width: 1em;
+  height: 1em;
+}
+
+.glass-button-text {
+  flex: 1;
+}
+
+/* ============================================================================
+   LOADING SPINNER
+   ============================================================================ */
+
+.glass-button-spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+}
+
+.glass-button-spinner svg {
+  width: 100%;
+  height: 100%;
+  animation: glass-spin 1s linear infinite;
+}
+
+@keyframes glass-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================================
+   DARK MODE ADAPTATION
+   ============================================================================ */
+
+@media (prefers-color-scheme: dark) {
+  .glass-button {
+    /* Darker glass in dark mode */
+    border-color: color-mix(in oklch, var(--glass-bg) 60%, transparent);
+
+    /* Adjusted shadows for dark backgrounds */
+    box-shadow:
+      0 0 calc(var(--glass-reflectivity) * 25px)
+        color-mix(in oklch, var(--glass-highlight) 20%, transparent),
+      0 2px 8px rgba(0, 0, 0, calc(0.16 * var(--glass-opacity))),
+      0 1px 2px rgba(0, 0, 0, calc(0.08 * var(--glass-opacity))),
+      inset 0 1px 0 color-mix(in oklch, var(--glass-highlight) calc(var(--glass-specular) * 80%), transparent),
+      inset 0 -1px 1px rgba(0, 0, 0, calc(0.06 * var(--glass-opacity)));
+  }
+}
+
+/* ============================================================================
+   REDUCED MOTION
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-button,
+  .glass-button-highlight,
+  .glass-button-shadow {
+    transition: none;
+    animation: none;
+  }
+
+  .glass-button:hover:not(:disabled),
+  .glass-button:active:not(:disabled) {
+    transform: none;
+  }
+}

@@ -1,0 +1,13 @@
+<!-- Silence ResizeObserver warning (common in Storybook) -->
+<script>
+  // Suppress ResizeObserver loop error
+  window.addEventListener('error', (e) => {
+    if (e.message === 'ResizeObserver loop completed with undelivered notifications.') {
+      const resizeObserverErr = e;
+      if (resizeObserverErr) {
+        e.stopImmediatePropagation();
+        e.stopPropagation();
+      }
+    }
+  });
+</script>

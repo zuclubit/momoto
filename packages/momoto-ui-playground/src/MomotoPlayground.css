@@ -1,0 +1,722 @@
+/**
+ * Momoto UI Playground Styles
+ * Crystal Design System 2025
+ *
+ * Implements glass/crystal aesthetics with:
+ * - Multi-layer depth
+ * - Backdrop blur
+ * - Micro-contrasts
+ * - Smooth transitions
+ * - Apple HIG-inspired refinement
+ */
+
+/* ============================================================================
+   CSS CUSTOM PROPERTIES (Tokens)
+   ============================================================================ */
+
+:root {
+  /* Colors (OKLCH) */
+  --color-surface: oklch(0.98 0.005 240);
+  --color-canvas: oklch(0.96 0.008 240);
+  --color-text-primary: oklch(0.15 0.01 240);
+  --color-text-secondary: oklch(0.45 0.02 240);
+  --color-text-tertiary: oklch(0.65 0.015 240);
+  --color-border: oklch(0.88 0.01 240);
+  --color-divider: oklch(0.92 0.008 240);
+
+  /* Semantic */
+  --color-primary: oklch(0.55 0.14 240);
+  --color-success: oklch(0.50 0.12 140);
+  --color-error: oklch(0.52 0.18 25);
+  --color-warning: oklch(0.60 0.16 60);
+
+  /* Elevation (Shadows) */
+  --elevation-0: none;
+  --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --elevation-2: 0 4px 12px rgba(0, 0, 0, 0.10), 0 2px 4px rgba(0, 0, 0, 0.08);
+  --elevation-3: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.10);
+  --elevation-inset: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+
+  /* Blur */
+  --blur-sm: 20px;
+  --blur-md: 30px;
+  --blur-lg: 40px;
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Animation */
+  --duration-fast: 180ms;
+  --duration-normal: 240ms;
+  --duration-slow: 320ms;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================================================
+   RESET & BASE
+   ============================================================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI',
+    'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  background: var(--color-canvas);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================================
+   GLASS SURFACE (Core Element)
+   ============================================================================ */
+
+.glass-surface {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(var(--blur-md)) saturate(1.2);
+  -webkit-backdrop-filter: blur(var(--blur-md)) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-surface::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Elevation variants */
+.elevation-0 {
+  box-shadow: var(--elevation-0);
+}
+
+.elevation-1 {
+  box-shadow: var(--elevation-1);
+}
+
+.elevation-2 {
+  box-shadow: var(--elevation-2);
+}
+
+.elevation-3 {
+  box-shadow: var(--elevation-3);
+}
+
+/* ============================================================================
+   PLAYGROUND LAYOUT
+   ============================================================================ */
+
+.momoto-playground {
+  min-height: 100vh;
+  padding: var(--space-lg);
+  background: linear-gradient(
+    180deg,
+    oklch(0.98 0.005 240) 0%,
+    oklch(0.96 0.008 240) 100%
+  );
+}
+
+/* Header */
+.playground-header {
+  margin-bottom: var(--space-xl);
+  padding: var(--space-lg) var(--space-xl);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-title h1 {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: var(--space-xs);
+}
+
+.subtitle {
+  font-size: 16px;
+  color: var(--color-text-secondary);
+}
+
+.header-status {
+  display: flex;
+  gap: var(--space-md);
+}
+
+/* Status Badge */
+.status-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+
+.status-label {
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-tertiary);
+}
+
+.status-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.status-active .status-value {
+  color: var(--color-success);
+}
+
+/* Grid Layout */
+.playground-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: var(--space-xl);
+  align-items: start;
+}
+
+/* Sidebar */
+.playground-sidebar {
+  padding: var(--space-lg);
+  position: sticky;
+  top: var(--space-lg);
+  max-height: calc(100vh - var(--space-xl));
+  overflow-y: auto;
+}
+
+.control-section {
+  margin-bottom: var(--space-xl);
+}
+
+.control-section h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: var(--space-md);
+  color: var(--color-text-primary);
+}
+
+/* Main */
+.playground-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.showcase-section {
+  padding: var(--space-xl);
+}
+
+.showcase-section h2 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: var(--space-lg);
+}
+
+/* ============================================================================
+   COLOR SLIDER
+   ============================================================================ */
+
+.color-slider {
+  margin-bottom: var(--space-md);
+}
+
+.slider-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: var(--space-sm);
+  color: var(--color-text-secondary);
+}
+
+.slider-value {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.slider-input {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(
+    to right,
+    var(--color-border),
+    var(--color-primary)
+  );
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  box-shadow: var(--elevation-2);
+  transition: transform var(--duration-fast) var(--ease);
+}
+
+.slider-input::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+
+.slider-input::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  box-shadow: var(--elevation-2);
+  border: none;
+}
+
+/* Color Preview */
+.color-preview {
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.preview-swatch {
+  width: 100%;
+  height: 64px;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-sm);
+  box-shadow: var(--elevation-1);
+}
+
+.preview-code {
+  display: block;
+  font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+/* ============================================================================
+   METRIC ROW
+   ============================================================================ */
+
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.metric-row:last-child {
+  border-bottom: none;
+}
+
+.metric-label {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.metric-value {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.metric-success .metric-value {
+  color: var(--color-success);
+}
+
+.metric-warning .metric-value {
+  color: var(--color-warning);
+}
+
+.metric-info .metric-value {
+  color: var(--color-primary);
+}
+
+/* ============================================================================
+   A11Y CARDS
+   ============================================================================ */
+
+.a11y-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-md);
+}
+
+.a11y-card {
+  padding: var(--space-lg);
+  text-align: center;
+  border: 2px solid transparent;
+  transition: all var(--duration-normal) var(--ease);
+}
+
+.a11y-card.a11y-pass {
+  border-color: var(--color-success);
+}
+
+.a11y-card.a11y-fail {
+  border-color: var(--color-error);
+}
+
+.a11y-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.a11y-ratio {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.a11y-level {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: var(--space-md);
+}
+
+.a11y-level.pass {
+  color: var(--color-success);
+}
+
+.a11y-level.fail {
+  color: var(--color-error);
+}
+
+.a11y-badge {
+  display: inline-block;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.a11y-badge.pass {
+  background: oklch(0.90 0.08 140);
+  color: oklch(0.25 0.12 140);
+}
+
+.a11y-badge.fail {
+  background: oklch(0.90 0.10 25);
+  color: oklch(0.35 0.18 25);
+}
+
+/* ============================================================================
+   TOKEN CARDS
+   ============================================================================ */
+
+.token-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-md);
+}
+
+.token-card {
+  padding: var(--space-md);
+  transition: all var(--duration-normal) var(--ease);
+}
+
+.token-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--elevation-2);
+}
+
+.token-swatch {
+  width: 100%;
+  height: 80px;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-md);
+  box-shadow: var(--elevation-1);
+}
+
+.token-state {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: var(--space-xs);
+}
+
+.token-description {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.token-code {
+  display: block;
+  font-family: 'SF Mono', Monaco, monospace;
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+}
+
+/* ============================================================================
+   COMPONENT SHOWCASE
+   ============================================================================ */
+
+.component-showcase {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.showcase-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.showcase-row > label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.showcase-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+/* ============================================================================
+   BUTTONS (Crystal Design)
+   ============================================================================ */
+
+.btn-crystal-primary {
+  height: 48px;
+  padding: 0 24px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  background: var(--btn-bg, var(--color-primary));
+  box-shadow: var(--elevation-1);
+  backdrop-filter: blur(var(--blur-sm)) saturate(1.2);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+  user-select: none;
+}
+
+.btn-crystal-primary:hover {
+  background: var(--btn-bg-hover, oklch(0.60 0.14 240));
+  box-shadow: var(--elevation-2);
+  transform: translateY(-1px) scale(1.02);
+}
+
+.btn-crystal-primary:active {
+  background: var(--btn-bg-active, oklch(0.47 0.14 240));
+  box-shadow: var(--elevation-0);
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-crystal-primary:focus-visible {
+  outline: none;
+  box-shadow: var(--elevation-1), 0 0 0 4px rgba(59, 130, 246, 0.3);
+}
+
+.btn-crystal-secondary {
+  height: 48px;
+  padding: 0 24px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(var(--blur-sm));
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.btn-crystal-secondary:hover {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: var(--color-text-secondary);
+  transform: translateY(-1px);
+}
+
+.btn-crystal-ghost {
+  height: 48px;
+  padding: 0 24px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.btn-crystal-ghost:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* ============================================================================
+   INPUT FIELDS (Crystal Design)
+   ============================================================================ */
+
+.input-crystal {
+  height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: var(--elevation-inset);
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.input-crystal::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.input-crystal:hover {
+  background: rgba(255, 255, 255, 0.65);
+  border-color: var(--color-text-tertiary);
+}
+
+.input-crystal:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.8);
+  border-color: var(--color-primary);
+  box-shadow: var(--elevation-0), 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
+/* ============================================================================
+   CARD DEMO
+   ============================================================================ */
+
+.card-crystal-demo {
+  padding: var(--space-lg);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(var(--blur-md)) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elevation-1);
+  transition: all var(--duration-normal) var(--ease);
+}
+
+.card-crystal-demo:hover {
+  box-shadow: var(--elevation-2);
+  transform: translateY(-2px);
+}
+
+.card-crystal-demo h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.metric-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.metric-change {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.metric-change.positive {
+  color: var(--color-success);
+}
+
+/* ============================================================================
+   CSS EXPORT
+   ============================================================================ */
+
+.css-export {
+  padding: var(--space-lg);
+  background: oklch(0.15 0.01 240);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  margin-bottom: var(--space-md);
+}
+
+.css-export code {
+  font-family: 'SF Mono', Monaco, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: oklch(0.85 0.02 240);
+}
+
+.btn-copy {
+  width: 100%;
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+
+@media (max-width: 1024px) {
+  .playground-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .playground-sidebar {
+    position: relative;
+    top: 0;
+    max-height: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-md);
+  }
+
+  .token-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .a11y-grid {
+    grid-template-columns: 1fr;
+  }
+}

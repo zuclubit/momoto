@@ -1,0 +1,31 @@
+{
+  "name": "momoto-wasm",
+  "type": "module",
+  "collaborators": [
+    "Momoto Team"
+  ],
+  "description": "WASM bindings for Momoto color perception metrics",
+  "version": "5.0.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/momoto/momoto"
+  },
+  "files": [
+    "momoto_wasm_bg.wasm",
+    "momoto_wasm.js",
+    "momoto_wasm.d.ts"
+  ],
+  "main": "momoto_wasm.js",
+  "homepage": "https://momoto.dev",
+  "types": "momoto_wasm.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ],
+  "keywords": [
+    "wasm",
+    "color",
+    "contrast",
+    "accessibility"
+  ]
+}

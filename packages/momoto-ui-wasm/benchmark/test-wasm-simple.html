@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple WASM Test</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: #0a0a0a;
+      color: #00ff88;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .output {
+      background: #000;
+      border: 1px solid #333;
+      padding: 20px;
+      margin: 20px 0;
+      white-space: pre-wrap;
+    }
+    .error {
+      color: #ff3333;
+    }
+    .success {
+      color: #00ff88;
+    }
+    button {
+      background: #00ff88;
+      color: #0a0a0a;
+      border: none;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      margin: 10px 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔬 Simple WASM Test</h1>
+  <p>This test tries to call WASM functions ONE TIME (no batch, no loop)</p>
+
+  <button onclick="testWASM()">Test WASM Functions</button>
+  <button onclick="clearOutput()">Clear</button>
+
+  <div class="output" id="output">Click "Test WASM Functions" to start...</div>
+
+  <script type="module">
+    function log(message, isError = false) {
+      const output = document.getElementById('output');
+      const className = isError ? 'error' : 'success';
+      output.innerHTML += `<span class="${className}">${message}</span>\n`;
+    }
+
+    function clearOutput() {
+      document.getElementById('output').innerHTML = '';
+    }
+
+    window.clearOutput = clearOutput;
+
+    window.testWASM = async function() {
+      clearOutput();
+      log('Starting WASM test...');
+      log('');
+
+      try {
+        // Step 1: Load module
+        log('Step 1: Loading WASM module (pkg-glass)...');
+        const module = await import('../pkg-glass/momoto_wasm.js');
+        await module.default();
+        log('✓ WASM module loaded (momoto_wasm with glass physics)', false);
+        log('');
+
+        // Step 2: Check if functions exist
+        log('Step 2: Checking available functions...');
+        log(`  fresnelFast: ${typeof module.fresnelFast}`);
+        log(`  beerLambertFast: ${typeof module.beerLambertFast}`);
+        log(`  totalLutMemory: ${typeof module.totalLutMemory}`);
+        log(`  MaterialContext: ${typeof module.MaterialContext}`);
+        log(`  BatchMaterialInput: ${typeof module.BatchMaterialInput}`);
+        log(`  BatchEvaluator: ${typeof module.BatchEvaluator}`);
+        log('');
+
+        // Step 3: Call fresnelFast ONCE
+        if (typeof module.fresnelFast === 'function') {
+          log('Step 3: Calling fresnelFast(1.5, 0.8) ONE TIME...');
+          const start = performance.now();
+          const result = module.fresnelFast(1.5, 0.8);
+          const end = performance.now();
+          const time = end - start;
+          log(`✓ fresnelFast returned: ${result}`, false);
+          log(`  Time: ${time.toFixed(4)}ms`);
+          log('');
+        } else {
+          log('✗ fresnelFast is not a function!', true);
+          log('');
+        }
+
+        // Step 4: Call beerLambertFast ONCE
+        if (typeof module.beerLambertFast === 'function') {
+          log('Step 4: Calling beerLambertFast(0.1, 5.0) ONE TIME...');
+          const start = performance.now();
+          const result = module.beerLambertFast(0.1, 5.0);
+          const end = performance.now();
+          const time = end - start;
+          log(`✓ beerLambertFast returned: ${result}`, false);
+          log(`  Time: ${time.toFixed(4)}ms`);
+          log('');
+        } else {
+          log('✗ beerLambertFast is not a function!', true);
+          log('');
+        }
+
+        // Step 5: LUT memory
+        if (typeof module.totalLutMemory === 'function') {
+          log('Step 5: Checking LUT memory...');
+          const memory = module.totalLutMemory();
+          log(`✓ Total LUT memory: ${(memory / 1024).toFixed(2)} KB`, false);
+          log('');
+        } else {
+          log('✗ totalLutMemory is not a function!', true);
+          log('');
+        }
+
+        // Step 6: Batch evaluation ONCE
+        if (module.MaterialContext && module.BatchMaterialInput && module.BatchEvaluator) {
+          log('Step 6: Testing batch evaluation with ONE material...');
+
+          try {
+            const context = module.MaterialContext.studio();
+            log('  ✓ Created MaterialContext');
+
+            const evaluator = module.BatchEvaluator.withContext(context);
+            log('  ✓ Created BatchEvaluator');
+
+            const input = new module.BatchMaterialInput();
+            log('  ✓ Created BatchMaterialInput');
+
+            input.push(1.5, 0.5, 3.0, 0.1);
+            log('  ✓ Pushed material data');
+
+            const start = performance.now();
+            const result = evaluator.evaluate(input);
+            const end = performance.now();
+            const time = end - start;
+
+            log(`  ✓ Evaluated batch in ${time.toFixed(4)}ms`);
+
+            const opacity = result.getOpacity();
+            log(`  ✓ Got opacity: ${opacity[0].toFixed(4)}`);
+
+            // Cleanup
+            result.free();
+            input.free();
+            evaluator.free();
+            context.free();
+
+            log('  ✓ Cleaned up resources');
+            log('');
+          } catch (err) {
+            log(`✗ Batch evaluation error: ${err.message}`, true);
+            log(`  Stack: ${err.stack}`, true);
+            log('');
+          }
+        } else {
+          log('✗ Batch evaluation classes not available!', true);
+          log('');
+        }
+
+        log('═'.repeat(60));
+        log('✓ ALL TESTS COMPLETED SUCCESSFULLY', false);
+        log('═'.repeat(60));
+
+      } catch (error) {
+        log('═'.repeat(60), true);
+        log(`✗ ERROR: ${error.message}`, true);
+        log('═'.repeat(60), true);
+        log('', true);
+        log('Stack trace:', true);
+        log(error.stack, true);
+      }
+    };
+  </script>
+</body>
+</html>

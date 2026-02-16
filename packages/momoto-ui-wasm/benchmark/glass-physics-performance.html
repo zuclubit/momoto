@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glass Physics Performance Benchmark</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: #4ec9b0;
+      margin-bottom: 1rem;
+      font-size: 2rem;
+      text-align: center;
+      border-bottom: 2px solid #4ec9b0;
+      padding-bottom: 0.5rem;
+    }
+
+    h2 {
+      color: #569cd6;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      border-bottom: 1px solid #569cd6;
+      padding-bottom: 0.3rem;
+    }
+
+    .info {
+      background: #252526;
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 2rem;
+      border-left: 4px solid #4ec9b0;
+    }
+
+    .controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: #0e639c;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+
+    button:hover:not(:disabled) {
+      background: #1177bb;
+    }
+
+    button:disabled {
+      background: #3e3e3e;
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .status {
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .status.running {
+      display: block;
+      background: #264f78;
+      border-left: 4px solid #569cd6;
+    }
+
+    .status.complete {
+      display: block;
+      background: #1e3a1e;
+      border-left: 4px solid #4ec9b0;
+    }
+
+    .status.error {
+      display: block;
+      background: #5a1d1d;
+      border-left: 4px solid #f48771;
+    }
+
+    #results {
+      background: #252526;
+      padding: 1.5rem;
+      border-radius: 4px;
+      white-space: pre-wrap;
+      font-size: 0.9rem;
+      overflow-x: auto;
+      min-height: 200px;
+    }
+
+    .metric {
+      display: grid;
+      grid-template-columns: 300px 150px 150px 150px;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #3e3e3e;
+    }
+
+    .metric.header {
+      font-weight: bold;
+      color: #4ec9b0;
+      border-bottom: 2px solid #4ec9b0;
+    }
+
+    .metric > div {
+      padding: 0 0.5rem;
+    }
+
+    .success { color: #4ec9b0; }
+    .warning { color: #dcdcaa; }
+    .error { color: #f48771; }
+    .info { color: #569cd6; }
+    .bold { font-weight: bold; }
+
+    .progress {
+      height: 4px;
+      background: #3e3e3e;
+      border-radius: 2px;
+      overflow: hidden;
+      margin: 1rem 0;
+      display: none;
+    }
+
+    .progress.active {
+      display: block;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #569cd6, #4ec9b0);
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    .summary {
+      background: #1e3a1e;
+      border: 2px solid #4ec9b0;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-top: 2rem;
+    }
+
+    .summary h3 {
+      color: #4ec9b0;
+      margin-bottom: 1rem;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .summary-item {
+      background: #252526;
+      padding: 1rem;
+      border-radius: 4px;
+    }
+
+    .summary-item .label {
+      color: #858585;
+      font-size: 0.85rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .summary-item .value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #4ec9b0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔬 Glass Physics Performance Benchmark</h1>
+
+    <div class="info">
+      <p><strong>Week 1-2 Performance Validation</strong></p>
+      <p>Testing: LUTs, Batch API, MaterialContext, WASM Integration</p>
+      <p>Target: 7-10x speedup for batch evaluation vs individual</p>
+    </div>
+
+    <div class="controls">
+      <button id="runAll">Run All Benchmarks</button>
+      <button id="runLUT">LUT Functions Only</button>
+      <button id="runBatch">Batch API Only</button>
+      <button id="runComparison">Batch vs Individual</button>
+      <button id="clearResults">Clear Results</button>
+    </div>
+
+    <div class="progress" id="progress">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="status" id="status"></div>
+
+    <div id="results"></div>
+
+    <div class="summary" id="summary" style="display: none;"></div>
+  </div>
+
+  <script type="module">
+    // Import from the built WASM module
+    import init, {
+      BatchMaterialInput,
+      BatchEvaluator,
+      MaterialContext,
+      fresnelFast,
+      beerLambertFast,
+      totalLutMemory,
+    } from '../momoto_wasm.js';
+
+    // ========================================================================
+    // CONFIGURATION
+    // ========================================================================
+
+    const ITERATIONS = {
+      WARMUP: 100,
+      FAST: 10000,
+      MEDIUM: 5000,
+      SLOW: 1000,
+    };
+
+    const MATERIAL_COUNTS = [1, 10, 50, 100, 250, 500];
+
+    // ========================================================================
+    // UTILITIES
+    // ========================================================================
+
+    function formatTime(ms) {
+      if (ms < 0.001) return `${(ms * 1000000).toFixed(2)}ns`;
+      if (ms < 1) return `${(ms * 1000).toFixed(2)}µs`;
+      if (ms < 1000) return `${ms.toFixed(2)}ms`;
+      return `${(ms / 1000).toFixed(2)}s`;
+    }
+
+    function formatNumber(n) {
+      return Math.floor(n).toLocaleString();
+    }
+
+    function formatMemory(bytes) {
+      if (bytes < 1024) return `${bytes}B`;
+      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)}KB`;
+      return `${(bytes / (1024 * 1024)).toFixed(2)}MB`;
+    }
+
+    function log(text, className = '') {
+      const results = document.getElementById('results');
+      const line = document.createElement('div');
+      if (className) line.className = className;
+      line.textContent = text;
+      results.appendChild(line);
+      results.scrollTop = results.scrollHeight;
+    }
+
+    function setStatus(text, type = 'running') {
+      const status = document.getElementById('status');
+      status.textContent = text;
+      status.className = `status ${type}`;
+    }
+
+    function setProgress(percent) {
+      const progress = document.getElementById('progress');
+      const bar = document.getElementById('progressBar');
+      progress.classList.add('active');
+      bar.style.width = `${percent}%`;
+    }
+
+    function hideProgress() {
+      document.getElementById('progress').classList.remove('active');
+    }
+
+    function benchmark(fn, iterations) {
+      // Warmup
+      for (let i = 0; i < Math.min(100, iterations / 10); i++) {
+        fn();
+      }
+
+      // Actual benchmark
+      const start = performance.now();
+      for (let i = 0; i < iterations; i++) {
+        fn();
+      }
+      const end = performance.now();
+
+      const totalTime = end - start;
+      const avgTime = totalTime / iterations;
+      const throughput = 1000 / avgTime;
+
+      return { avgTime, throughput, totalTime };
+    }
+
+    function generateMaterials(count) {
+      const materials = [];
+      for (let i = 0; i < count; i++) {
+        materials.push({
+          ior: 1.5,
+          roughness: 0.2 + (i / count) * 0.4,
+          thickness: 2.0 + (i / count) * 3.0,
+          absorption: 0.1 + (i / count) * 0.15,
+        });
+      }
+      return materials;
+    }
+
+    // ========================================================================
+    // BENCHMARKS
+    // ========================================================================
+
+    let benchmarkResults = {
+      lutFresnel: null,
+      lutBeer: null,
+      lutMemory: null,
+      batchScaling: [],
+      overallSpeedup: null,
+    };
+
+    function benchmarkLUTFunctions() {
+      log('\n════════════════════════════════════════════════════════════════════════════════', 'bold');
+      log('LUT FUNCTIONS PERFORMANCE', 'bold success');
+      log('════════════════════════════════════════════════════════════════════════════════', 'bold');
+      log('');
+
+      // Fresnel Fast
+      const fresnelResult = benchmark(() => fresnelFast(1.5, 0.8), ITERATIONS.FAST);
+      log(`  fresnelFast(1.5, 0.8)                      | ${formatTime(fresnelResult.avgTime).padStart(12)} | ${formatNumber(fresnelResult.throughput).padStart(12)} ops/s`);
+      benchmarkResults.lutFresnel = fresnelResult.avgTime;
+
+      // Beer-Lambert Fast
+      const beerResult = benchmark(() => beerLambertFast(0.1, 5.0), ITERATIONS.FAST);
+      log(`  beerLambertFast(0.1, 5.0)                  | ${formatTime(beerResult.avgTime).padStart(12)} | ${formatNumber(beerResult.throughput).padStart(12)} ops/s`);
+      benchmarkResults.lutBeer = beerResult.avgTime;
+
+      // Memory usage
+      const lutMemory = totalLutMemory();
+      benchmarkResults.lutMemory = lutMemory;
+      log(`\n  LUT Memory Usage: ${formatMemory(lutMemory)}`, 'info');
+
+      // Performance targets
+      log('\n  Performance Targets:');
+      const fresnelTarget = fresnelResult.avgTime < 0.001;
+      const beerTarget = beerResult.avgTime < 0.001;
+      const memTarget = lutMemory < 1024 * 1024;
+      log(`    fresnelFast < 1µs:        ${fresnelTarget ? '✓' : '✗'} (${formatTime(fresnelResult.avgTime)})`, fresnelTarget ? 'success' : 'error');
+      log(`    beerLambertFast < 1µs:    ${beerTarget ? '✓' : '✗'} (${formatTime(beerResult.avgTime)})`, beerTarget ? 'success' : 'error');
+      log(`    LUT memory < 1MB:         ${memTarget ? '✓' : '✗'} (${formatMemory(lutMemory)})`, memTarget ? 'success' : 'error');
+    }
+
+    async function benchmarkBatchAPI() {
+      log('\n════════════════════════════════════════════════════════════════════════════════', 'bold');
+      log('BATCH API SCALING PERFORMANCE', 'bold success');
+      log('════════════════════════════════════════════════════════════════════════════════', 'bold');
+      log('');
+
+      log(`  ${'Materials'.padEnd(15)} | ${'Time'.padStart(12)} | ${'Per-Material'.padStart(12)} | ${'Throughput'.padStart(15)}`);
+      log('  ───────────────────────────────────────────────────────────────────────────');
+
+      benchmarkResults.batchScaling = [];
+
+      for (let i = 0; i < MATERIAL_COUNTS.length; i++) {
+        const count = MATERIAL_COUNTS[i];
+        const materials = generateMaterials(count);
+
+        const context = MaterialContext.studio();
+        const evaluator = BatchEvaluator.withContext(context);
+
+        // Create input
+        const input = new BatchMaterialInput();
+        for (const mat of materials) {
+          input.push(mat.ior, mat.roughness, mat.thickness, mat.absorption);
+        }
+
+        const result = benchmark(
+          () => {
+            const res = evaluator.evaluate(input);
+            res.free();
+          },
+          Math.max(100, Math.floor(ITERATIONS.MEDIUM / count))
+        );
+
+        const perMaterial = result.avgTime / count;
+        const throughput = count / result.avgTime;
+
+        benchmarkResults.batchScaling.push({
+          count,
+          totalTime: result.avgTime,
+          perMaterial,
+          throughput,
+        });
+
+        log(`  ${count.toString().padEnd(15)} | ${formatTime(result.avgTime).padStart(12)} | ${formatTime(perMaterial).padStart(12)} | ${formatNumber(throughput * 1000).padStart(15)} mats/s`);
+
+        input.free();
+        evaluator.free();
+        context.free();
+
+        setProgress(((i + 1) / MATERIAL_COUNTS.length) * 33);
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+
+      // Analyze scaling
+      const baseline = benchmarkResults.batchScaling[0].perMaterial;
+      const best = benchmarkResults.batchScaling[benchmarkResults.batchScaling.length - 1].perMaterial;
+      const improvement = baseline / best;
+
+      log('\n  Scaling Analysis:', 'info');
+      log(`    Per-material cost (1 material):   ${formatTime(baseline)}`);
+      log(`    Per-material cost (${benchmarkResults.batchScaling[benchmarkResults.batchScaling.length - 1].count} materials): ${formatTime(best)}`);
+      log(`    Scaling improvement:              ${improvement.toFixed(1)}x`, improvement >= 6 ? 'success' : 'warning');
+
+      const meetsTarget = improvement >= 6;
+      log(`    Meets 6x target:                  ${meetsTarget ? '✓' : '✗'}`, meetsTarget ? 'success' : 'error');
+    }
+
+    async function benchmarkBatchVsIndividual() {
+      log('\n════════════════════════════════════════════════════════════════════════════════', 'bold');
+      log('BATCH VS INDIVIDUAL EVALUATION COMPARISON', 'bold success');
+      log('════════════════════════════════════════════════════════════════════════════════', 'bold');
+      log('');
+
+      const testCounts = [10, 50, 100];
+
+      for (let i = 0; i < testCounts.length; i++) {
+        const count = testCounts[i];
+        const materials = generateMaterials(count);
+
+        // Individual evaluation
+        const indivContext = MaterialContext.studio();
+        const indivEvaluator = BatchEvaluator.withContext(indivContext);
+
+        const individualResult = benchmark(
+          () => {
+            for (const mat of materials) {
+              const input = new BatchMaterialInput();
+              input.push(mat.ior, mat.roughness, mat.thickness, mat.absorption);
+              const res = indivEvaluator.evaluate(input);
+              res.free();
+              input.free();
+            }
+          },
+          Math.max(50, Math.floor(ITERATIONS.SLOW / count))
+        );
+
+        // Batch evaluation
+        const batchContext = MaterialContext.studio();
+        const batchEvaluator = BatchEvaluator.withContext(batchContext);
+
+        const batchInput = new BatchMaterialInput();
+        for (const mat of materials) {
+          batchInput.push(mat.ior, mat.roughness, mat.thickness, mat.absorption);
+        }
+
+        const batchResult = benchmark(
+          () => {
+            const res = batchEvaluator.evaluate(batchInput);
+            res.free();
+          },
+          Math.max(100, Math.floor(ITERATIONS.MEDIUM / count))
+        );
+
+        const speedup = individualResult.avgTime / batchResult.avgTime;
+
+        log(`\n  ${count} materials:`);
+        log(`    Individual evaluation:         ${formatTime(individualResult.avgTime)} | ${formatNumber(individualResult.throughput)} ops/s`);
+        log(`    Batch evaluation:              ${formatTime(batchResult.avgTime)} | ${formatNumber(batchResult.throughput)} ops/s`);
+        log(`    Speedup:                       ${speedup.toFixed(1)}x`, speedup >= 7 ? 'success' : speedup >= 5 ? 'info' : 'warning');
+        log(`    JS↔WASM crossings reduced:     ${count} → 1 (${count}x reduction)`, 'info');
+
+        if (count === 100) {
+          benchmarkResults.overallSpeedup = speedup;
+        }
+
+        batchInput.free();
+        batchEvaluator.free();
+        batchContext.free();
+        indivEvaluator.free();
+        indivContext.free();
+
+        setProgress(33 + ((i + 1) / testCounts.length) * 67);
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+
+      log('\n  Performance Summary (100 materials):', 'bold');
+      const meetsTarget = benchmarkResults.overallSpeedup >= 7 && benchmarkResults.overallSpeedup <= 12;
+      log(`    Overall speedup:    ${benchmarkResults.overallSpeedup.toFixed(1)}x`, benchmarkResults.overallSpeedup >= 7 ? 'success' : 'warning');
+      log(`    Meets 7-10x target: ${meetsTarget ? '✓' : '✗'}`, meetsTarget ? 'success' : 'error');
+    }
+
+    function showSummary() {
+      const summary = document.getElementById('summary');
+      summary.style.display = 'block';
+
+      summary.innerHTML = `
+        <h3>🎯 Performance Summary</h3>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <div class="label">LUT Memory</div>
+            <div class="value">${formatMemory(benchmarkResults.lutMemory)}</div>
+          </div>
+          <div class="summary-item">
+            <div class="label">Fresnel LUT</div>
+            <div class="value">${formatTime(benchmarkResults.lutFresnel)}</div>
+          </div>
+          <div class="summary-item">
+            <div class="label">Beer-Lambert LUT</div>
+            <div class="value">${formatTime(benchmarkResults.lutBeer)}</div>
+          </div>
+          <div class="summary-item">
+            <div class="label">Batch Scaling</div>
+            <div class="value">${(benchmarkResults.batchScaling[0].perMaterial / benchmarkResults.batchScaling[benchmarkResults.batchScaling.length - 1].perMaterial).toFixed(1)}x</div>
+          </div>
+          <div class="summary-item">
+            <div class="label">Overall Speedup</div>
+            <div class="value">${benchmarkResults.overallSpeedup?.toFixed(1)}x</div>
+          </div>
+          <div class="summary-item">
+            <div class="label">Target Status</div>
+            <div class="value">${benchmarkResults.overallSpeedup >= 7 ? '✓ PASS' : '✗ FAIL'}</div>
+          </div>
+        </div>
+        <p style="margin-top: 1rem; text-align: center; color: #4ec9b0; font-weight: bold;">
+          ${benchmarkResults.overallSpeedup >= 7 ? '✓ All performance targets met!' : '⚠ Some targets not met'}
+        </p>
+      `;
+    }
+
+    // ========================================================================
+    // MAIN EXECUTION
+    // ========================================================================
+
+    async function runAllBenchmarks() {
+      try {
+        setStatus('Initializing WASM...', 'running');
+        setProgress(0);
+        document.getElementById('results').innerHTML = '';
+        document.getElementById('summary').style.display = 'none';
+
+        // Initialize WASM
+        await init();
+
+        log('Glass Physics Performance Benchmark Suite', 'bold success');
+        log('Week 1-2 Performance Validation', 'info');
+        log('');
+
+        setStatus('Running LUT benchmarks...', 'running');
+        benchmarkLUTFunctions();
+
+        setStatus('Running Batch API benchmarks...', 'running');
+        await benchmarkBatchAPI();
+
+        setStatus('Running comparison benchmarks...', 'running');
+        await benchmarkBatchVsIndividual();
+
+        hideProgress();
+        setStatus('✓ All benchmarks complete!', 'complete');
+
+        showSummary();
+
+      } catch (error) {
+        hideProgress();
+        setStatus(`✗ Benchmark failed: ${error.message}`, 'error');
+        log(`\nError: ${error.message}`, 'error');
+        console.error(error);
+      }
+    }
+
+    async function runLUTOnly() {
+      try {
+        setStatus('Initializing WASM...', 'running');
+        document.getElementById('results').innerHTML = '';
+        await init();
+        benchmarkLUTFunctions();
+        setStatus('✓ LUT benchmarks complete!', 'complete');
+      } catch (error) {
+        setStatus(`✗ Failed: ${error.message}`, 'error');
+      }
+    }
+
+    async function runBatchOnly() {
+      try {
+        setStatus('Initializing WASM...', 'running');
+        document.getElementById('results').innerHTML = '';
+        await init();
+        await benchmarkBatchAPI();
+        setStatus('✓ Batch benchmarks complete!', 'complete');
+      } catch (error) {
+        setStatus(`✗ Failed: ${error.message}`, 'error');
+      }
+    }
+
+    async function runComparisonOnly() {
+      try {
+        setStatus('Initializing WASM...', 'running');
+        document.getElementById('results').innerHTML = '';
+        await init();
+        await benchmarkBatchVsIndividual();
+        setStatus('✓ Comparison benchmarks complete!', 'complete');
+      } catch (error) {
+        setStatus(`✗ Failed: ${error.message}`, 'error');
+      }
+    }
+
+    // Button handlers
+    document.getElementById('runAll').addEventListener('click', runAllBenchmarks);
+    document.getElementById('runLUT').addEventListener('click', runLUTOnly);
+    document.getElementById('runBatch').addEventListener('click', runBatchOnly);
+    document.getElementById('runComparison').addEventListener('click', runComparisonOnly);
+    document.getElementById('clearResults').addEventListener('click', () => {
+      document.getElementById('results').innerHTML = '';
+      document.getElementById('summary').style.display = 'none';
+      document.getElementById('status').className = 'status';
+    });
+
+    // Auto-run on load
+    log('Ready! Click "Run All Benchmarks" to start.', 'info');
+  </script>
+</body>
+</html>

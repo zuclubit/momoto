@@ -1,0 +1,320 @@
+/**
+ * Crystal Card Styles
+ * Glass effect cards with various variants
+ */
+
+/* ============================================================================
+   CARD BASE
+   ============================================================================ */
+
+.crystal-card-base {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--crystal-glass);
+  border: 1px solid var(--crystal-glass-border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(var(--blur-md)) saturate(1.2);
+  transition: all var(--duration-fast) var(--ease);
+  overflow: hidden;
+}
+
+/* Padding Variants */
+.crystal-card-padding-none {
+  padding: 0;
+}
+
+.crystal-card-padding-sm {
+  padding: var(--space-4);
+}
+
+.crystal-card-padding-md {
+  padding: var(--space-6);
+}
+
+.crystal-card-padding-lg {
+  padding: var(--space-8);
+}
+
+/* ============================================================================
+   CARD VARIANTS
+   ============================================================================ */
+
+/* Default */
+.crystal-card-default {
+  box-shadow: var(--shadow-1);
+}
+
+/* Metric - Optimized for KPIs/metrics */
+.crystal-card-metric {
+  box-shadow: var(--shadow-1);
+  background: var(--crystal-glass-heavy);
+}
+
+/* Action - Interactive cards */
+.crystal-card-action {
+  box-shadow: var(--shadow-1);
+  cursor: pointer;
+}
+
+/* Elevated - Higher elevation */
+.crystal-card-elevated {
+  box-shadow: var(--shadow-2);
+  background: var(--crystal-glass-heavy);
+}
+
+/* ============================================================================
+   INTERACTIVE STATES
+   ============================================================================ */
+
+.crystal-card-hoverable:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2);
+}
+
+.crystal-card-interactive {
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.crystal-card-interactive:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-1);
+}
+
+.crystal-card-interactive:focus {
+  outline: none;
+}
+
+.crystal-card-interactive:focus-visible {
+  outline: 2px solid var(--crystal-primary);
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   CARD SECTIONS
+   ============================================================================ */
+
+.crystal-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--crystal-divider);
+}
+
+.crystal-card-content {
+  flex: 1;
+}
+
+.crystal-card-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--crystal-divider);
+}
+
+/* ============================================================================
+   LOADING STATE
+   ============================================================================ */
+
+.crystal-card-loading {
+  pointer-events: none;
+}
+
+.crystal-card-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--crystal-glass);
+  backdrop-filter: blur(var(--blur-sm));
+  z-index: 1;
+}
+
+.crystal-card-spinner {
+  color: var(--crystal-primary);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================================
+   METRIC CARD SPECIFIC
+   ============================================================================ */
+
+.crystal-metric-card {
+  min-width: 240px;
+}
+
+.crystal-metric-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.crystal-metric-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--crystal-glass-light);
+  color: var(--crystal-primary);
+}
+
+.crystal-metric-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--crystal-text-secondary);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.crystal-metric-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.crystal-metric-value {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--crystal-text-primary);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.crystal-metric-change {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.crystal-metric-change-positive {
+  color: var(--crystal-success);
+}
+
+.crystal-metric-change-positive::before {
+  content: '↑';
+  font-size: var(--font-size-base);
+}
+
+.crystal-metric-change-negative {
+  color: var(--crystal-error);
+}
+
+.crystal-metric-change-negative::before {
+  content: '↓';
+  font-size: var(--font-size-base);
+}
+
+.crystal-metric-change-neutral {
+  color: var(--crystal-text-secondary);
+}
+
+.crystal-metric-change-neutral::before {
+  content: '→';
+  font-size: var(--font-size-base);
+}
+
+.crystal-metric-trend {
+  margin-top: var(--space-2);
+  height: 60px;
+  opacity: 0.6;
+}
+
+/* ============================================================================
+   CARD GRID LAYOUTS
+   ============================================================================ */
+
+.crystal-card-grid {
+  display: grid;
+  gap: var(--space-6);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.crystal-card-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.crystal-card-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.crystal-card-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .crystal-card-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .crystal-card-grid-2,
+  .crystal-card-grid-3,
+  .crystal-card-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================================
+   ACCESSIBILITY
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .crystal-card-base,
+  .crystal-card-hoverable:hover,
+  .crystal-card-interactive:active {
+    transition: none;
+    transform: none;
+  }
+
+  .crystal-card-spinner {
+    animation: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .crystal-card-base {
+    border-width: 2px;
+  }
+
+  .crystal-card-header,
+  .crystal-card-footer {
+    border-width: 2px;
+  }
+}
+
+/* Touch device optimization */
+@media (hover: none) and (pointer: coarse) {
+  .crystal-card-interactive {
+    -webkit-tap-highlight-color: rgba(59, 130, 246, 0.1);
+  }
+}

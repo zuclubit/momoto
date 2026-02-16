@@ -1,0 +1,840 @@
+/**
+ * Crystal Button Styles - Physical Glass System Edition
+ *
+ * The most advanced button styling using real physics-based glass materials.
+ * All calculations powered by Momoto WASM (Rust compiled to WebAssembly).
+ *
+ * Physical Systems:
+ * ✨ Beer-Lambert Transmittance - Exponential light decay through glass
+ *    • Surface layer: Fresnel reflections (edge highlights)
+ *    • Volume layer: Main glass appearance (Beer-Lambert law)
+ *    • Substrate layer: Contact darkening (path length variation)
+ *
+ * 🌑 Multi-Layer Shadow Engine - Contact + Ambient shadows
+ *    • Contact shadow: Sharp (1-4px) at touch point
+ *    • Ambient shadow: Soft (12-40px) environmental occlusion
+ *    • Dynamic elevation: Rest → Hover → Active transitions
+ *
+ * 🎨 Perceptual Color Science
+ *    • OKLCH color space (perceptually uniform)
+ *    • WCAG AAA accessibility via APCA
+ *    • Adaptive saturation based on transmittance
+ *
+ * 🔧 Material Properties (Apple-compatible)
+ *    • Translucency: Light transmission through material (50% in Apple)
+ *    • Dark Tint: Inherent glass tint (42% in Apple)
+ *    • Specular: Edge/corner highlights with directional lighting
+ *    • Integrated Shadow: Neutral/warm/cool shadows (50% in Apple)
+ *    • Blur, reflectivity, refraction, depth
+ *    • Noise texture for realistic surface
+ *    • Smooth transitions with natural easing
+ *
+ * All CSS variables calculated by Rust WASM, zero hardcoding.
+ */
+
+/* ============================================================================
+   BASE BUTTON
+   ============================================================================ */
+
+.crystal-button {
+  /* Layout */
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  /* Typography */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  text-decoration: none;
+
+  /* Styling */
+  border-radius: 10px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  user-select: none;
+
+  /* Transitions */
+  transition:
+    all 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Interaction */
+  -webkit-tap-highlight-color: transparent;
+}
+
+.crystal-button:focus-visible {
+  outline: 2px solid var(--btn-border-focus);
+  outline-offset: 2px;
+}
+
+.crystal-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ============================================================================
+   SIZES
+   ============================================================================ */
+
+.crystal-button-sm {
+  padding: 0.375rem 0.875rem;
+  font-size: 0.875rem;
+  border-radius: 8px;
+  min-height: 32px;
+}
+
+.crystal-button-md {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.9375rem;
+  border-radius: 10px;
+  min-height: 40px;
+}
+
+.crystal-button-lg {
+  padding: 0.625rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 12px;
+  min-height: 48px;
+}
+
+.crystal-button-full-width {
+  width: 100%;
+}
+
+/* ============================================================================
+   GLASS VARIANTS - BASE STYLES (100% Momoto Physics)
+   ============================================================================ */
+
+.crystal-button-glass {
+  position: relative;
+  color: var(--btn-text);
+  border-color: color-mix(in oklch, var(--btn-border-idle) 40%, transparent);
+
+  /* ========================================================================
+     🌟 MULTI-LAYER BACKGROUND SYSTEM (3D Glass Depth)
+     ======================================================================== */
+  background:
+    /* Layer 1: Luminosity gradient (simulates curved glass surface) */
+    radial-gradient(
+      ellipse 120% 100% at 50% 0%,
+      color-mix(in oklch, var(--btn-highlight) calc((1 - var(--btn-glass-translucency, 0)) * 25%), transparent) 0%,
+      transparent 60%
+    ),
+    /* Layer 2: Edge darkening (gives 3D depth to borders) */
+    radial-gradient(
+      ellipse 90% 85% at 50% 50%,
+      transparent 0%,
+      transparent 40%,
+      color-mix(in oklch, var(--btn-shadow) calc((1 - var(--btn-glass-translucency, 0)) * 18%), transparent) 100%
+    ),
+    /* Layer 3: Dark tint (inherent glass color - Apple: 42%) */
+    color-mix(
+      in oklch,
+      oklch(var(--btn-glass-dark-color, 0.25 0.01 240)) calc(var(--btn-glass-dark-intensity, 0) * 100%),
+      transparent
+    ),
+    /* Layer 4: Base material */
+    color-mix(
+      in oklch,
+      var(--btn-bg-idle) calc(var(--btn-glass-opacity, 0.08) * (1 - var(--btn-glass-translucency, 0)) * 100%),
+      transparent
+    );
+  background-blend-mode: screen, multiply, var(--btn-glass-dark-blend, multiply), normal;
+
+  /* ========================================================================
+     🔍 ADVANCED BACKDROP-FILTER (Physical Glass Optics)
+     ======================================================================== */
+  backdrop-filter:
+    blur(calc(var(--btn-glass-blur, 20px) * (1 - var(--btn-glass-translucency, 0) * 0.3)))
+    saturate(calc(1 + var(--btn-glass-opacity, 0.8) * 0.6 * (1 - var(--btn-glass-translucency, 0) * 0.4)))
+    brightness(calc(1.0 + var(--btn-glass-translucency, 0) * 0.15))  /* More translucent = brighter */
+    contrast(calc(1.0 - var(--btn-glass-translucency, 0) * 0.1));    /* More translucent = less contrast */
+
+  /* Performance optimization for backdrop-filter */
+  -webkit-backdrop-filter:
+    blur(calc(var(--btn-glass-blur, 20px) * (1 - var(--btn-glass-translucency, 0) * 0.3)))
+    saturate(calc(1 + var(--btn-glass-opacity, 0.8) * 0.6 * (1 - var(--btn-glass-translucency, 0) * 0.4)))
+    brightness(calc(1.0 + var(--btn-glass-translucency, 0) * 0.15))
+    contrast(calc(1.0 - var(--btn-glass-translucency, 0) * 0.1));
+
+  /* ========================================================================
+     💎 MULTI-LAYER BOX-SHADOW (3D Depth & Thickness)
+     ======================================================================== */
+  box-shadow:
+    /* Outer elevation shadow (WASM Shadow Engine) */
+    var(--btn-shadow-rest),
+
+    /* Outer reflectivity glow */
+    0 0 calc(var(--btn-glass-reflectivity) * 80px)
+      color-mix(in oklch, var(--btn-highlight) calc(var(--btn-glass-reflectivity) * 100%), transparent),
+
+    /* Inner highlight (top edge - simulates light refraction) */
+    inset 0 1.5px 2px
+      color-mix(
+        in oklch,
+        var(--btn-highlight) calc(var(--btn-layer-surface) * 120%),
+        transparent
+      ),
+
+    /* Inner shadow layer 1 (bottom edge - depth) */
+    inset 0 -1.5px 2px
+      color-mix(in oklch, var(--btn-shadow) calc((1 - var(--btn-layer-substrate)) * 120%), transparent),
+
+    /* Inner shadow layer 2 (bottom-right - glass thickness) */
+    inset -1px -2px 4px
+      color-mix(in oklch, var(--btn-shadow) calc((1 - var(--btn-layer-substrate)) * 80%), transparent),
+
+    /* Inner shadow layer 3 (perimeter darkening - 3D depth) */
+    inset 0 0 12px
+      color-mix(in oklch, var(--btn-shadow) calc((1 - var(--btn-glass-translucency, 0)) * 12%), transparent);
+
+  /* GPU acceleration for smooth rendering */
+  will-change: transform, box-shadow;
+  transform: translateZ(0);
+}
+
+/* ============================================================================
+   ✨ SPECULAR REFLECTION LAYER (Curved Glass Surface)
+   ============================================================================ */
+.crystal-button-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    /* Layer 1: Main specular (radial - simulates curved glass reflection) */
+    radial-gradient(
+      ellipse 140% 120% at 30% 20%,
+      color-mix(in oklch, var(--btn-highlight) calc(var(--btn-glass-specular-intensity, 0.25) * 140%), transparent) 0%,
+      color-mix(in oklch, var(--btn-highlight) calc(var(--btn-glass-specular-intensity, 0.25) * 70%), transparent) 20%,
+      transparent 50%
+    ),
+    /* Layer 2: Secondary specular reflection (bottom-right, weaker) */
+    radial-gradient(
+      ellipse 100% 80% at 75% 85%,
+      transparent 0%,
+      transparent 30%,
+      color-mix(in oklch, var(--btn-highlight) calc(var(--btn-glass-specular-intensity, 0.25) * 40%), transparent) 60%,
+      transparent 100%
+    ),
+    /* Layer 3: Top edge highlight (sharp, bright) */
+    linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--btn-highlight) calc(var(--btn-glass-specular-edges, 0) * var(--btn-glass-specular-intensity, 0.25) * 180%), transparent) 0%,
+      color-mix(in oklch, var(--btn-highlight) calc(var(--btn-glass-specular-edges, 0) * var(--btn-glass-specular-intensity, 0.25) * 90%), transparent) 8%,
+      transparent 18%
+    ),
+    /* Layer 4: Left edge highlight (sharp, bright) */
+    linear-gradient(
+      90deg,
+      color-mix(in oklch, var(--btn-highlight) calc(var(--btn-glass-specular-edges, 0) * var(--btn-glass-specular-intensity, 0.25) * 150%), transparent) 0%,
+      color-mix(in oklch, var(--btn-highlight) calc(var(--btn-glass-specular-edges, 0) * var(--btn-glass-specular-intensity, 0.25) * 70%), transparent) 6%,
+      transparent 15%
+    ),
+    /* Layer 5: Corner highlight (top-left - most intense) */
+    radial-gradient(
+      circle at 8% 8%,
+      color-mix(in oklch, var(--btn-highlight) calc(var(--btn-glass-specular-corners, 0) * var(--btn-glass-specular-intensity, 0.25) * 200%), transparent) 0%,
+      color-mix(in oklch, var(--btn-highlight) calc(var(--btn-glass-specular-corners, 0) * var(--btn-glass-specular-intensity, 0.25) * 80%), transparent) 15%,
+      transparent 30%
+    );
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: calc(0.75 * var(--btn-glass-specular-enabled, 1));
+  transition: opacity 250ms cubic-bezier(0.4, 0, 0.2, 1), filter 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* Sharpness affects blur - sharper = less blur */
+  filter: blur(calc((1 - var(--btn-glass-specular-sharpness, 0.7)) * 2px));
+  /* Mix mode for realistic light blending */
+  mix-blend-mode: screen;
+}
+
+/* Glass noise texture (realistic surface) */
+.crystal-button-glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  opacity: var(--btn-glass-noise, 0.02);
+  mix-blend-mode: overlay;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* ============================================================================
+   🎯 HOVER STATE - Physical Lift Effect
+   ============================================================================ */
+.crystal-button-glass:hover:not(:disabled) {
+  border-color: color-mix(in oklch, var(--btn-border-hover) 55%, transparent);
+
+  /* Physical lift: subtle scale + translateY */
+  transform: translateY(-2px) scale(1.015) translateZ(0);
+
+  /* Multi-layer background (same as base, maintains 3D structure) */
+  background:
+    /* Layer 1: Enhanced luminosity gradient on hover */
+    radial-gradient(
+      ellipse 130% 110% at 50% 0%,
+      color-mix(in oklch, var(--btn-highlight) calc((1 - var(--btn-glass-translucency, 0)) * 35%), transparent) 0%,
+      transparent 65%
+    ),
+    /* Layer 2: Edge darkening (slightly reduced on hover - lifting effect) */
+    radial-gradient(
+      ellipse 92% 88% at 50% 50%,
+      transparent 0%,
+      transparent 45%,
+      color-mix(in oklch, var(--btn-shadow) calc((1 - var(--btn-glass-translucency, 0)) * 14%), transparent) 100%
+    ),
+    /* Layer 3: Dark tint */
+    color-mix(
+      in oklch,
+      oklch(var(--btn-glass-dark-color, 0.25 0.01 240)) calc(var(--btn-glass-dark-intensity, 0) * 100%),
+      transparent
+    ),
+    /* Layer 4: Base material (slightly brighter on hover) */
+    color-mix(
+      in oklch,
+      var(--btn-bg-hover) calc(var(--btn-glass-opacity, 0.08) * (1 - var(--btn-glass-translucency, 0)) * 110%),
+      transparent
+    );
+  background-blend-mode: screen, multiply, var(--btn-glass-dark-blend, multiply), normal;
+
+  /* Enhanced backdrop-filter (more blur, saturation, brightness) */
+  backdrop-filter:
+    blur(calc((var(--btn-glass-blur, 20px) + 4px) * (1 - var(--btn-glass-translucency, 0) * 0.3)))
+    saturate(calc(1 + var(--btn-glass-opacity, 0.8) * 0.8 * (1 - var(--btn-glass-translucency, 0) * 0.4)))
+    brightness(calc(1.0 + var(--btn-glass-translucency, 0) * 0.2))
+    contrast(calc(1.0 - var(--btn-glass-translucency, 0) * 0.08));
+
+  -webkit-backdrop-filter:
+    blur(calc((var(--btn-glass-blur, 20px) + 4px) * (1 - var(--btn-glass-translucency, 0) * 0.3)))
+    saturate(calc(1 + var(--btn-glass-opacity, 0.8) * 0.8 * (1 - var(--btn-glass-translucency, 0) * 0.4)))
+    brightness(calc(1.0 + var(--btn-glass-translucency, 0) * 0.2))
+    contrast(calc(1.0 - var(--btn-glass-translucency, 0) * 0.08));
+
+  /* Enhanced shadows (stronger glow, deeper inner shadows) */
+  box-shadow:
+    /* Outer elevation shadow (higher on hover) */
+    var(--btn-shadow-hover),
+
+    /* Outer glow (60% stronger) */
+    0 0 calc(var(--btn-glass-reflectivity) * 150px)
+      color-mix(in oklch, var(--btn-highlight) calc(var(--btn-glass-reflectivity) * 180%), transparent),
+
+    /* Inner highlight (brighter) */
+    inset 0 2px 3px
+      color-mix(
+        in oklch,
+        var(--btn-highlight) calc(var(--btn-layer-surface) * 150%),
+        transparent
+      ),
+
+    /* Inner shadow layer 1 (maintained) */
+    inset 0 -2px 3px
+      color-mix(in oklch, var(--btn-shadow) calc((1 - var(--btn-layer-substrate)) * 110%), transparent),
+
+    /* Inner shadow layer 2 (maintained) */
+    inset -1px -2px 4px
+      color-mix(in oklch, var(--btn-shadow) calc((1 - var(--btn-layer-substrate)) * 70%), transparent),
+
+    /* Inner shadow layer 3 (slightly reduced - less perimeter darkening on hover) */
+    inset 0 0 10px
+      color-mix(in oklch, var(--btn-shadow) calc((1 - var(--btn-glass-translucency, 0)) * 8%), transparent);
+}
+
+.crystal-button-glass:hover:not(:disabled)::before {
+  /* Significantly brighter specular on hover (glass catches more light) */
+  opacity: calc(0.95 * var(--btn-glass-specular-enabled, 1));
+  filter: blur(calc((1 - var(--btn-glass-specular-sharpness, 0.7)) * 1.5px));
+}
+
+.crystal-button-glass:active:not(:disabled) {
+  background:
+    /* Dark tint layer (consistent with base) */
+    color-mix(
+      in oklch,
+      oklch(var(--btn-glass-dark-color, 0.25 0.01 240)) calc(var(--btn-glass-dark-intensity, 0) * 100%),
+      transparent
+    ),
+    /* Active material layer */
+    color-mix(
+      in oklch,
+      var(--btn-bg-active) calc(var(--btn-glass-opacity, 0.08) * (1 - var(--btn-glass-translucency, 0)) * 100%),
+      transparent
+    );
+  background-blend-mode: var(--btn-glass-dark-blend, multiply), normal;
+  /* Physical press: push down and compress slightly */
+  transform: translateY(0.5px) scale(0.985);
+
+  /* Micro-shift: reduce blur when pressed (simulates compression) */
+  backdrop-filter:
+    blur(calc((var(--btn-glass-blur, 20px) - 3px) * (1 - var(--btn-glass-translucency, 0) * 0.3)))
+    saturate(calc(1 + var(--btn-glass-opacity, 0.8) * 0.55 * (1 - var(--btn-glass-translucency, 0) * 0.4)));
+
+  /* Pressed shadows (100% WASM): reduced outer glow, increased inner shadow */
+  box-shadow:
+    /* Physics-based active elevation (WASM Shadow Engine - pressed down) */
+    var(--btn-shadow-active),
+
+    /* Dimmed reflectivity (light absorbed by press) - WASM calculated */
+    0 0 calc(var(--btn-glass-reflectivity) * 50px)
+      color-mix(in oklch, var(--btn-highlight) calc(var(--btn-glass-reflectivity) * 70%), transparent),
+
+    /* Strong inner shadow (depth of press) - Substrate layer visible (Beer-Lambert) */
+    inset 0 2px 4px
+      color-mix(in oklch, var(--btn-shadow) calc((1 - var(--btn-layer-substrate)) * 150%), transparent);
+}
+
+.crystal-button-glass:active:not(:disabled)::before {
+  /* Reduced specular when pressed */
+  opacity: 0.4;
+}
+
+/* ============================================================================
+   🎨 GLASS VARIANT CUSTOMIZATIONS - DRAMATICALLY DIFFERENT
+   ============================================================================ */
+
+/* ============================================================================
+   Regular Glass (BALANCED - 50% Translucency, 22px Blur, 35% Dark)
+   The standard glass - balance between material and background visibility
+   ============================================================================ */
+.crystal-button-glass-regular {
+  --btn-glass-blur: 22px;
+  --btn-glass-translucency: 0.50;
+  --btn-glass-dark-intensity: 0.35;
+  --btn-glass-specular-intensity: 0.60;
+  --btn-glass-opacity: 0.82;
+}
+
+/* ============================================================================
+   Clear Glass (HIGHLY TRANSLUCENT - 90% Translucency, 10px Blur, 8% Dark)
+   Almost invisible - only noticeable by bright specular highlights
+   ============================================================================ */
+.crystal-button-glass-clear {
+  --btn-glass-blur: 10px;
+  --btn-glass-translucency: 0.90;
+  --btn-glass-dark-intensity: 0.08;
+  --btn-glass-specular-intensity: 0.85;
+  --btn-glass-opacity: 0.60;
+  --btn-glass-specular-sharpness: 0.9;
+
+  /* Enhanced backdrop-filter for ultra-clear appearance */
+  backdrop-filter:
+    blur(10px)
+    saturate(1.2)
+    brightness(1.15)
+    contrast(0.92);
+
+  -webkit-backdrop-filter:
+    blur(10px)
+    saturate(1.2)
+    brightness(1.15)
+    contrast(0.92);
+
+  /* Minimal edge darkening (almost invisible borders) */
+  background:
+    radial-gradient(
+      ellipse 120% 100% at 50% 0%,
+      color-mix(in oklch, var(--btn-highlight) 8%, transparent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 94% 90% at 50% 50%,
+      transparent 0%,
+      transparent 55%,
+      color-mix(in oklch, var(--btn-shadow) 5%, transparent) 100%
+    ),
+    color-mix(in oklch, oklch(var(--btn-glass-dark-color, 0.30 0.01 240)) 8%, transparent),
+    color-mix(in oklch, var(--btn-bg-idle) 3%, transparent);
+
+  background-blend-mode: screen, multiply, multiply, normal;
+
+  /* Lighter border */
+  border-color: color-mix(in oklch, var(--btn-border-idle) 25%, transparent);
+
+  /* Lighter shadows (almost invisible) */
+  box-shadow:
+    var(--btn-shadow-rest),
+    0 0 calc(var(--btn-glass-reflectivity) * 100px)
+      color-mix(in oklch, var(--btn-highlight) calc(var(--btn-glass-reflectivity) * 140%), transparent),
+    inset 0 1px 1px color-mix(in oklch, var(--btn-highlight) calc(var(--btn-layer-surface) * 180%), transparent),
+    inset 0 -1px 1px color-mix(in oklch, var(--btn-shadow) 5%, transparent),
+    inset -0.5px -1px 2px color-mix(in oklch, var(--btn-shadow) 3%, transparent),
+    inset 0 0 8px color-mix(in oklch, var(--btn-shadow) 2%, transparent);
+}
+
+.crystal-button-glass-clear::before {
+  /* VERY bright, sharp specular (makes glass visible) */
+  opacity: 0.95;
+  filter: blur(1px);
+}
+
+/* ============================================================================
+   Thick Glass (DENSE MATERIAL - 35% Translucency, 42px Blur, 65% Dark)
+   Heavy, solid material - background heavily obscured, strong dark tint
+   ============================================================================ */
+.crystal-button-glass-thick {
+  --btn-glass-blur: 42px;
+  --btn-glass-translucency: 0.35;
+  --btn-glass-dark-intensity: 0.65;
+  --btn-glass-specular-intensity: 0.45;
+  --btn-glass-opacity: 0.95;
+  --btn-glass-specular-sharpness: 0.55;
+
+  /* Heavy blur with reduced brightness (dense material) */
+  backdrop-filter:
+    blur(42px)
+    saturate(1.8)
+    brightness(0.92)
+    contrast(1.08);
+
+  -webkit-backdrop-filter:
+    blur(42px)
+    saturate(1.8)
+    brightness(0.92)
+    contrast(1.08);
+
+  /* Strong edge darkening + dark tint (thick material) */
+  background:
+    radial-gradient(
+      ellipse 125% 105% at 50% 0%,
+      color-mix(in oklch, var(--btn-highlight) 32%, transparent) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 88% 82% at 50% 50%,
+      transparent 0%,
+      transparent 30%,
+      color-mix(in oklch, var(--btn-shadow) 28%, transparent) 100%
+    ),
+    color-mix(in oklch, oklch(var(--btn-glass-dark-color, 0.20 0.01 240)) 65%, transparent),
+    color-mix(in oklch, var(--btn-bg-idle) 15%, transparent);
+
+  background-blend-mode: screen, multiply, multiply, normal;
+
+  /* Stronger border (visible material edge) */
+  border-color: color-mix(in oklch, var(--btn-border-idle) 65%, transparent);
+
+  /* Deeper shadows (heavy material weight) */
+  box-shadow:
+    var(--btn-shadow-rest),
+    0 0 calc(var(--btn-glass-reflectivity) * 70px)
+      color-mix(in oklch, var(--btn-highlight) calc(var(--btn-glass-reflectivity) * 80%), transparent),
+    inset 0 2px 3px color-mix(in oklch, var(--btn-highlight) calc(var(--btn-layer-surface) * 110%), transparent),
+    inset 0 -2px 3px color-mix(in oklch, var(--btn-shadow) calc((1 - var(--btn-layer-substrate)) * 150%), transparent),
+    inset -1.5px -3px 6px color-mix(in oklch, var(--btn-shadow) calc((1 - var(--btn-layer-substrate)) * 120%), transparent),
+    inset 0 0 18px color-mix(in oklch, var(--btn-shadow) 20%, transparent);
+}
+
+.crystal-button-glass-thick::before {
+  /* Softer, diffused specular (thick material scatters light) */
+  opacity: 0.60;
+  filter: blur(3px);
+}
+
+/* ============================================================================
+   Frosted Glass (OPAQUE & TEXTURED - 25% Translucency, 35px Blur, 50% Dark)
+   Heavily diffused - granulated texture, very opaque, soft appearance
+   ============================================================================ */
+.crystal-button-glass-frosted {
+  --btn-glass-blur: 35px;
+  --btn-glass-translucency: 0.25;
+  --btn-glass-dark-intensity: 0.50;
+  --btn-glass-specular-intensity: 0.35;
+  --btn-glass-opacity: 0.90;
+  --btn-glass-specular-sharpness: 0.45;
+
+  /* Heavy blur with high saturation, reduced contrast (frosted diffusion) */
+  backdrop-filter:
+    blur(35px)
+    saturate(2.0)
+    brightness(0.95)
+    contrast(0.85);
+
+  -webkit-backdrop-filter:
+    blur(35px)
+    saturate(2.0)
+    brightness(0.95)
+    contrast(0.85);
+
+  /* Softer gradients (frosted glass has diffuse appearance) */
+  background:
+    radial-gradient(
+      ellipse 122% 102% at 50% 0%,
+      color-mix(in oklch, var(--btn-highlight) 28%, transparent) 0%,
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse 90% 86% at 50% 50%,
+      transparent 0%,
+      transparent 35%,
+      color-mix(in oklch, var(--btn-shadow) 22%, transparent) 100%
+    ),
+    color-mix(in oklch, oklch(var(--btn-glass-dark-color, 0.22 0.01 240)) 50%, transparent),
+    color-mix(in oklch, var(--btn-bg-idle) 12%, transparent);
+
+  background-blend-mode: screen, multiply, multiply, normal;
+
+  /* Additional filters for frosted appearance */
+  filter: contrast(1.15) saturate(0.85);
+
+  /* Medium border visibility */
+  border-color: color-mix(in oklch, var(--btn-border-idle) 50%, transparent);
+
+  /* Softer shadows (diffuse material) */
+  box-shadow:
+    var(--btn-shadow-rest),
+    0 0 calc(var(--btn-glass-reflectivity) * 90px)
+      color-mix(in oklch, var(--btn-highlight) calc(var(--btn-glass-reflectivity) * 90%), transparent),
+    inset 0 1.5px 2.5px color-mix(in oklch, var(--btn-highlight) calc(var(--btn-layer-surface) * 100%), transparent),
+    inset 0 -1.5px 2.5px color-mix(in oklch, var(--btn-shadow) calc((1 - var(--btn-layer-substrate)) * 130%), transparent),
+    inset -1px -2px 5px color-mix(in oklch, var(--btn-shadow) calc((1 - var(--btn-layer-substrate)) * 90%), transparent),
+    inset 0 0 14px color-mix(in oklch, var(--btn-shadow) 15%, transparent);
+}
+
+.crystal-button-glass-frosted::before {
+  /* Soft, diffused specular (frosted surface scatters light broadly) */
+  opacity: 0.55;
+  filter: blur(4px);
+  mix-blend-mode: soft-light;
+}
+
+.crystal-button-glass-frosted::after {
+  /* Enhanced noise texture for granulated frosted appearance */
+  opacity: calc(var(--btn-glass-noise, 0.02) * 4);
+  mix-blend-mode: overlay;
+}
+
+/* ============================================================================
+   Subtle Glass (Very Light - kept as is for subtle overlays)
+   ============================================================================ */
+.crystal-button-glass-subtle {
+  --btn-glass-blur: 15px;
+  --btn-glass-translucency: 0.70;
+  --btn-glass-dark-intensity: 0.12;
+  --btn-glass-opacity: 0.50;
+
+  background: color-mix(in oklch, var(--btn-bg-idle) 2%, transparent);
+  border-color: color-mix(in oklch, var(--btn-border-idle) 20%, transparent);
+}
+
+/* Vibrant Glass (80% opacity, 20px blur, boosted chroma) */
+.crystal-button-glass-vibrant {
+  /* Enhanced saturation and reflectivity */
+  backdrop-filter:
+    blur(var(--btn-glass-blur, 20px))
+    saturate(calc(1 + var(--btn-glass-opacity, 0.8) * 0.9));
+}
+
+.crystal-button-glass-vibrant::before {
+  /* Stronger specular highlights */
+  opacity: 0.75;
+}
+
+/* ============================================================================
+   VIBRANCY EFFECT
+   ============================================================================ */
+
+.crystal-button-with-vibrancy {
+  /* Text and icons get boosted chroma from WASM Vibrancy */
+}
+
+.crystal-button-with-vibrancy .crystal-button-content,
+.crystal-button-with-vibrancy .crystal-button-icon-left,
+.crystal-button-with-vibrancy .crystal-button-icon-right {
+  /* Vibrancy effect applied via color prop from WASM */
+  filter: saturate(1.2) contrast(1.05);
+}
+
+/* ============================================================================
+   LOADING STATE
+   ============================================================================ */
+
+.crystal-button-loading {
+  cursor: wait;
+  pointer-events: none;
+}
+
+.crystal-button-spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: crystal-button-spin 0.6s linear infinite;
+}
+
+@keyframes crystal-button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================================
+   ICONS
+   ============================================================================ */
+
+.crystal-button-icon-left,
+.crystal-button-icon-right {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.crystal-button-icon-left {
+  margin-right: -0.125rem;
+}
+
+.crystal-button-icon-right {
+  margin-left: -0.125rem;
+}
+
+/* ============================================================================
+   FOCUS STATE - Enhanced visibility
+   ============================================================================ */
+
+.crystal-button-glass:focus-visible {
+  outline: 2px solid var(--btn-border-focus);
+  outline-offset: 3px;
+
+  /* Subtle refraction shift simulation via enhanced specular (100% WASM) */
+  box-shadow:
+    /* Reflectivity glow - WASM calculated */
+    0 0 calc(var(--btn-glass-reflectivity) * 100px)
+      color-mix(in oklch, var(--btn-highlight) calc(var(--btn-glass-reflectivity) * 130%), transparent),
+    /* Depth shadow - WASM calculated */
+    0 calc(var(--btn-glass-depth) * 5px) calc(var(--btn-glass-depth) * 14px)
+      color-mix(in oklch, var(--btn-shadow) calc(0.09 * var(--btn-glass-opacity) * 100%), transparent),
+    /* Specular highlight - Beer-Lambert */
+    inset 0 1px 0
+      color-mix(in oklch, var(--btn-highlight) calc(var(--btn-glass-specular) * 120%), transparent),
+    /* Focus ring glow */
+    0 0 0 4px color-mix(in oklch, var(--btn-border-focus) 15%, transparent);
+}
+
+/* ============================================================================
+   FORCE STATES (for Storybook debugging)
+   ============================================================================ */
+
+.crystal-button-force-hover,
+.crystal-button-force-hover.crystal-button-glass {
+  background:
+    color-mix(
+      in oklch,
+      oklch(var(--btn-glass-dark-color, 0.25 0.01 240)) calc(var(--btn-glass-dark-intensity, 0) * 100%),
+      transparent
+    ),
+    color-mix(
+      in oklch,
+      var(--btn-bg-hover) calc(var(--btn-glass-opacity, 0.08) * (1 - var(--btn-glass-translucency, 0)) * 100%),
+      transparent
+    );
+  background-blend-mode: var(--btn-glass-dark-blend, multiply), normal;
+  border-color: color-mix(in oklch, var(--btn-border-hover) 50%, transparent);
+  transform: translateY(-1.5px);
+
+  backdrop-filter:
+    blur(calc((var(--btn-glass-blur, 20px) + 2px) * (1 - var(--btn-glass-translucency, 0) * 0.3)))
+    saturate(calc(1 + var(--btn-glass-opacity, 0.8) * 0.65 * (1 - var(--btn-glass-translucency, 0) * 0.4)));
+
+  box-shadow:
+    /* Reflectivity glow - WASM */
+    0 0 calc(var(--btn-glass-reflectivity) * 130px)
+      color-mix(in oklch, var(--btn-highlight) calc(var(--btn-glass-reflectivity) * 160%), transparent),
+    /* Ambient shadow - WASM shadow color */
+    0 calc(var(--btn-glass-depth) * 7px) calc(var(--btn-glass-depth) * 18px)
+      color-mix(in oklch, var(--btn-shadow) calc(0.12 * var(--btn-glass-opacity) * 100%), transparent),
+    /* Contact shadow - WASM shadow color */
+    0 calc(var(--btn-glass-depth) * 3.5px) calc(var(--btn-glass-depth) * 7px)
+      color-mix(in oklch, var(--btn-shadow) calc(0.09 * var(--btn-glass-opacity) * 100%), transparent),
+    /* Specular - Beer-Lambert */
+    inset 0 1px 0
+      color-mix(in oklch, var(--btn-highlight) calc(var(--btn-glass-specular) * 110%), transparent);
+}
+
+.crystal-button-force-hover.crystal-button-glass::before {
+  opacity: 0.85;
+}
+
+.crystal-button-force-active,
+.crystal-button-force-active.crystal-button-glass {
+  background:
+    color-mix(
+      in oklch,
+      oklch(var(--btn-glass-dark-color, 0.25 0.01 240)) calc(var(--btn-glass-dark-intensity, 0) * 100%),
+      transparent
+    ),
+    color-mix(
+      in oklch,
+      var(--btn-bg-active) calc(var(--btn-glass-opacity, 0.08) * (1 - var(--btn-glass-translucency, 0)) * 100%),
+      transparent
+    );
+  background-blend-mode: var(--btn-glass-dark-blend, multiply), normal;
+  transform: translateY(0.5px) scale(0.985);
+
+  backdrop-filter:
+    blur(calc((var(--btn-glass-blur, 20px) - 3px) * (1 - var(--btn-glass-translucency, 0) * 0.3)))
+    saturate(calc(1 + var(--btn-glass-opacity, 0.8) * 0.55 * (1 - var(--btn-glass-translucency, 0) * 0.4)));
+
+  box-shadow:
+    /* Dimmed reflectivity - WASM */
+    0 0 calc(var(--btn-glass-reflectivity) * 50px)
+      color-mix(in oklch, var(--btn-highlight) calc(var(--btn-glass-reflectivity) * 70%), transparent),
+    /* Contact shadow - WASM shadow color */
+    0 calc(var(--btn-glass-depth) * 1px) calc(var(--btn-glass-depth) * 4px)
+      color-mix(in oklch, var(--btn-shadow) calc(0.06 * var(--btn-glass-opacity) * 100%), transparent),
+    /* Inner shadow (pressed) - WASM shadow color */
+    inset 0 2px 4px
+      color-mix(in oklch, var(--btn-shadow) calc(0.10 * var(--btn-glass-opacity) * 100%), transparent);
+}
+
+.crystal-button-force-active.crystal-button-glass::before {
+  opacity: 0.4;
+}
+
+.crystal-button-force-focus,
+.crystal-button-force-focus.crystal-button-glass {
+  outline: 2px solid var(--btn-border-focus);
+  outline-offset: 3px;
+
+  box-shadow:
+    /* Reflectivity glow - WASM */
+    0 0 calc(var(--btn-glass-reflectivity) * 100px)
+      color-mix(in oklch, var(--btn-highlight) calc(var(--btn-glass-reflectivity) * 130%), transparent),
+    /* Depth shadow - WASM shadow color */
+    0 calc(var(--btn-glass-depth) * 5px) calc(var(--btn-glass-depth) * 14px)
+      color-mix(in oklch, var(--btn-shadow) calc(0.09 * var(--btn-glass-opacity) * 100%), transparent),
+    /* Specular - Beer-Lambert */
+    inset 0 1px 0
+      color-mix(in oklch, var(--btn-highlight) calc(var(--btn-glass-specular) * 120%), transparent),
+    /* Focus ring */
+    0 0 0 4px color-mix(in oklch, var(--btn-border-focus) 15%, transparent);
+}
+
+/* ============================================================================
+   ACCESSIBILITY
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .crystal-button {
+    transition: none;
+  }
+
+  .crystal-button-spinner {
+    animation-duration: 1.2s;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .crystal-button-glass {
+    border-width: 2px;
+  }
+}

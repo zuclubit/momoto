@@ -1,0 +1,199 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Examples/Momoto Canonical/Introduction" />
+
+# Momoto Canonical Examples
+
+These interactive examples demonstrate the 4 canonical use cases from Momoto's Rust implementation, now running in your browser via WebAssembly.
+
+## What is Momoto?
+
+Momoto is a **physics-based perceptual color system** that provides:
+
+- 🔬 **Physics-based material rendering** - Glass materials with accurate Fresnel equations and Beer-Lambert absorption
+- 🎨 **Perceptual color spaces** - OKLCH, Linear RGB, sRGB with full conversion support
+- 🎯 **Context-aware adaptation** - Materials respond to background, lighting, and viewing angle
+- ⚡ **High performance** - Sub-microsecond evaluations via Rust + WASM
+- 🔌 **Backend abstraction** - Same material → multiple outputs (CSS, WebGPU, Print)
+
+## The 4 Canonical Examples
+
+### 1. Liquid Glass Benchmark
+
+**Purpose:** Core material rendering demonstration
+
+Shows the fundamental liquid glass material system with:
+- Physical properties (opacity, scattering, Fresnel, thickness)
+- Material evaluation with context
+- CSS rendering output
+- Live preview of the glass effect
+
+**Based on:** `examples/01_liquid_glass_benchmark.rs`
+
+**Key Concepts:**
+- `GlassMaterial` - Physics-based material definition
+- `EvalMaterialContext` - Background, lighting, viewing angle
+- `CssBackend` - Rendering to CSS
+- Physical units throughout (millimeters, not pixels)
+
+---
+
+### 2. Context-Aware Material
+
+**Purpose:** Demonstrates material adaptation
+
+Shows how a single material adapts to:
+- Dark vs light backgrounds
+- Saturated color backgrounds
+- Different viewing angles (grazing vs perpendicular)
+
+**Based on:** `examples/02_context_aware_material.rs`
+
+**Key Concepts:**
+- Same material → different contexts
+- Fresnel reflectance changes with viewing angle
+- Edge intensity at grazing angles
+- Perceptual adaptation to background
+
+---
+
+### 3. Batch vs Single Performance
+
+**Purpose:** Performance benchmarking
+
+Evaluates 1000 materials to demonstrate:
+- Per-material evaluation time
+- Browser-based WASM performance
+- Real-time capability validation
+
+**Based on:** `examples/03_batch_vs_single.rs`
+
+**Key Concepts:**
+- Single evaluation: ~1-2 µs per material
+- Batch optimization planned for future
+- SIMD acceleration opportunities
+- Zero-copy data transfer
+
+---
+
+### 4. Backend Swap
+
+**Purpose:** Multi-backend rendering
+
+Shows the same evaluated material rendered to:
+- CSS backend (working)
+- WebGPU backend (planned)
+- Print backend (planned)
+
+**Based on:** `examples/04_backend_swap.rs`
+
+**Key Concepts:**
+- Backend abstraction layer
+- Consistent results across platforms
+- Backend capabilities inspection
+- Pluggable rendering architecture
+
+---
+
+## Technical Architecture
+
+```
+┌─────────────┐
+│ GlassMaterial│ (Physical properties: IOR, roughness, thickness)
+└──────┬───────┘
+       │ evaluate()
+       │ + MaterialContext (background, angle, lighting)
+       ▼
+┌──────────────────┐
+│EvaluatedMaterial │ (Resolved: opacity, scattering_mm, fresnel)
+└──────┬────────────┘
+       │ render()
+       │ + RenderContext (desktop/mobile/4K)
+       ▼
+   ┌───┴────┐
+   │Backend │ (CSS, WebGPU, Print)
+   └────┬───┘
+        │
+        ▼
+    CSS Output
+```
+
+## Physics Principles
+
+### Fresnel Equations
+Glass reflectance based on index of refraction (IOR) and viewing angle:
+- F₀ = ((n₁-n₂)/(n₁+n₂))² at normal incidence
+- Increases to ~1.0 at grazing angles (edge glow)
+
+### Beer-Lambert Law
+Light transmission through glass:
+- T = e^(-absorption × distance)
+- Wavelength-dependent absorption
+- Thicker glass = more absorption
+
+### Perlin Noise
+Procedural texture for frosted glass:
+- Natural variation without textures
+- Scalable at any resolution
+- Deterministic from seed
+
+---
+
+## Browser Compatibility
+
+These examples require:
+- ✅ **WebAssembly support** (all modern browsers)
+- ✅ **ES6 modules** (Chrome 61+, Firefox 60+, Safari 11+)
+- ✅ **OKLCH color space** (modern browsers, with fallback)
+
+---
+
+## Performance Notes
+
+Running in browser via WASM:
+- **Material evaluation:** 1-2 µs per material
+- **WASM overhead:** ~10% vs native Rust
+- **Memory usage:** Minimal (zero-copy where possible)
+- **Real-time capable:** Yes, for UI applications
+
+Native Rust performance:
+- **Material evaluation:** ~1.2 µs (Apple M1)
+- **WCAG contrast:** 7.4 ns
+- **APCA contrast:** 54 ns
+
+---
+
+## Source Code
+
+These examples are faithful translations of the Rust originals:
+
+- **Rust source:** `/momoto/examples/`
+- **WASM bindings:** `/momoto/crates/momoto-wasm/`
+- **TypeScript integration:** This file!
+
+Explore the Rust source to see the canonical implementation.
+
+---
+
+## Next Steps
+
+After exploring these examples:
+
+1. **Read the docs** - `ARCHITECTURE.md`, `CONCEPTS.md`, `MIGRATION.md`
+2. **Try the API** - Use `GlassMaterial` in your own components
+3. **Customize materials** - Adjust IOR, roughness, thickness
+4. **Experiment with contexts** - Different backgrounds and angles
+5. **Contribute** - Report issues, suggest features, submit PRs
+
+---
+
+## Learn More
+
+- [GitHub Repository](https://github.com/momoto/momoto)
+- [Documentation](https://docs.momoto.dev)
+- [API Reference](https://docs.momoto.dev/api)
+- [Migration Guide](https://docs.momoto.dev/migration)
+
+---
+
+**Built with:** Rust 🦀 + WebAssembly 🕸️ + React ⚛️ + Storybook 📚

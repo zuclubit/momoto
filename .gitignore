@@ -37,3 +37,6 @@ yarn-error.log*
 
 # Storybook
 storybook-static/
+
+# Subdirectories with their own git repos (use submodules instead)
+momoto/
