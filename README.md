@@ -291,6 +291,85 @@ Momoto UI renders.**
 
 ---
 
+## 🔮 Crystal Design System (New in 2026)
+
+**Phase 5 & 6 Complete**: Production-ready component library with integrated WASM engine.
+
+### What's New
+
+The **Momoto Crystal Design System** is a complete React component library featuring:
+
+- 🔮 **Glass/Crystal UI** - Apple HIG-inspired with frosted glass effects
+- ⚡ **Integrated WASM** - Built-in token derivation (15x faster)
+- 📦 **Production Ready** - Button, Input, Card components
+- 📚 **Storybook Docs** - 30+ interactive stories
+- ♿ **WCAG AAA** - Accessibility by default
+
+### Quick Start (Crystal Components)
+
+```bash
+npm install @momoto-ui/crystal
+```
+
+```tsx
+import { Button, Input, Card, MetricCard } from '@momoto-ui/crystal';
+import '@momoto-ui/crystal/styles';
+
+function Dashboard() {
+  return (
+    <div>
+      <MetricCard
+        title="Total Revenue"
+        value="$127,540"
+        change="+12.5%"
+        changeType="positive"
+      />
+
+      <Card variant="elevated">
+        <Input
+          label="Email"
+          type="email"
+          placeholder="name@example.com"
+        />
+        <Button variant="primary">Submit</Button>
+      </Card>
+    </div>
+  );
+}
+```
+
+### Crystal Components
+
+- **Button** - 4 variants (primary, secondary, ghost, danger), 3 sizes
+- **Input** - Validation states, password toggle, icons
+- **Card** - Metric cards, interactive cards, elevated cards
+
+### Documentation
+
+- [Crystal Components README](packages/momoto-ui-crystal/README.md)
+- [Crystal Design System 2025](CRYSTAL-DESIGN-SYSTEM-2025.md)
+- [UI Mockup Prompts](UI-MOCKUP-PROMPT.md)
+- [Phase 5 Complete](IMPLEMENTATION-PHASE5-COMPLETE.md)
+- [Phase 6 Complete](IMPLEMENTATION-PHASE6-COMPLETE.md)
+- [Project Summary 2026](PROJECT-SUMMARY-2026.md)
+
+### Interactive Playground
+
+Try the Momoto UI Playground to explore color token derivation:
+
+```bash
+cd packages/momoto-ui-playground
+npm run dev
+```
+
+**Features:**
+- Real-time OKLCH color controls
+- Live accessibility validation (WCAG + APCA)
+- Component showcase
+- CSS token export
+
+---
+
 ## License
 
 MIT © 2026 Zuclubit

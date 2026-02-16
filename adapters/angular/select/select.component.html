@@ -1,0 +1,94 @@
+<div [ngStyle]="getContainerStyle()" [class]="classNames">
+  <!-- Label -->
+  <label
+    *ngIf="label"
+    [class]="CLASS_PREFIX + '__label'"
+    [ngStyle]="getLabelStyle()"
+  >
+    {{ label }}<ng-container *ngIf="required"> *</ng-container>
+  </label>
+
+  <!-- Field -->
+  <div
+    [attr.role]="ariaAttrs.role"
+    [attr.aria-expanded]="ariaAttrs['aria-expanded']"
+    [attr.aria-controls]="ariaAttrs['aria-controls']"
+    [attr.aria-activedescendant]="ariaAttrs['aria-activedescendant']"
+    [attr.aria-disabled]="ariaAttrs['aria-disabled']"
+    [attr.aria-required]="ariaAttrs['aria-required']"
+    [attr.aria-invalid]="ariaAttrs['aria-invalid']"
+    [attr.aria-label]="ariaAttrs['aria-label']"
+    [attr.aria-describedby]="ariaAttrs['aria-describedby']"
+    [attr.aria-labelledby]="ariaAttrs['aria-labelledby']"
+    [attr.tabindex]="disabled ? -1 : 0"
+    [class]="CLASS_PREFIX + '__field'"
+    [attr.data-testid]="testId"
+    [ngStyle]="getFieldStyle()"
+    (click)="onFieldClick()"
+    (mouseenter)="onMouseEnter()"
+    (mouseleave)="onMouseLeave()"
+    (focus)="onFocus()"
+    (blur)="onBlur()"
+  >
+    <!-- Display value -->
+    <span
+      [class]="CLASS_PREFIX + '__value'"
+      [ngStyle]="{
+        color: selectOutput.selectedOption ? selectOutput.styles.fieldTextColor : selectOutput.styles.placeholderColor,
+        flex: 1
+      }"
+    >
+      {{ selectOutput.displayValue }}
+    </span>
+
+    <!-- Chevron icon -->
+    <svg
+      [class]="CLASS_PREFIX + '__icon'"
+      [ngStyle]="getIconStyle()"
+      viewBox="0 0 20 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M5 7.5l5 5 5-5"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+
+    <!-- Dropdown menu -->
+    <div
+      *ngIf="isOpen && !disabled"
+      [attr.id]="ariaAttrs['aria-controls']"
+      role="listbox"
+      [class]="CLASS_PREFIX + '__dropdown'"
+      [ngStyle]="getDropdownStyle()"
+    >
+      <div
+        *ngFor="let option of options; trackBy: trackByValue"
+        [attr.id]="'momoto-select-option-' + option.value"
+        role="option"
+        [attr.aria-selected]="option.value === value"
+        [attr.aria-disabled]="option.disabled"
+        [class]="CLASS_PREFIX + '__option'"
+        [ngStyle]="getOptionStyle(option)"
+        (click)="onOptionClick(option.value, option.disabled)"
+        (mouseenter)="onOptionMouseEnter(option.value)"
+      >
+        {{ option.label }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Helper text -->
+  <span
+    *ngIf="displayHelperText"
+    [class]="CLASS_PREFIX + '__helper'"
+    [ngStyle]="getHelperStyle()"
+  >
+    {{ displayHelperText }}
+  </span>
+</div>

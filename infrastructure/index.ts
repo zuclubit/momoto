@@ -61,3 +61,15 @@ export {
   W3CTokenExporter,
   type W3CExporterOptions,
 } from './exporters';
+
+// ============================================================================
+// MOMOTO BRIDGE (WASM)
+// ============================================================================
+
+export {
+  MomotoBridge,
+  type QualityScoreInput,
+  type SirenCorrectionResult,
+  type SirenMetadata,
+  type WasmModule,
+} from './MomotoBridge';

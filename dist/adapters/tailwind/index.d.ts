@@ -1,6 +1,6 @@
-import { R as Result } from '../../UIState-CG23I-mF.js';
-import { T as TokenCollection } from '../../TokenCollection-q4YtsOMz.js';
-import '../../DesignToken-wtGoW8Zp.js';
+import { _ as Result } from '../../UIState-DmEU8dBf.js';
+import { T as TokenCollection } from '../../TokenCollection-tspMCTIo.js';
+import '../../DesignToken-BFJu4GcO.js';
 
 /**
  * @fileoverview Tailwind Config Adapter

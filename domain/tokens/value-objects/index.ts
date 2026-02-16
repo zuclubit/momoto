@@ -4,6 +4,7 @@
  */
 
 export { DesignToken } from './DesignToken';
+export { EnrichedToken } from './EnrichedToken';
 export type {
   TokenProvenance,
   TokenContext,
@@ -15,6 +16,10 @@ export type {
   CompositeTokenValue,
   W3CDesignToken,
 } from './DesignToken';
+export type {
+  MomotoDecisionMetadata,
+  MomotoColorDecision,
+} from './EnrichedToken';
 
 // NOTE: TokenType and TokenCategory are NOT re-exported here to avoid
 // ambiguity with domain/types definitions (which have different values).

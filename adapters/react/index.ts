@@ -53,3 +53,42 @@ export {
   useAppliedTokens,
   useThemePreferences,
 } from './useTheme';
+
+// ============================================================================
+// COMPONENTS (FASE 14)
+// ============================================================================
+
+// Button
+export { Button, ButtonWithVariant } from './button';
+export type { ButtonProps, ButtonVariantProps } from './button';
+
+// TextField (FASE 15)
+export { TextField } from './textfield';
+export type { TextFieldProps } from './textfield';
+
+// Checkbox (FASE 15)
+export { Checkbox } from './checkbox';
+export type { CheckboxProps } from './checkbox';
+
+// Select (FASE 15)
+export { Select } from './select';
+export type { SelectProps } from './select';
+
+// Switch (FASE 15)
+export { Switch } from './switch';
+export type { SwitchProps } from './switch';
+
+// Card (FASE 16.3 - Layout Primitives)
+export { Card } from './card';
+export type { CardProps } from './card';
+export { CardVariant, CardPadding, CardRadius } from './card';
+
+// Stat (FASE 16.3 - KPI Components)
+export { Stat } from './stat';
+export type { StatProps, StatTrend } from './stat';
+export { StatSize, TrendDirection } from './stat';
+
+// Badge (FASE 16.3 - Status Components)
+export { Badge } from './badge';
+export type { BadgeProps } from './badge';
+export { BadgeVariant, BadgeSize } from './badge';

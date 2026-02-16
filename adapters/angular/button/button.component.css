@@ -1,0 +1,18 @@
+/**
+ * Button Component Styles
+ *
+ * FASE 13: Multi-Framework Adapters
+ *
+ * Minimal component-scoped styles for Angular Button.
+ * Most styling comes from ButtonCore via [ngStyle].
+ */
+
+/* Spinner animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

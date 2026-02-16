@@ -1,7 +1,7 @@
-import { R as Result } from '../../UIState-CG23I-mF.js';
-import { T as ThemeAdapterPort, a as ThemeConfig, c as ThemeChangeOptions, b as ThemeState, d as ThemePreferences, S as SystemPreferences } from '../../ThemeAdapterPort-U3_XSldO.js';
-import '../../TokenCollection-q4YtsOMz.js';
-import '../../DesignToken-wtGoW8Zp.js';
+import { _ as Result } from '../../UIState-DmEU8dBf.js';
+import { T as ThemeAdapterPort, b as ThemeConfig, a as ThemeChangeOptions, d as ThemeState, c as ThemePreferences, S as SystemPreferences } from '../../ThemeAdapterPort-SCERvwI1.js';
+import '../../TokenCollection-tspMCTIo.js';
+import '../../DesignToken-BFJu4GcO.js';
 
 /**
  * @fileoverview CSS Variables Adapter
@@ -65,6 +65,9 @@ declare class CssVariablesAdapter implements ThemeAdapterPort {
     private themeChangeListeners;
     private systemPrefsListeners;
     private mediaQueryList;
+    private mediaQueryHandler;
+    private pendingTimeouts;
+    private isDisposed;
     constructor(options?: CssAdapterOptions);
     apply(config: ThemeConfig): Promise<Result<void, Error>>;
     remove(): Promise<Result<void, Error>>;
@@ -94,6 +97,20 @@ declare class CssVariablesAdapter implements ThemeAdapterPort {
     private detectContrastPreference;
     private notifyThemeChange;
     private notifySystemPrefsChange;
+    /**
+     * Dispose of the adapter and clean up all resources.
+     *
+     * Call this method when the adapter is no longer needed to prevent memory leaks.
+     * After calling dispose(), the adapter should not be used.
+     *
+     * @example
+     * ```typescript
+     * const adapter = new CssVariablesAdapter();
+     * // ... use adapter ...
+     * adapter.dispose(); // Clean up when done
+     * ```
+     */
+    dispose(): void;
 }
 
 export { type CssAdapterOptions, CssVariablesAdapter, CssVariablesAdapter as default };

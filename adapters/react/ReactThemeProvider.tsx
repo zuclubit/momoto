@@ -19,8 +19,15 @@ import React, {
   type ReactNode,
 } from 'react';
 
-import type { Result } from '../../domain/types';
 import { failure } from '../../domain/types';
+
+/**
+ * Result type for async operations.
+ * Defined locally to ensure proper DTS generation.
+ */
+type AsyncResult<T, E = Error> =
+  | { success: true; value: T }
+  | { success: false; error: E };
 import type { TokenCollection } from '../../domain/tokens';
 import type {
   ThemeConfig,
@@ -60,25 +67,25 @@ interface ThemeContextState {
  */
 interface ThemeContextActions {
   /** Aplica un tema */
-  applyTheme: (config: ThemeConfig) => Promise<Result<void, Error>>;
+  applyTheme: (config: ThemeConfig) => Promise<AsyncResult<void>>;
   /** Cambia a un tema registrado */
-  switchTheme: (themeName: string, options?: ThemeChangeOptions) => Promise<Result<void, Error>>;
+  switchTheme: (themeName: string, options?: ThemeChangeOptions) => Promise<AsyncResult<void>>;
   /** Alterna modo oscuro */
-  toggleDarkMode: (options?: ThemeChangeOptions) => Promise<Result<void, Error>>;
+  toggleDarkMode: (options?: ThemeChangeOptions) => Promise<AsyncResult<void>>;
   /** Registra un nuevo tema */
-  registerTheme: (config: ThemeConfig) => Promise<Result<void, Error>>;
+  registerTheme: (config: ThemeConfig) => Promise<AsyncResult<void>>;
   /** Elimina un tema registrado */
-  unregisterTheme: (themeName: string) => Promise<Result<void, Error>>;
+  unregisterTheme: (themeName: string) => Promise<AsyncResult<void>>;
   /** Sincroniza con preferencias del sistema */
-  syncWithSystem: () => Promise<Result<void, Error>>;
+  syncWithSystem: () => Promise<AsyncResult<void>>;
   /** Obtiene preferencias guardadas */
-  getPreferences: () => Promise<Result<ThemePreferences, Error>>;
+  getPreferences: () => Promise<AsyncResult<ThemePreferences>>;
   /** Guarda preferencias */
-  setPreferences: (prefs: Partial<ThemePreferences>) => Promise<Result<void, Error>>;
+  setPreferences: (prefs: Partial<ThemePreferences>) => Promise<AsyncResult<void>>;
   /** Obtiene una variable CSS */
-  getVariable: (name: string) => Promise<Result<string | null, Error>>;
+  getVariable: (name: string) => Promise<AsyncResult<string | null>>;
   /** Establece una variable CSS */
-  setVariable: (name: string, value: string) => Promise<Result<void, Error>>;
+  setVariable: (name: string, value: string) => Promise<AsyncResult<void>>;
 }
 
 /**
@@ -289,7 +296,7 @@ export function ThemeProvider({
   // ACTIONS
   // ─────────────────────────────────────────────────────────────────────────
 
-  const applyTheme = useCallback(async (config: ThemeConfig): Promise<Result<void, Error>> => {
+  const applyTheme = useCallback(async (config: ThemeConfig): Promise<AsyncResult<void>> => {
     if (!adapterRef.current) {
       return failure(new Error('Theme adapter not initialized'));
     }
@@ -320,7 +327,7 @@ export function ThemeProvider({
   }, []);
 
   const switchTheme = useCallback(
-    async (themeName: string, options?: ThemeChangeOptions): Promise<Result<void, Error>> => {
+    async (themeName: string, options?: ThemeChangeOptions): Promise<AsyncResult<void>> => {
       if (!adapterRef.current) {
         return failure(new Error('Theme adapter not initialized'));
       }
@@ -353,7 +360,7 @@ export function ThemeProvider({
   );
 
   const toggleDarkMode = useCallback(
-    async (options?: ThemeChangeOptions): Promise<Result<void, Error>> => {
+    async (options?: ThemeChangeOptions): Promise<AsyncResult<void>> => {
       if (!adapterRef.current) {
         return failure(new Error('Theme adapter not initialized'));
       }
@@ -369,7 +376,7 @@ export function ThemeProvider({
     []
   );
 
-  const registerTheme = useCallback(async (config: ThemeConfig): Promise<Result<void, Error>> => {
+  const registerTheme = useCallback(async (config: ThemeConfig): Promise<AsyncResult<void>> => {
     if (!adapterRef.current) {
       return failure(new Error('Theme adapter not initialized'));
     }
@@ -388,7 +395,7 @@ export function ThemeProvider({
   }, []);
 
   const unregisterTheme = useCallback(
-    async (themeName: string): Promise<Result<void, Error>> => {
+    async (themeName: string): Promise<AsyncResult<void>> => {
       if (!adapterRef.current) {
         return failure(new Error('Theme adapter not initialized'));
       }
@@ -412,7 +419,7 @@ export function ThemeProvider({
     [state.activeTheme]
   );
 
-  const syncWithSystem = useCallback(async (): Promise<Result<void, Error>> => {
+  const syncWithSystem = useCallback(async (): Promise<AsyncResult<void>> => {
     if (!adapterRef.current) {
       return failure(new Error('Theme adapter not initialized'));
     }
@@ -420,7 +427,7 @@ export function ThemeProvider({
     return adapterRef.current.syncWithSystem();
   }, []);
 
-  const getPreferences = useCallback(async (): Promise<Result<ThemePreferences, Error>> => {
+  const getPreferences = useCallback(async (): Promise<AsyncResult<ThemePreferences>> => {
     if (!adapterRef.current) {
       return failure(new Error('Theme adapter not initialized'));
     }
@@ -429,7 +436,7 @@ export function ThemeProvider({
   }, []);
 
   const setPreferences = useCallback(
-    async (prefs: Partial<ThemePreferences>): Promise<Result<void, Error>> => {
+    async (prefs: Partial<ThemePreferences>): Promise<AsyncResult<void>> => {
       if (!adapterRef.current) {
         return failure(new Error('Theme adapter not initialized'));
       }
@@ -440,7 +447,7 @@ export function ThemeProvider({
   );
 
   const getVariable = useCallback(
-    async (name: string): Promise<Result<string | null, Error>> => {
+    async (name: string): Promise<AsyncResult<string | null>> => {
       if (!adapterRef.current) {
         return failure(new Error('Theme adapter not initialized'));
       }
@@ -451,7 +458,7 @@ export function ThemeProvider({
   );
 
   const setVariable = useCallback(
-    async (name: string, value: string): Promise<Result<void, Error>> => {
+    async (name: string, value: string): Promise<AsyncResult<void>> => {
       if (!adapterRef.current) {
         return failure(new Error('Theme adapter not initialized'));
       }

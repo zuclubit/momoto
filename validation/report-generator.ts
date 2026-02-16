@@ -304,15 +304,26 @@ export class ReportGenerator {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${title}</title>
   <style>
+    /* ⚠️ TEMPLATE DEFAULT COLORS
+     * These are hardcoded colors for static HTML report generation.
+     *
+     * TODO (FASE 4 - Token Enrichment):
+     * - Replace with ColorDecision-derived tokens
+     * - Generate from Momoto theme system
+     * - Include qualityScore, confidence, reason metadata
+     *
+     * CURRENT STATUS: Acceptable hardcoding for report templates
+     * (not rendered components, so lower priority than UI layer)
+     */
     :root {
-      --color-success: #22c55e;
-      --color-error: #ef4444;
-      --color-warning: #f59e0b;
-      --color-info: #3b82f6;
-      --color-bg: #0f172a;
-      --color-surface: #1e293b;
-      --color-text: #f1f5f9;
-      --color-muted: #94a3b8;
+      --color-success: #22c55e;  /* TODO: Use Momoto decision */
+      --color-error: #ef4444;    /* TODO: Use Momoto decision */
+      --color-warning: #f59e0b;  /* TODO: Use Momoto decision */
+      --color-info: #3b82f6;     /* TODO: Use Momoto decision */
+      --color-bg: #0f172a;       /* TODO: Use Momoto decision */
+      --color-surface: #1e293b;  /* TODO: Use Momoto decision */
+      --color-text: #f1f5f9;     /* TODO: Use Momoto decision */
+      --color-muted: #94a3b8;    /* TODO: Use Momoto decision */
     }
 
     * {
@@ -394,6 +405,7 @@ export class ReportGenerator {
     }
 
     .score {
+      /* TODO: Replace #8b5cf6 with Momoto-derived color */
       background: linear-gradient(135deg, var(--color-info), #8b5cf6);
     }
 
@@ -413,6 +425,7 @@ export class ReportGenerator {
     }
 
     .check-header:hover {
+      /* TODO: Replace rgba() with Momoto-derived color */
       background: rgba(255, 255, 255, 0.05);
     }
 
@@ -438,6 +451,7 @@ export class ReportGenerator {
 
     .check-body {
       padding: 0 1rem 1rem;
+      /* TODO: Replace rgba() with Momoto-derived color */
       border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
 
@@ -449,16 +463,19 @@ export class ReportGenerator {
     }
 
     .issue.error {
+      /* TODO: Replace rgba() with Momoto-derived color */
       background: rgba(239, 68, 68, 0.1);
       border-color: var(--color-error);
     }
 
     .issue.warning {
+      /* TODO: Replace rgba() with Momoto-derived color */
       background: rgba(245, 158, 11, 0.1);
       border-color: var(--color-warning);
     }
 
     .issue.info {
+      /* TODO: Replace rgba() with Momoto-derived color */
       background: rgba(59, 130, 246, 0.1);
       border-color: var(--color-info);
     }

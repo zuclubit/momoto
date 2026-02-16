@@ -98,6 +98,11 @@ export class CssVariablesAdapter implements ThemeAdapterPort {
   private systemPrefsListeners: Set<(prefs: SystemPreferences) => void> = new Set();
   private mediaQueryList: MediaQueryList | null = null;
 
+  // Cleanup tracking for memory safety
+  private mediaQueryHandler: ((e: MediaQueryListEvent) => void) | null = null;
+  private pendingTimeouts: Set<ReturnType<typeof setTimeout>> = new Set();
+  private isDisposed = false;
+
   // ─────────────────────────────────────────────────────────────────────────
   // CONSTRUCTOR
   // ─────────────────────────────────────────────────────────────────────────
@@ -195,10 +200,16 @@ export class CssVariablesAdapter implements ThemeAdapterPort {
     const result = await this.apply(theme);
 
     if (options?.animate) {
-      setTimeout(
-        () => this.disableTransitions(),
+      const timeoutId = setTimeout(
+        () => {
+          this.pendingTimeouts.delete(timeoutId);
+          if (!this.isDisposed) {
+            this.disableTransitions();
+          }
+        },
         options.animationDuration || this.options.defaultTransitionDuration
       );
+      this.pendingTimeouts.add(timeoutId);
     }
 
     if (options?.persist) {
@@ -248,10 +259,16 @@ export class CssVariablesAdapter implements ThemeAdapterPort {
     }
 
     if (options?.animate) {
-      setTimeout(
-        () => this.disableTransitions(),
+      const timeoutId = setTimeout(
+        () => {
+          this.pendingTimeouts.delete(timeoutId);
+          if (!this.isDisposed) {
+            this.disableTransitions();
+          }
+        },
         options.animationDuration || this.options.defaultTransitionDuration
       );
+      this.pendingTimeouts.add(timeoutId);
     }
 
     if (options?.persist) {
@@ -465,36 +482,53 @@ export class CssVariablesAdapter implements ThemeAdapterPort {
 
     this.mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
 
-    const handler = (_e: MediaQueryListEvent) => {
+    // Store handler reference for cleanup
+    this.mediaQueryHandler = (_e: MediaQueryListEvent) => {
+      if (this.isDisposed) return;
+
       this.notifySystemPrefsChange();
 
       // Auto-sync if enabled
-      this.getPreferences().then(result => {
-        if (result.success && result.value.followSystem) {
-          this.syncWithSystem();
-        }
-      });
+      this.getPreferences()
+        .then(result => {
+          if (result.success && result.value.followSystem) {
+            this.syncWithSystem().catch(() => {
+              // Silent fail - system sync is best-effort
+            });
+          }
+        })
+        .catch(() => {
+          // Silent fail - preferences retrieval is best-effort
+        });
     };
 
-    this.mediaQueryList.addEventListener('change', handler);
+    this.mediaQueryList.addEventListener('change', this.mediaQueryHandler);
   }
 
   private loadPreferences(): void {
-    this.getPreferences().then(result => {
-      if (!result.success) return;
+    this.getPreferences()
+      .then(result => {
+        if (!result.success || this.isDisposed) return;
 
-      const prefs = result.value;
+        const prefs = result.value;
 
-      if (prefs.preferredTheme) {
-        this.switchTo(prefs.preferredTheme);
-      }
+        if (prefs.preferredTheme) {
+          this.switchTo(prefs.preferredTheme).catch(() => {
+            // Silent fail - theme switch is best-effort during initialization
+          });
+        }
 
-      if (prefs.darkModeOverride !== null && prefs.darkModeOverride !== undefined) {
-        this.isDarkMode = prefs.darkModeOverride;
-      } else if (prefs.followSystem) {
-        this.syncWithSystem();
-      }
-    });
+        if (prefs.darkModeOverride !== null && prefs.darkModeOverride !== undefined) {
+          this.isDarkMode = prefs.darkModeOverride;
+        } else if (prefs.followSystem) {
+          this.syncWithSystem().catch(() => {
+            // Silent fail - system sync is best-effort
+          });
+        }
+      })
+      .catch(() => {
+        // Silent fail - preferences loading is best-effort
+      });
   }
 
   private generateCss(config: ThemeConfig): string {
@@ -539,23 +573,91 @@ export class CssVariablesAdapter implements ThemeAdapterPort {
   }
 
   private notifyThemeChange(): void {
-    this.getState().then(result => {
-      if (result.success) {
-        for (const listener of this.themeChangeListeners) {
-          listener(result.value);
+    if (this.isDisposed) return;
+
+    this.getState()
+      .then(result => {
+        if (result.success && !this.isDisposed) {
+          for (const listener of this.themeChangeListeners) {
+            try {
+              listener(result.value);
+            } catch {
+              // Silent fail - listener errors should not break the adapter
+            }
+          }
         }
-      }
-    });
+      })
+      .catch(() => {
+        // Silent fail - state retrieval error should not break notifications
+      });
   }
 
   private notifySystemPrefsChange(): void {
-    this.detectSystemPreferences().then(result => {
-      if (result.success) {
-        for (const listener of this.systemPrefsListeners) {
-          listener(result.value);
+    if (this.isDisposed) return;
+
+    this.detectSystemPreferences()
+      .then(result => {
+        if (result.success && !this.isDisposed) {
+          for (const listener of this.systemPrefsListeners) {
+            try {
+              listener(result.value);
+            } catch {
+              // Silent fail - listener errors should not break the adapter
+            }
+          }
         }
-      }
-    });
+      })
+      .catch(() => {
+        // Silent fail - preference detection error should not break notifications
+      });
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // LIFECYCLE
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Dispose of the adapter and clean up all resources.
+   *
+   * Call this method when the adapter is no longer needed to prevent memory leaks.
+   * After calling dispose(), the adapter should not be used.
+   *
+   * @example
+   * ```typescript
+   * const adapter = new CssVariablesAdapter();
+   * // ... use adapter ...
+   * adapter.dispose(); // Clean up when done
+   * ```
+   */
+  dispose(): void {
+    if (this.isDisposed) return;
+
+    this.isDisposed = true;
+
+    // Remove media query listener
+    if (this.mediaQueryList && this.mediaQueryHandler) {
+      this.mediaQueryList.removeEventListener('change', this.mediaQueryHandler);
+      this.mediaQueryHandler = null;
+      this.mediaQueryList = null;
+    }
+
+    // Cancel all pending timeouts
+    for (const timeoutId of this.pendingTimeouts) {
+      clearTimeout(timeoutId);
+    }
+    this.pendingTimeouts.clear();
+
+    // Clear all listeners
+    this.themeChangeListeners.clear();
+    this.systemPrefsListeners.clear();
+
+    // Clear registered themes
+    this.registeredThemes.clear();
+
+    // Remove style element content (but keep element for potential re-use)
+    if (this.styleElement) {
+      this.styleElement.textContent = '';
+    }
   }
 }
 

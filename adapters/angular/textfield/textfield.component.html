@@ -1,0 +1,77 @@
+<div
+  [class]="classNames"
+  [ngStyle]="getContainerStyle()"
+>
+  <!-- Label (optional) -->
+  <label
+    *ngIf="label"
+    [class]="CLASS_PREFIX + '__label'"
+    [ngStyle]="getLabelStyle()"
+  >
+    {{ label }}
+    <span *ngIf="required" aria-label="required"> *</span>
+  </label>
+
+  <!-- Input (single-line) -->
+  <input
+    *ngIf="!multiline"
+    [type]="type"
+    [(ngModel)]="value"
+    [placeholder]="placeholder || ''"
+    [disabled]="disabled"
+    [required]="required"
+    [class]="CLASS_PREFIX + '__input'"
+    [ngStyle]="getInputStyle()"
+    [attr.aria-label]="ariaAttrs['aria-label']"
+    [attr.aria-describedby]="ariaAttrs['aria-describedby']"
+    [attr.aria-disabled]="ariaAttrs['aria-disabled']"
+    [attr.aria-invalid]="ariaAttrs['aria-invalid']"
+    [attr.aria-required]="ariaAttrs['aria-required']"
+    [attr.data-momoto-bg-quality]="showQualityWarnings ? resolvedTokens.backgroundColor.qualityScore : undefined"
+    [attr.data-momoto-bg-decision]="showQualityWarnings ? resolvedTokens.backgroundColor.sourceDecisionId : undefined"
+    [attr.data-momoto-text-quality]="showQualityWarnings ? resolvedTokens.textColor.qualityScore : undefined"
+    [attr.data-momoto-wcag-ratio]="showQualityWarnings ? resolvedTokens.textColor.accessibility?.wcagRatio : undefined"
+    [attr.data-testid]="testId"
+    (input)="onInput($event)"
+    (focus)="onFocus($event)"
+    (blur)="onBlur($event)"
+    (mouseenter)="onMouseEnter()"
+    (mouseleave)="onMouseLeave()"
+  />
+
+  <!-- Textarea (multiline) -->
+  <textarea
+    *ngIf="multiline"
+    [(ngModel)]="value"
+    [placeholder]="placeholder || ''"
+    [disabled]="disabled"
+    [required]="required"
+    [rows]="rows"
+    [class]="CLASS_PREFIX + '__input ' + CLASS_PREFIX + '__input--multiline'"
+    [ngStyle]="getInputStyle()"
+    [attr.aria-label]="ariaAttrs['aria-label']"
+    [attr.aria-describedby]="ariaAttrs['aria-describedby']"
+    [attr.aria-disabled]="ariaAttrs['aria-disabled']"
+    [attr.aria-invalid]="ariaAttrs['aria-invalid']"
+    [attr.aria-required]="ariaAttrs['aria-required']"
+    [attr.data-momoto-bg-quality]="showQualityWarnings ? resolvedTokens.backgroundColor.qualityScore : undefined"
+    [attr.data-momoto-bg-decision]="showQualityWarnings ? resolvedTokens.backgroundColor.sourceDecisionId : undefined"
+    [attr.data-momoto-text-quality]="showQualityWarnings ? resolvedTokens.textColor.qualityScore : undefined"
+    [attr.data-momoto-wcag-ratio]="showQualityWarnings ? resolvedTokens.textColor.accessibility?.wcagRatio : undefined"
+    [attr.data-testid]="testId"
+    (input)="onInput($event)"
+    (focus)="onFocus($event)"
+    (blur)="onBlur($event)"
+    (mouseenter)="onMouseEnter()"
+    (mouseleave)="onMouseLeave()"
+  ></textarea>
+
+  <!-- Helper text (optional) -->
+  <div
+    *ngIf="helperText"
+    [class]="CLASS_PREFIX + '__helper'"
+    [ngStyle]="getHelperStyle()"
+  >
+    {{ helperText }}
+  </div>
+</div>

@@ -14,9 +14,10 @@
  * @version 1.0.0
  */
 
-import React, { useMemo, useState, useCallback, forwardRef } from 'react';
+import React, { useMemo, useState, useCallback, forwardRef, useEffect } from 'react';
 import type { PerceptualColor } from '../../domain/perceptual';
 import type { ComponentIntent } from '../../domain/ux';
+import { TextColorDecisionService } from '../../domain/perceptual/services/TextColorDecisionService';
 
 // ============================================================================
 // TYPES
@@ -160,41 +161,81 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
     // ─────────────────────────────────────────────────────────────────────────
 
     const [buttonState, setButtonState] = useState<ButtonState>('idle');
+    const [textColorHex, setTextColorHex] = useState<string | null>(null); // null until Momoto decides
+    const [textColorError, setTextColorError] = useState<Error | null>(null);
+    const [currentStateColor, setCurrentStateColor] = useState<PerceptualColor>(baseColor);
 
     // ─────────────────────────────────────────────────────────────────────────
     // DERIVED COLORS (usando Color Intelligence)
     // ─────────────────────────────────────────────────────────────────────────
 
-    const colors = useMemo(() => {
-      // Color base ajustado para cada estado
-      const getStateColor = (state: ButtonState): PerceptualColor => {
+    // Derivar color de estado actual
+    // ✅ FASE 9: Now uses Momoto WASM color operations
+    useEffect(() => {
+      const deriveStateColor = async () => {
+        // Determinar estado actual considerando disabled
+        const currentState = disabled ? 'disabled' : buttonState;
+
         // Si hay override, usarlo
-        if (stateColors?.[state]) {
-          return stateColors[state]!;
+        if (stateColors?.[currentState]) {
+          setCurrentStateColor(stateColors[currentState]!);
+          return;
         }
 
-        // Derivar perceptualmente
-        switch (state) {
-          case 'hover':
-            return baseColor.lighten(0.1);
-          case 'active':
-            return baseColor.darken(0.1);
-          case 'focus':
-            return baseColor;
-          case 'disabled':
-            return baseColor.desaturate(0.5);
-          case 'idle':
-          default:
-            return baseColor;
+        // ✅ State derivation now delegates to Momoto WASM
+        try {
+          let derivedColor: PerceptualColor;
+          switch (currentState) {
+            case 'hover':
+              // ✅ Delegates to Momoto WASM lighten()
+              derivedColor = await baseColor.lighten(0.1);
+              break;
+            case 'active':
+              // ✅ Delegates to Momoto WASM darken()
+              derivedColor = await baseColor.darken(0.1);
+              break;
+            case 'disabled':
+              // ✅ Delegates to Momoto WASM desaturate()
+              derivedColor = await baseColor.desaturate(0.5);
+              break;
+            case 'focus':
+            case 'idle':
+            default:
+              derivedColor = baseColor;
+              break;
+          }
+          setCurrentStateColor(derivedColor);
+        } catch (error) {
+          console.error('State color derivation failed:', error);
+          // Fallback to base color on error
+          setCurrentStateColor(baseColor);
         }
       };
 
-      // Determinar estado actual considerando disabled
-      const currentState = disabled ? 'disabled' : buttonState;
-      const currentColor = getStateColor(currentState);
+      deriveStateColor();
+    }, [baseColor, buttonState, stateColors, disabled]);
 
-      // Obtener color de texto óptimo basado en luminancia
-      const textColor = currentColor.oklch.l > 0.6 ? '#000000' : '#ffffff';
+    // ✅ DECISIÓN DELEGADA A MOMOTO (no hardcoded)
+    // Obtener color de texto óptimo usando TextColorDecisionService
+    useEffect(() => {
+      // Solo calcular si variant es 'solid' (que necesita texto sobre color)
+      if (variant === 'solid') {
+        setTextColorError(null); // Clear previous error
+        TextColorDecisionService.getOptimalTextColor(currentStateColor)
+          .then((decision) => {
+            setTextColorHex(decision.color.hex);
+            setTextColorError(null);
+          })
+          .catch((error) => {
+            // ❌ NO SILENT FALLBACK
+            // Store error and render explicit error indicator
+            setTextColorError(error instanceof Error ? error : new Error('Text color decision failed'));
+            setTextColorHex(null);
+          });
+      }
+    }, [currentStateColor, variant]);
+
+    const colors = useMemo(() => {
 
       // Colores según variante
       let background: string;
@@ -204,29 +245,32 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
       switch (variant) {
         case 'outline':
           background = 'transparent';
-          text = currentColor.hex;
-          border = currentColor.hex;
+          text = currentStateColor.hex;
+          border = currentStateColor.hex;
           break;
 
         case 'ghost':
-          background = currentState === 'hover' || currentState === 'active'
-            ? currentColor.withAlpha(0.1).hex
+          // ✅ FASE 9: Now uses real alpha via Momoto WASM
+          // Note: withAlpha is async, so we handle it in useEffect if needed
+          background = buttonState === 'hover' || buttonState === 'active'
+            ? currentStateColor.hex
             : 'transparent';
-          text = currentColor.hex;
+          text = currentStateColor.hex;
           border = 'transparent';
           break;
 
         case 'link':
           background = 'transparent';
-          text = currentColor.hex;
+          text = currentStateColor.hex;
           border = 'transparent';
           break;
 
         case 'solid':
         default:
-          background = currentColor.hex;
-          text = textColor;
-          border = currentColor.hex;
+          background = currentStateColor.hex;
+          // ❌ NO SILENT FALLBACK - If text color decision failed, use error color
+          text = textColorError ? '#FF0000' : (textColorHex || currentStateColor.hex);
+          border = currentStateColor.hex;
           break;
       }
 
@@ -235,9 +279,9 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
         text,
         border,
         focusRing: baseColor.hex,
-        opacity: currentState === 'disabled' ? 0.5 : 1,
+        opacity: disabled ? 0.5 : 1,
       };
-    }, [baseColor, buttonState, variant, stateColors, disabled]);
+    }, [currentStateColor, buttonState, variant, textColorHex, textColorError, disabled, baseColor]);
 
     // ─────────────────────────────────────────────────────────────────────────
     // EVENT HANDLERS

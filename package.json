@@ -1,6 +1,6 @@
 {
   "name": "@zuclubit/momoto-ui",
-  "version": "1.0.0",
+  "version": "1.0.0-rc1",
   "description": "Color Intelligence Design System - Hexagonal Architecture UI Kit",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -90,7 +90,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "verify:contract": "ts-node scripts/verify-contract/index.ts"
   },
   "keywords": [
     "design-system",
@@ -117,10 +118,15 @@
       "optional": true
     }
   },
+  "dependencies": {
+    "momoto-wasm": "file:./momoto/crates/momoto-wasm/pkg"
+  },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
+    "ts-morph": "^21.0.0",
+    "ts-node": "^10.9.2",
     "tsup": "^8.0.0",
     "typescript": "^5.3.0",
     "vitest": "^1.0.0"

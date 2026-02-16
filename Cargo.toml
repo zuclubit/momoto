@@ -1,0 +1,31 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/momoto-ui-core",
+]
+
+[workspace.package]
+version = "1.0.0-rc1"
+authors = ["Momoto UI Team"]
+edition = "2021"
+rust-version = "1.70"
+license = "MIT"
+repository = "https://github.com/momoto/momoto-ui"
+description = "Momoto UI - Perceptual Design System with Rust/WASM core"
+keywords = ["ui", "design-system", "wasm", "perceptual", "color"]
+categories = ["wasm", "web-programming", "gui"]
+
+[workspace.dependencies]
+wasm-bindgen = "0.2"
+js-sys = "0.3"
+
+[profile.release]
+opt-level = "z"     # Optimize for size
+lto = true          # Link-time optimization
+codegen-units = 1   # Better optimization
+panic = "abort"     # Smaller binary
+strip = true        # Remove debug symbols
+
+[profile.dev]
+opt-level = 0
+debug = true

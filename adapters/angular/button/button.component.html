@@ -1,0 +1,81 @@
+<button
+  [type]="type"
+  [class]="classNames"
+  [ngStyle]="getStyleObject()"
+  [disabled]="disabled || loading"
+  [attr.aria-label]="ariaAttrs['aria-label']"
+  [attr.aria-describedby]="ariaAttrs['aria-describedby']"
+  [attr.aria-disabled]="ariaAttrs['aria-disabled']"
+  [attr.data-momoto-bg-quality]="showQualityWarnings ? resolvedTokens.backgroundColor.qualityScore : undefined"
+  [attr.data-momoto-bg-decision]="showQualityWarnings ? resolvedTokens.backgroundColor.sourceDecisionId : undefined"
+  [attr.data-momoto-text-quality]="showQualityWarnings ? resolvedTokens.textColor.qualityScore : undefined"
+  [attr.data-momoto-wcag-ratio]="showQualityWarnings ? resolvedTokens.textColor.accessibility?.wcagRatio : undefined"
+  [attr.data-testid]="testId"
+  (click)="onClick()"
+  (mouseenter)="onMouseEnter()"
+  (mouseleave)="onMouseLeave()"
+  (focus)="onFocus()"
+  (blur)="onBlur()"
+  (mousedown)="onMouseDown()"
+  (mouseup)="onMouseUp()"
+>
+  <!-- Icon (left) -->
+  <span
+    *ngIf="icon && iconPosition === 'left'"
+    [class]="CLASS_PREFIX + '__icon ' + CLASS_PREFIX + '__icon--left'"
+    [ngStyle]="{ width: sizeConfig.iconSize + 'px', height: sizeConfig.iconSize + 'px' }"
+    aria-hidden="true"
+  >
+    <ng-content select="[iconLeft]"></ng-content>
+    <ng-container *ngIf="icon">
+      <!-- Icon content would be projected here -->
+    </ng-container>
+  </span>
+
+  <!-- Label -->
+  <span [class]="CLASS_PREFIX + '__label'">
+    {{ label }}
+  </span>
+
+  <!-- Icon (right) -->
+  <span
+    *ngIf="icon && iconPosition === 'right'"
+    [class]="CLASS_PREFIX + '__icon ' + CLASS_PREFIX + '__icon--right'"
+    [ngStyle]="{ width: sizeConfig.iconSize + 'px', height: sizeConfig.iconSize + 'px' }"
+    aria-hidden="true"
+  >
+    <ng-content select="[iconRight]"></ng-content>
+    <ng-container *ngIf="icon">
+      <!-- Icon content would be projected here -->
+    </ng-container>
+  </span>
+
+  <!-- Loading indicator -->
+  <span
+    *ngIf="loading"
+    [class]="CLASS_PREFIX + '__spinner'"
+    aria-label="Loading"
+    [ngStyle]="{
+      position: 'absolute',
+      width: sizeConfig.iconSize + 'px',
+      height: sizeConfig.iconSize + 'px'
+    }"
+  >
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style="animation: spin 1s linear infinite"
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-dasharray="32 16"
+      />
+    </svg>
+  </span>
+</button>

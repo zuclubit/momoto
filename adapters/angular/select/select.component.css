@@ -1,0 +1,15 @@
+/**
+ * @fileoverview Angular Select Component Styles
+ *
+ * FASE 15.4: Component Expansion - Select
+ *
+ * Minimal CSS file - all styling is handled via [ngStyle] bindings
+ * from SelectCore.
+ *
+ * This file exists to satisfy Angular's component requirements.
+ *
+ * @module momoto-ui/adapters/angular/select
+ * @version 1.0.0
+ */
+
+/* No styles needed - all styling is token-driven via [ngStyle] */

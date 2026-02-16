@@ -1,0 +1,15 @@
+/**
+ * @fileoverview Angular Checkbox Component Styles
+ *
+ * FASE 15: Component Expansion
+ *
+ * Minimal CSS file - all styling is handled via [ngStyle] bindings
+ * from CheckboxCore.
+ *
+ * This file exists to satisfy Angular's component requirements.
+ *
+ * @module momoto-ui/adapters/angular/checkbox
+ * @version 1.0.0
+ */
+
+/* No styles needed - all styling is token-driven via [ngStyle] */

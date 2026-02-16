@@ -21,5 +21,6 @@ export * from './services';
 
 // Principal re-exports
 export { DesignToken } from './value-objects/DesignToken';
+export { EnrichedToken } from './value-objects/EnrichedToken';
 export { TokenCollection } from './entities/TokenCollection';
 export { TokenDerivationService } from './services/TokenDerivationService';

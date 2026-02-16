@@ -1,0 +1,79 @@
+<label
+  [ngStyle]="getContainerStyle()"
+  [class]="classNames"
+  (mouseenter)="onMouseEnter()"
+  (mouseleave)="onMouseLeave()"
+>
+  <!-- Hidden native checkbox (for accessibility and form submission) -->
+  <input
+    #inputRef
+    type="checkbox"
+    [checked]="checked"
+    (change)="onChange($event)"
+    (focus)="onFocus($event)"
+    (blur)="onBlur($event)"
+    [disabled]="disabled"
+    [required]="required"
+    [ngStyle]="{
+      position: 'absolute',
+      opacity: 0,
+      width: '1px',
+      height: '1px',
+      margin: '-1px'
+    }"
+    [attr.aria-checked]="ariaAttrs['aria-checked']"
+    [attr.aria-disabled]="ariaAttrs['aria-disabled']"
+    [attr.aria-label]="ariaAttrs['aria-label']"
+    [attr.aria-describedby]="ariaAttrs['aria-describedby']"
+    [attr.aria-required]="ariaAttrs['aria-required']"
+    [attr.aria-invalid]="ariaAttrs['aria-invalid']"
+    [attr.data-momoto-bg-quality]="showQualityWarnings ? resolvedTokens.backgroundColor.qualityScore : undefined"
+    [attr.data-momoto-bg-decision]="showQualityWarnings ? resolvedTokens.backgroundColor.sourceDecisionId : undefined"
+    [attr.data-momoto-check-quality]="showQualityWarnings ? resolvedTokens.checkColor.qualityScore : undefined"
+    [attr.data-testid]="testId"
+  />
+
+  <!-- Visual checkbox box -->
+  <span
+    [class]="CLASS_PREFIX + '__box'"
+    [ngStyle]="getBoxStyle()"
+  >
+    <!-- Checkmark or dash icon -->
+    <svg
+      *ngIf="showIcon"
+      [class]="CLASS_PREFIX + '__icon'"
+      [ngStyle]="getIconStyle()"
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <!-- Dash icon for indeterminate state -->
+      <path
+        *ngIf="indeterminate"
+        d="M4 8h8"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+      />
+      <!-- Checkmark icon for checked state -->
+      <path
+        *ngIf="!indeterminate"
+        d="M3 8l3 3 7-7"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </span>
+
+  <!-- Label (optional) -->
+  <span
+    *ngIf="label"
+    [class]="CLASS_PREFIX + '__label'"
+    [ngStyle]="getLabelStyle()"
+  >
+    {{ label }}
+  </span>
+</label>

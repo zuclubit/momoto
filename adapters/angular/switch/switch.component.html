@@ -1,0 +1,27 @@
+<div [class]="switchOutput.classNames" [ngStyle]="{ display: switchOutput.styles.containerDisplay, alignItems: switchOutput.styles.containerAlignItems, gap: switchOutput.styles.containerGap + 'px' }">
+  <div
+    [attr.role]="switchOutput.ariaAttrs.role"
+    [attr.aria-checked]="switchOutput.ariaAttrs['aria-checked']"
+    [attr.aria-disabled]="switchOutput.ariaAttrs['aria-disabled']"
+    [attr.aria-required]="switchOutput.ariaAttrs['aria-required']"
+    [attr.aria-invalid]="switchOutput.ariaAttrs['aria-invalid']"
+    [attr.tabindex]="disabled ? -1 : 0"
+    [class]="CLASS_PREFIX + '__track'"
+    [ngStyle]="getTrackStyle()"
+    (click)="onClick()"
+    (mouseenter)="onMouseEnter()"
+    (mouseleave)="onMouseLeave()"
+    (focus)="onFocus()"
+    (blur)="onBlur()"
+  >
+    <span [class]="CLASS_PREFIX + '__thumb'" [ngStyle]="getThumbStyle()"></span>
+  </div>
+
+  <label *ngIf="label" [class]="CLASS_PREFIX + '__label'" [ngStyle]="{ display: switchOutput.styles.labelDisplay, fontSize: switchOutput.styles.labelFontSize + 'px', color: switchOutput.styles.labelColor, fontWeight: switchOutput.styles.labelFontWeight }">
+    {{ label }}<ng-container *ngIf="required"> *</ng-container>
+  </label>
+
+  <span *ngIf="displayHelperText" [class]="CLASS_PREFIX + '__helper'" [ngStyle]="{ display: switchOutput.styles.helperDisplay, fontSize: switchOutput.styles.helperFontSize + 'px', color: switchOutput.styles.helperColor }">
+    {{ displayHelperText }}
+  </span>
+</div>

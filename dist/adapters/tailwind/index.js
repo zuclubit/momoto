@@ -2,19 +2,19 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-var chunkDJQAGD5B_js = require('../../chunk-DJQAGD5B.js');
-require('../../chunk-5YMPXU57.js');
-require('../../chunk-ZM4FIU5F.js');
+var chunkJ6GOFYUV_js = require('../../chunk-J6GOFYUV.js');
+require('../../chunk-BHREJNNS.js');
+require('../../chunk-24JBTL7L.js');
 
 
 
 Object.defineProperty(exports, "TailwindConfigAdapter", {
   enumerable: true,
-  get: function () { return chunkDJQAGD5B_js.TailwindConfigAdapter; }
+  get: function () { return chunkJ6GOFYUV_js.TailwindConfigAdapter; }
 });
 Object.defineProperty(exports, "default", {
   enumerable: true,
-  get: function () { return chunkDJQAGD5B_js.TailwindConfigAdapter_default; }
+  get: function () { return chunkJ6GOFYUV_js.TailwindConfigAdapter_default; }
 });
 //# sourceMappingURL=index.js.map
 //# sourceMappingURL=index.js.map

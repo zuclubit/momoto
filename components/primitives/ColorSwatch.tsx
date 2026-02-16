@@ -14,8 +14,9 @@
  * @version 1.0.0
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import type { PerceptualColor } from '../../domain/perceptual';
+import { TextColorDecisionService } from '../../domain/perceptual/services/TextColorDecisionService';
 
 // ============================================================================
 // TYPES
@@ -112,29 +113,46 @@ export function ColorSwatch({
   bordered = false,
   className = '',
 }: ColorSwatchProps): React.ReactElement {
-  // Deriva el color de texto óptimo basado en luminancia OKLCH
-  // Colores claros (L > 0.6) requieren texto oscuro, y viceversa
-  const textColor = useMemo(() => {
-    return color.oklch.l > 0.6 ? '#000000' : '#ffffff';
+  // ✅ DECISIÓN DELEGADA A MOMOTO (no hardcoded)
+  // Deriva el color de texto óptimo usando TextColorDecisionService
+  const [textColor, setTextColor] = useState<string | null>(null); // null until Momoto decides
+  const [textColorError, setTextColorError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    setTextColorError(null); // Clear previous error
+    TextColorDecisionService.getOptimalTextColor(color)
+      .then((decision) => {
+        setTextColor(decision.color.hex);
+        setTextColorError(null);
+      })
+      .catch((error) => {
+        // ❌ NO SILENT FALLBACK
+        // Store error and render explicit error indicator
+        setTextColorError(error instanceof Error ? error : new Error('Text color decision failed'));
+        setTextColor(null);
+      });
   }, [color]);
 
   // Obtiene el valor hex del color
   const backgroundColor = useMemo(() => color.hex, [color]);
 
-  // Información de contraste simplificada (WCAG ratio aproximado)
-  // Para cálculos precisos usar AccessibilityService
+  // ⚠️ DISPLAY-ONLY APPROXIMATION - NOT FOR DECISION MAKING
+  // This is a simplified preview calculation for informational display purposes only.
+  // For actual accessibility decisions, use TextColorDecisionService or AccessibilityService.
+  // The text color decision above is correctly delegated to Momoto WASM.
   const contrastInfo = useMemo(() => {
-    // Aproximación usando luminancia OKLCH
-    // Luminancia 0 = negro, 1 = blanco
+    // Simplified approximation using OKLCH lightness
+    // NOTE: These thresholds (0.6, 0.5) are for display preview only
+    // Real decisions use TextColorDecisionService which delegates to Momoto WASM
     const l = color.oklch.l;
-    // Contraste aproximado contra el texto óptimo
-    const contrastRatio = l > 0.6
-      ? (l + 0.05) / 0.05  // Texto negro sobre fondo claro
-      : 1.05 / (l + 0.05); // Texto blanco sobre fondo oscuro
+    const LIGHTNESS_MIDPOINT = 0.6; // Display approximation threshold
+    const contrastRatio = l > LIGHTNESS_MIDPOINT
+      ? (l + 0.05) / 0.05  // Estimated ratio with black text
+      : 1.05 / (l + 0.05); // Estimated ratio with white text
 
     return {
       wcag: contrastRatio.toFixed(2),
-      apca: Math.round(Math.abs(l - 0.5) * 200).toString(), // Aproximación APCA
+      apca: Math.round(Math.abs(l - 0.5) * 200).toString(), // Display approximation
     };
   }, [color]);
 
@@ -185,13 +203,15 @@ export function ColorSwatch({
         {showValue && size !== 'sm' && (
           <span
             style={{
-              color: textColor,
+              // ❌ NO SILENT FALLBACK - If text color decision failed, use error color
+              color: textColorError ? '#FF0000' : (textColor || backgroundColor),
               fontSize: sizeConfig.fontSize,
               fontFamily: 'monospace',
               fontWeight: 500,
             }}
+            title={textColorError ? `Error: ${textColorError.message}` : undefined}
           >
-            {backgroundColor.toUpperCase()}
+            {textColorError ? '⚠️' : backgroundColor.toUpperCase()}
           </span>
         )}
       </div>
