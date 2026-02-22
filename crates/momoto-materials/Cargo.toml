@@ -1,0 +1,57 @@
+[package]
+name = "momoto-materials"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+momoto-core = { path = "../momoto-core", version = "7.0.0" }
+momoto-intelligence = { path = "../momoto-intelligence", version = "7.0.0" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0" }
+
+# GPU acceleration (Phase 11)
+wgpu = { version = "0.19", optional = true }
+bytemuck = { version = "1.14", features = ["derive"], optional = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wgpu = { version = "0.19", features = ["webgpu"], optional = true }
+
+[dev-dependencies]
+approx = "0.5"
+
+[features]
+default = []
+wasm = []
+gpu = ["wgpu", "bytemuck"]
+
+# API exposure levels
+full = []                    # Expose all public APIs at crate root
+internals = []               # Expose internal algorithms for debugging
+experimental = []            # Enable experimental features under development
+
+# Physics modules
+thin-film = []               # Thin-film interference (iridescence, AR coatings)
+dispersion = []              # Chromatic dispersion (Cauchy, Sellmeier)
+metals = []                  # Complex IOR for metals (gold, silver, copper)
+mie = []                     # Mie scattering (fog, smoke, particles)
+spectral = []                # Full spectral rendering pipeline
+differentiable = []          # Differentiable rendering for optimization
+neural = []                  # Neural correction layers
+metrology = []               # Scientific metrology and certification
+
+# All physics features
+physics-full = ["thin-film", "dispersion", "metals", "mie", "spectral"]
+
+# Research-grade features
+research = ["physics-full", "differentiable", "metrology", "internals"]
+
+# Production bundle
+production = ["physics-full", "gpu"]

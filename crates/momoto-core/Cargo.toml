@@ -1,0 +1,49 @@
+[package]
+name = "momoto-core"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Canonical perceptual color foundation - color spaces, luminance, and perception primitives"
+keywords = ["color", "perception", "colorspace", "luminance"]
+
+[lib]
+crate-type = ["rlib"]
+
+[features]
+# Optional serialization support for EvaluatedMaterial
+serde = ["dep:serde"]
+# WebGPU backend (stub implementation, full version in Phase 4)
+webgpu = []
+# Expose internal algorithms and constants for debugging/education
+internals = []
+# Experimental features under active development
+experimental = []
+
+[dependencies]
+# Core has zero dependencies by default - pure Rust implementation
+# This ensures maximum portability and no platform drift
+serde = { version = "1.0", features = ["derive"], optional = true }
+
+[dev-dependencies]
+criterion.workspace = true
+proptest.workspace = true
+serde_json = "1.0"
+
+[[example]]
+name = "01_liquid_glass_benchmark"
+path = "../../examples/01_liquid_glass_benchmark.rs"
+
+[[example]]
+name = "02_context_aware_material"
+path = "../../examples/02_context_aware_material.rs"
+
+[[example]]
+name = "03_batch_vs_single"
+path = "../../examples/03_batch_vs_single.rs"
+
+[[example]]
+name = "04_backend_swap"
+path = "../../examples/04_backend_swap.rs"

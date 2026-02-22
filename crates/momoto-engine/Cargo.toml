@@ -1,0 +1,27 @@
+[package]
+name = "momoto-engine"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Performance execution engine - batch processing, SIMD, WASM bindings"
+keywords = ["performance", "simd", "wasm", "batch"]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+momoto-core = { path = "../momoto-core" }
+momoto-metrics = { path = "../momoto-metrics" }
+wasm-bindgen = { workspace = true, optional = true }
+
+[dev-dependencies]
+criterion.workspace = true
+wasm-bindgen-test = "0.3"
+
+[features]
+default = ["wasm"]
+wasm = ["dep:wasm-bindgen"]
+simd = []

@@ -1,0 +1,61 @@
+name: Deploy Storybook to Cloudflare Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/storybook/**'
+      - 'crates/momoto-wasm/**'
+      - '.github/workflows/deploy-storybook.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    name: Deploy Storybook
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-action@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Build WASM
+        run: |
+          cd crates/momoto-wasm
+          wasm-pack build --target web --release
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd apps/storybook
+          npm ci
+
+      - name: Build Storybook
+        run: |
+          cd apps/storybook
+          npm run build-storybook
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: momoto-storybook
+          directory: apps/storybook/storybook-static
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
