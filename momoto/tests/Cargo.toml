@@ -1,0 +1,29 @@
+[package]
+name = "momoto-integration-tests"
+version = "6.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+momoto-core = { path = "../crates/momoto-core" }
+momoto-metrics = { path = "../crates/momoto-metrics" }
+momoto-prelude = { path = "../crates/momoto-prelude" }
+momoto-agent = { path = "../crates/momoto-agent" }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+
+[[test]]
+name = "validate_rust"
+path = "validate_rust.rs"
+
+[[test]]
+name = "e2e_scenarios"
+path = "e2e_scenarios.rs"
+
+[[test]]
+name = "cross_validation"
+path = "cross_validation.rs"
+
+[[test]]
+name = "external_validation"
+path = "external_validation.rs"

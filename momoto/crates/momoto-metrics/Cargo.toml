@@ -1,0 +1,24 @@
+[package]
+name = "momoto-metrics"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Contrast metric plugins - APCA, WCAG 2.x, SAPC implementations"
+keywords = ["contrast", "apca", "wcag", "accessibility"]
+
+[lib]
+crate-type = ["rlib"]
+
+[features]
+# Expose internal constants and algorithm parameters for debugging/education
+internals = []
+
+[dependencies]
+momoto-core = { path = "../momoto-core" }
+
+[dev-dependencies]
+criterion.workspace = true
+proptest.workspace = true

@@ -1,0 +1,109 @@
+{
+  "name": "momoto",
+  "version": "5.0.0",
+  "description": "The Perceptual Color Intelligence Standard for Accessible & AI-Safe Design Systems",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./public-api": {
+      "types": "./dist/public-api.d.ts",
+      "import": "./dist/public-api.js"
+    },
+    "./experimental": {
+      "types": "./dist/experimental-api.d.ts",
+      "import": "./dist/experimental-api.js"
+    },
+    "./react": {
+      "types": "./dist/react/useColorIntelligence.d.ts",
+      "import": "./dist/react/useColorIntelligence.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc && tsc-alias",
+    "build:watch": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "benchmark": "tsx benchmark/index.ts",
+    "benchmark:accuracy": "tsx benchmark/suites/accuracy.benchmark.ts",
+    "benchmark:performance": "tsx benchmark/suites/performance.benchmark.ts",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,json,md}\"",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build && npm run test",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "color",
+    "accessibility",
+    "wcag",
+    "apca",
+    "oklch",
+    "oklab",
+    "hct",
+    "design-tokens",
+    "design-system",
+    "ai-safety",
+    "contrast",
+    "perceptual",
+    "color-science"
+  ],
+  "author": "Zuclubit",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zuclubit/momoto.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zuclubit/momoto/issues"
+  },
+  "homepage": "https://github.com/zuclubit/momoto#readme",
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@material/material-color-utilities": "^0.4.0",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.48",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "@vitest/coverage-v8": "^1.2.0",
+    "@vitest/ui": "^1.2.0",
+    "apca-w3": "^0.1.9",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "fast-check": "^4.5.3",
+    "prettier": "^3.2.4",
+    "tsc-alias": "^1.8.8",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vite-plugin-top-level-await": "^1.6.0",
+    "vite-plugin-wasm": "^3.5.0",
+    "vitest": "^1.2.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

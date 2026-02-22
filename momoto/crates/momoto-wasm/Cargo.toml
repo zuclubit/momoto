@@ -1,0 +1,42 @@
+[package]
+name = "momoto-wasm"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "WASM bindings for Momoto color perception metrics"
+keywords = ["wasm", "color", "contrast", "accessibility"]
+categories = ["wasm", "accessibility"]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+momoto-core = { path = "../momoto-core" }
+momoto-metrics = { path = "../momoto-metrics" }
+momoto-intelligence = { path = "../momoto-intelligence" }
+momoto-materials = { path = "../momoto-materials" }
+momoto-agent = { path = "../momoto-agent" }
+momoto-events = { path = "../momoto-events" }
+wasm-bindgen = { workspace = true }
+js-sys = "0.3"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde-wasm-bindgen = "0.6"
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = ["-O", "--enable-bulk-memory", "--enable-nontrapping-float-to-int"]
+
+# Add panic hook for better error messages
+[dependencies.console_error_panic_hook]
+version = "0.1"
+optional = true
+
+[features]
+default = ["console_error_panic_hook"]

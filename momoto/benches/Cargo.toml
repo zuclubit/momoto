@@ -1,0 +1,22 @@
+[package]
+name = "momoto-benchmarks"
+version = "6.0.0"
+edition = "2021"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+momoto-core = { path = "../crates/momoto-core" }
+momoto-metrics = { path = "../crates/momoto-metrics" }
+momoto-materials = { path = "../crates/momoto-materials" }
+criterion = { workspace = true, features = ["html_reports"] }
+
+[[bench]]
+name = "contrast_metrics"
+harness = false
+
+[[bench]]
+name = "glass_physics"
+harness = false
