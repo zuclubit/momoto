@@ -1,0 +1,35 @@
+{
+  "name": "@momoto-ui/tailwind",
+  "version": "1.0.0",
+  "description": "Tailwind CSS v3/v4 plugin for Momoto Engine — generates accessible color scales from WASM engine",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types":   "./dist/index.d.ts",
+      "import":  "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "dev":   "tsup src/index.ts --format esm,cjs --dts --watch"
+  },
+  "keywords": ["tailwind", "plugin", "color", "accessibility", "wcag", "apca", "momoto"],
+  "author": "Zuclubit",
+  "license": "MIT",
+  "peerDependencies": {
+    "tailwindcss": ">=3.0.0"
+  },
+  "dependencies": {
+    "@momoto-ui/wasm": "*"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0"
+  }
+}

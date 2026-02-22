@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Momoto — Color Intelligence</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0f0f13;
+      --surface: #1a1a23;
+      --border:  #2a2a38;
+      --text:    #e8eaf6;
+      --muted:   #8890b0;
+      --accent:  #6188d8;
+      --pass:    #4caf82;
+      --warn:    #f4b942;
+      --fail:    #e05555;
+      --radius:  8px;
+      --font:    -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.5;
+      padding: 12px;
+      min-height: 100vh;
+    }
+
+    /* ── Tabs ─────────────────────────────────────────────────────────────── */
+    .tabs { display: flex; gap: 2px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
+    .tab {
+      padding: 6px 12px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── Cards ────────────────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+
+    /* ── Buttons ──────────────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px;
+      border: none;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      letter-spacing: 0.02em;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+
+    /* ── Audit results ────────────────────────────────────────────────────── */
+    .pair-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 6px;
+      background: var(--bg);
+    }
+    .swatch { width: 28px; height: 28px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; }
+    .pair-info { flex: 1; min-width: 0; }
+    .pair-name { font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pair-metrics { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .badge {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .badge-pass { background: rgba(76,175,130,0.2); color: var(--pass); }
+    .badge-warn { background: rgba(244,185,66,0.2); color: var(--warn); }
+    .badge-fail { background: rgba(224,85,85,0.2); color: var(--fail); }
+
+    .apply-btn {
+      padding: 4px 8px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* ── Color picker row ─────────────────────────────────────────────────── */
+    .input-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    label { font-size: 11px; color: var(--muted); flex-shrink: 0; width: 60px; }
+    input[type="color"] { width: 36px; height: 28px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); cursor: pointer; padding: 2px; }
+    input[type="text"], input[type="number"] {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-size: 11px;
+      padding: 5px 8px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+    input[type="range"] { flex: 1; accent-color: var(--accent); }
+
+    /* ── Palette grid ─────────────────────────────────────────────────────── */
+    .palette-grid { display: grid; grid-template-columns: repeat(11, 1fr); gap: 3px; margin-bottom: 8px; }
+    .tone-cell {
+      aspect-ratio: 1;
+      border-radius: 3px;
+      cursor: pointer;
+      position: relative;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.1s;
+    }
+    .tone-cell:hover { transform: scale(1.1); z-index: 1; }
+    .tone-label { font-size: 9px; text-align: center; margin-top: 2px; color: var(--muted); }
+
+    /* ── CVD preview ──────────────────────────────────────────────────────── */
+    .cvd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .cvd-card { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+    .cvd-label { font-size: 10px; font-weight: 600; padding: 4px 8px; background: rgba(255,255,255,0.05); color: var(--muted); }
+    .cvd-swatch { height: 60px; }
+
+    /* ── Tokens export ────────────────────────────────────────────────────── */
+    .code-block {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 10px;
+      color: #a8d4ff;
+      white-space: pre;
+      overflow-x: auto;
+      max-height: 200px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+
+    /* ── Status ───────────────────────────────────────────────────────────── */
+    #status {
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      margin-bottom: 10px;
+      display: none;
+    }
+    #status.info  { background: rgba(97,136,216,0.15); color: var(--accent); display: block; }
+    #status.error { background: rgba(224,85,85,0.15);  color: var(--fail);   display: block; }
+    #status.ok    { background: rgba(76,175,130,0.15); color: var(--pass);   display: block; }
+
+    #wasm-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 10px; color: var(--muted); margin-bottom: 12px;
+    }
+    #wasm-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--warn); }
+    #wasm-dot.ready { background: var(--pass); }
+
+    /* ── Loading spinner ──────────────────────────────────────────────────── */
+    .spinner { width: 14px; height: 14px; border: 2px solid rgba(97,136,216,0.3); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading .spinner { display: inline-block; }
+
+    .empty-state { text-align: center; color: var(--muted); padding: 24px; font-size: 11px; }
+
+    /* ── Scrollbar ─────────────────────────────────────────────────────────  */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<!-- WASM status -->
+<div id="wasm-badge">
+  <div id="wasm-dot"></div>
+  <span id="wasm-text">Loading WASM engine…</span>
+</div>
+
+<!-- Status messages -->
+<div id="status"></div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab active" data-tab="audit">Audit</button>
+  <button class="tab" data-tab="palette">Palette</button>
+  <button class="tab" data-tab="cvd">CVD</button>
+  <button class="tab" data-tab="tokens">Tokens</button>
+</div>
+
+<!-- ── AUDIT PANEL ──────────────────────────────────────────────────────── -->
+<div class="panel active" id="tab-audit">
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btn-audit">
+      <span class="spinner"></span> Audit Selection
+    </button>
+    <button class="btn btn-secondary" id="btn-refresh">Refresh</button>
+  </div>
+  <div id="audit-results">
+    <div class="empty-state">Select text or frames in Figma,<br>then click <strong>Audit Selection</strong></div>
+  </div>
+</div>
+
+<!-- ── PALETTE PANEL ────────────────────────────────────────────────────── -->
+<div class="panel" id="tab-palette">
+  <div class="card">
+    <div class="card-title">HCT Tonal Palette</div>
+    <div class="input-row">
+      <label>Base color</label>
+      <input type="color" id="palette-color" value="#6188d8" />
+      <input type="text"  id="palette-hex"   value="#6188d8" maxlength="7" />
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-generate-palette">Generate</button>
+      <button class="btn btn-secondary" id="btn-apply-palette">Apply to Figma</button>
+    </div>
+  </div>
+  <div id="palette-output"></div>
+</div>
+
+<!-- ── CVD PANEL ────────────────────────────────────────────────────────── -->
+<div class="panel" id="tab-cvd">
+  <div class="card">
+    <div class="card-title">Color Vision Deficiency Simulation</div>
+    <div class="input-row">
+      <label>Color</label>
+      <input type="color" id="cvd-color" value="#6188d8" />
+      <input type="text"  id="cvd-hex"   value="#6188d8" maxlength="7" />
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-cvd">Simulate</button>
+    </div>
+  </div>
+  <div id="cvd-output"></div>
+</div>
+
+<!-- ── TOKENS PANEL ──────────────────────────────────────────────────────── -->
+<div class="panel" id="tab-tokens">
+  <div class="card">
+    <div class="card-title">Export Design Tokens</div>
+    <p style="font-size:11px; color:var(--muted); margin-bottom: 10px;">
+      Exports all local paint styles as CSS custom properties.
+    </p>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-export">Export Tokens</button>
+      <button class="btn btn-secondary" id="btn-copy-css">Copy CSS</button>
+    </div>
+  </div>
+  <div id="tokens-output"></div>
+</div>
+
+<script>
+// ── WASM module ──────────────────────────────────────────────────────────────
+// Loaded via esm.sh CDN — works without local bundling
+let wasm = null
+const WASM_URL = 'https://esm.sh/momoto-wasm@7.0.0'
+
+async function initWasm() {
+  try {
+    const mod = await import(WASM_URL)
+    await mod.default()
+    wasm = mod
+    document.getElementById('wasm-dot').classList.add('ready')
+    document.getElementById('wasm-text').textContent = 'WASM engine ready (v7.0.0)'
+  } catch (e) {
+    document.getElementById('wasm-text').textContent = 'WASM unavailable — metrics estimated'
+    showStatus('WASM engine unavailable. Contrast metrics will be estimated.', 'error')
+  }
+}
+
+// ── Tab switching ────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab, .panel').forEach(el => el.classList.remove('active'))
+    tab.classList.add('active')
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active')
+  })
+})
+
+// ── Status helper ────────────────────────────────────────────────────────────
+function showStatus(msg, type = 'info') {
+  const el = document.getElementById('status')
+  el.textContent = msg
+  el.className = type
+  if (type !== 'error') setTimeout(() => { el.style.display = 'none'; el.className = '' }, 3000)
+}
+
+// ── Color pair sync ──────────────────────────────────────────────────────────
+function syncColorInputs(colorId, hexId) {
+  const colorEl = document.getElementById(colorId)
+  const hexEl   = document.getElementById(hexId)
+  colorEl.addEventListener('input', () => { hexEl.value = colorEl.value })
+  hexEl.addEventListener('input', () => {
+    if (/^#[0-9a-fA-F]{6}$/.test(hexEl.value)) colorEl.value = hexEl.value
+  })
+}
+syncColorInputs('palette-color', 'palette-hex')
+syncColorInputs('cvd-color',     'cvd-hex')
+
+// ── WCAG contrast (pure JS fallback) ────────────────────────────────────────
+function hexToRgbLinear(hex) {
+  const r = parseInt(hex.slice(1, 3), 16) / 255
+  const g = parseInt(hex.slice(3, 5), 16) / 255
+  const b = parseInt(hex.slice(5, 7), 16) / 255
+  const toLinear = c => c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+  return [toLinear(r), toLinear(g), toLinear(b)]
+}
+function luminance([r, g, b]) { return 0.2126 * r + 0.7152 * g + 0.0722 * b }
+function wcagRatio(fg, bg) {
+  const l1 = luminance(hexToRgbLinear(fg))
+  const l2 = luminance(hexToRgbLinear(bg))
+  return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05)
+}
+function ratingClass(ratio) {
+  if (ratio >= 7) return 'badge-pass'
+  if (ratio >= 4.5) return 'badge-pass'
+  if (ratio >= 3) return 'badge-warn'
+  return 'badge-fail'
+}
+function ratingLabel(ratio) {
+  if (ratio >= 7) return 'AAA'
+  if (ratio >= 4.5) return 'AA'
+  if (ratio >= 3) return 'AA Large'
+  return 'Fail'
+}
+
+// ── AUDIT TAB ────────────────────────────────────────────────────────────────
+let lastPairs = []
+
+document.getElementById('btn-audit').addEventListener('click', () => {
+  parent.postMessage({ pluginMessage: { type: 'audit-selection' } }, '*')
+  document.getElementById('btn-audit').classList.add('loading')
+})
+document.getElementById('btn-refresh').addEventListener('click', () => {
+  parent.postMessage({ pluginMessage: { type: 'get-selection' } }, '*')
+})
+
+function renderAuditPairs(pairs) {
+  lastPairs = pairs
+  const container = document.getElementById('audit-results')
+  if (!pairs.length) {
+    container.innerHTML = '<div class="empty-state">No color pairs found.<br>Select text layers inside frames.</div>'
+    return
+  }
+
+  container.innerHTML = pairs.map(({ nodeId, name, fg, bg }) => {
+    const ratio  = wcagRatio(fg, bg)
+    const cls    = ratingClass(ratio)
+    const label  = ratingLabel(ratio)
+
+    // Best accessible foreground (computed if WASM available)
+    let apca = ''
+    if (wasm) {
+      try {
+        const fgC = wasm.Color.fromHex(fg)
+        const bgC = wasm.Color.fromHex(bg)
+        const lc  = Math.abs(wasm.apcaContrast(fgC, bgC))
+        apca = ` · APCA ${lc.toFixed(0)} Lc`
+      } catch {}
+    }
+
+    return `
+      <div class="pair-item">
+        <div class="swatch" style="background:${fg}; border-color:${bg};" title="FG: ${fg}"></div>
+        <div class="swatch" style="background:${bg};" title="BG: ${bg}"></div>
+        <div class="pair-info">
+          <div class="pair-name" title="${name}">${name}</div>
+          <div class="pair-metrics">${fg} on ${bg} · ${ratio.toFixed(2)}:1 · <strong>${label}</strong>${apca}</div>
+        </div>
+        <span class="badge ${cls}">${label}</span>
+        ${ratio < 4.5 ? `<button class="apply-btn" onclick="fixForeground('${nodeId}','${bg}')">Fix</button>` : ''}
+      </div>
+    `
+  }).join('')
+}
+
+async function fixForeground(nodeId, bg) {
+  let hex = '#ffffff'
+  if (wasm) {
+    try {
+      const bgC = wasm.Color.fromHex(bg)
+      hex = wasm.agentRecommendForeground(bgC)
+    } catch {}
+  }
+  parent.postMessage({ pluginMessage: { type: 'apply-foreground', hex, nodeId } }, '*')
+  showStatus(`Applied recommended foreground to layer`, 'ok')
+}
+
+// ── PALETTE TAB ──────────────────────────────────────────────────────────────
+const TONES = [10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99]
+const TWMAP = { 10:950, 20:900, 30:800, 40:700, 50:600, 60:500, 70:400, 80:300, 90:200, 95:100, 99:50 }
+
+let generatedPalette = []
+
+document.getElementById('btn-generate-palette').addEventListener('click', generatePalette)
+document.getElementById('btn-apply-palette').addEventListener('click', () => {
+  if (!generatedPalette.length) { showStatus('Generate a palette first', 'error'); return }
+  parent.postMessage({ pluginMessage: { type: 'apply-palette', palette: generatedPalette } }, '*')
+  showStatus(`Sent ${generatedPalette.length} color styles to Figma`, 'ok')
+})
+
+async function generatePalette() {
+  const hex = document.getElementById('palette-hex').value
+  const out = document.getElementById('palette-output')
+
+  if (!wasm) {
+    out.innerHTML = '<div class="empty-state">WASM engine required for palette generation</div>'
+    return
+  }
+
+  try {
+    const [h, c] = Array.from(wasm.hexToHct(hex))
+    const raw    = wasm.hctTonalPalette(h, c) // Float32Array of [h,c per tone]
+
+    generatedPalette = []
+    const swatches = TONES.map((t, i) => {
+      const toneHex = wasm.hctToHex(raw[i * 3], raw[i * 3 + 1], t)
+      const name    = `Primary/${TWMAP[t]}`
+      generatedPalette.push({ name, hex: toneHex })
+      const textColor = t < 50 ? '#ffffff' : '#000000'
+      return `
+        <div style="display:flex; flex-direction:column; align-items:center;">
+          <div class="tone-cell" style="background:${toneHex}; width:100%; min-height:36px;"
+               title="${name}: ${toneHex}"
+               onclick="navigator.clipboard.writeText('${toneHex}')">
+          </div>
+          <div class="tone-label">${TWMAP[t]}</div>
+          <div class="tone-label" style="color:${toneHex}; font-family:monospace;">${toneHex}</div>
+        </div>
+      `
+    })
+
+    out.innerHTML = `
+      <div class="card">
+        <div class="card-title">Tonal Palette — ${hex}</div>
+        <div class="palette-grid">${swatches.join('')}</div>
+        <p style="font-size:10px; color:var(--muted); margin-top:4px;">Click any swatch to copy hex</p>
+      </div>
+    `
+  } catch (e) {
+    showStatus('Failed to generate palette: ' + e.message, 'error')
+  }
+}
+
+// ── CVD TAB ──────────────────────────────────────────────────────────────────
+document.getElementById('btn-cvd').addEventListener('click', simulateCvd)
+
+async function simulateCvd() {
+  const hex = document.getElementById('cvd-hex').value
+  const out = document.getElementById('cvd-output')
+
+  if (!wasm) {
+    out.innerHTML = '<div class="empty-state">WASM engine required for CVD simulation</div>'
+    return
+  }
+
+  try {
+    const types = ['protanopia', 'deuteranopia', 'tritanopia']
+    const labels = { protanopia: 'Protanopia (Red)', deuteranopia: 'Deuteranopia (Green)', tritanopia: 'Tritanopia (Blue)' }
+
+    const results = types.map(type => {
+      const simHex = wasm.simulateCVD(hex, type)
+      const delta  = wasm.cvdDeltaE(hex, simHex).toFixed(1)
+      return { type, label: labels[type], simHex, delta }
+    })
+
+    out.innerHTML = `
+      <div class="card">
+        <div class="card-title">Original vs. Simulated</div>
+        <div style="margin-bottom:10px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+            <div style="width:40px;height:40px;border-radius:6px;background:${hex};border:1px solid rgba(255,255,255,0.1);"></div>
+            <div>
+              <div style="font-weight:600;">${hex}</div>
+              <div style="font-size:10px;color:var(--muted);">Original</div>
+            </div>
+          </div>
+        </div>
+        <div class="cvd-grid">
+          ${results.map(({ label, simHex, delta }) => `
+            <div class="cvd-card">
+              <div class="cvd-swatch" style="background:${simHex};"></div>
+              <div style="padding:6px;">
+                <div style="font-size:10px;font-weight:600;">${label}</div>
+                <div style="font-size:10px;color:var(--muted);">${simHex} · ΔE ${delta}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `
+  } catch (e) {
+    showStatus('CVD simulation failed: ' + e.message, 'error')
+  }
+}
+
+// ── TOKENS TAB ───────────────────────────────────────────────────────────────
+let exportedCss = ''
+
+document.getElementById('btn-export').addEventListener('click', () => {
+  parent.postMessage({ pluginMessage: { type: 'export-tokens' } }, '*')
+})
+document.getElementById('btn-copy-css').addEventListener('click', () => {
+  if (!exportedCss) { showStatus('Export tokens first', 'error'); return }
+  navigator.clipboard.writeText(exportedCss).then(() => showStatus('Copied to clipboard!', 'ok'))
+})
+
+// ── Main thread → UI messages ─────────────────────────────────────────────────
+window.onmessage = (event) => {
+  const msg = event.data.pluginMessage
+  if (!msg) return
+
+  document.getElementById('btn-audit').classList.remove('loading')
+
+  switch (msg.type) {
+    case 'audit-pairs':
+      renderAuditPairs(msg.pairs || [])
+      break
+
+    case 'tokens-css':
+      exportedCss = msg.css
+      document.getElementById('tokens-output').innerHTML = `
+        <div class="card">
+          <div class="card-title">${(msg.css.match(/--color/g) || []).length} tokens exported</div>
+          <div class="code-block">${msg.css.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+        </div>
+      `
+      break
+
+    case 'selection':
+      // Update UI to reflect new selection info
+      break
+
+    case 'error':
+      showStatus(msg.message, 'error')
+      break
+  }
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+initWasm()
+</script>
+</body>
+</html>

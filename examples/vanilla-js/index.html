@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Momoto Engine — Vanilla JS Demo</title>
+  <style>
+    body { font-family: system-ui; background: #07070e; color: #e8eaf6; padding: 2rem; }
+    .card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; padding: 1.5rem; margin: 1rem 0; }
+    .pass { color: #4ade80; } .fail { color: #f87171; }
+    .swatch { display: inline-block; width: 40px; height: 40px; border-radius: 6px;
+              vertical-align: middle; margin-right: 8px; }
+    pre { background: rgba(0,0,0,0.4); padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 13px; }
+    h2 { color: #a78bfa; margin-top: 2rem; }
+  </style>
+</head>
+<body>
+  <h1>Momoto Engine v7.0.0 — Vanilla JS</h1>
+  <div id="output"></div>
+
+  <script type="module">
+    import init, {
+      Color, wcagContrastRatio, wcagPasses, wcagLevel, apcaContrast,
+      hexToHct, hctTonalPalette, hctToHex,
+      generatePalette, simulateCVD, cvdDeltaE,
+      ThinFilm, TransferMatrixFilm,
+      agentRecommendForeground, agentGetMetrics,
+      getMomotoIdentity
+    } from 'https://esm.sh/momoto-wasm@7.0.0';
+
+    const out = document.getElementById('output');
+    const section = (title, html) => {
+      out.innerHTML += `<div class="card"><h2>${title}</h2>${html}</div>`;
+    };
+
+    await init();
+
+    // ── Identity ─────────────────────────────────────────────────────────
+    const identity = JSON.parse(getMomotoIdentity());
+    section('Engine', `<pre>${JSON.stringify(identity, null, 2)}</pre>`);
+
+    // ── Accessibility ─────────────────────────────────────────────────────
+    const pairs = [
+      { fg: '#c8d4ff', bg: '#07070e' },
+      { fg: '#888888', bg: '#ffffff' },
+      { fg: '#000000', bg: '#ffffff' },
+    ];
+    let html = '';
+    for (const { fg, bg } of pairs) {
+      const fgC = Color.fromHex(fg), bgC = Color.fromHex(bg);
+      const ratio = wcagContrastRatio(fgC, bgC);
+      const apca  = apcaContrast(fgC, bgC);
+      const level = wcagLevel(ratio, false);
+      const ok = wcagPasses(ratio, 0, false);
+      html += `
+        <div>
+          <span class="swatch" style="background:${fg}"></span>
+          <span class="swatch" style="background:${bg}"></span>
+          <strong>${fg}</strong> on <strong>${bg}</strong>:
+          WCAG <span class="${ok ? 'pass':'fail'}">${ratio.toFixed(2)}:1 (${level})</span>
+          &nbsp;·&nbsp; APCA <strong>${apca.toFixed(1)} Lc</strong>
+        </div>`;
+    }
+    section('Accessibility (WCAG + APCA)', html);
+
+    // ── HCT Tonal Palette ──────────────────────────────────────────────────
+    const [h, c] = hexToHct('#3a7bd5');
+    const pal = hctTonalPalette(h, c);
+    const tones = [10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99];
+    let swatches = '';
+    tones.forEach((t, i) => {
+      const hex = hctToHex(pal[i*3], pal[i*3+1], t);
+      swatches += `<span class="swatch" style="background:${hex};width:52px;height:52px;border-radius:8px" title="tone ${t}: ${hex}"></span>`;
+    });
+    section('HCT Tonal Palette (#3a7bd5)', swatches);
+
+    // ── Color Harmony ─────────────────────────────────────────────────────
+    const harmonies = ['triadic', 'analogous', 'complementary', 'split_complementary'];
+    let harmHtml = '';
+    for (const type of harmonies) {
+      const colors = generatePalette('#6366f1', type, 4);
+      harmHtml += `<div style="margin:8px 0"><strong>${type}:</strong> `;
+      colors.forEach(c => {
+        harmHtml += `<span class="swatch" style="background:${c}" title="${c}"></span>`;
+      });
+      harmHtml += `</div>`;
+    }
+    section('Color Harmony', harmHtml);
+
+    // ── CVD Simulation ─────────────────────────────────────────────────────
+    const base = '#3a7bd5';
+    const cvdTypes = ['protanopia', 'deuteranopia', 'tritanopia'];
+    let cvdHtml = `<span class="swatch" style="background:${base};width:60px;height:60px"></span> Original<br><br>`;
+    for (const type of cvdTypes) {
+      const sim = simulateCVD(base, type);
+      const de  = cvdDeltaE(base, type);
+      const severity = de < 20 ? 'mild' : de < 60 ? 'moderate' : 'severe';
+      cvdHtml += `
+        <span class="swatch" style="background:${sim};width:60px;height:60px"></span>
+        <strong>${type}</strong>: ${sim} (ΔE ${de.toFixed(1)} — ${severity})<br>`;
+    }
+    section('CVD Simulation (Viénot 1999)', cvdHtml);
+
+    // ── Thin Film CSS ─────────────────────────────────────────────────────
+    const bubble  = ThinFilm.soapBubbleMedium();
+    const morpho  = TransferMatrixFilm.morphoButterfly();
+    const bubbleCss  = bubble.toCssSoapBubble(90);
+    const morphoCss0 = morpho.toCssStructuralColor(0);
+    const morphoCss45 = morpho.toCssStructuralColor(45);
+    section('Glass Physics — CSS Output', `
+      <div style="border-radius:12px;height:80px;${bubbleCss};margin:8px 0">Soap Bubble</div>
+      <div style="border-radius:12px;height:80px;${morphoCss0};margin:8px 0">Morpho Butterfly (0°)</div>
+      <div style="border-radius:12px;height:80px;${morphoCss45};margin:8px 0">Morpho Butterfly (45°)</div>
+    `);
+
+    // ── AI Recommendation ─────────────────────────────────────────────────
+    const rec = JSON.parse(agentRecommendForeground('#07070e', 0, 0));
+    const met = JSON.parse(agentGetMetrics('#6188d8'));
+    section('AI Agent', `
+      <p>Best foreground for <code>#07070e</code>:
+         <span class="swatch" style="background:${rec.hex}"></span>
+         <strong>${rec.hex}</strong> — WCAG ${rec.wcagRatio?.toFixed(2)}:1
+         <span class="${rec.passes ? 'pass':'fail'}">(${rec.passes ? 'PASS':'FAIL'})</span>
+      </p>
+      <pre>${JSON.stringify(met, null, 2)}</pre>
+    `);
+  </script>
+</body>
+</html>

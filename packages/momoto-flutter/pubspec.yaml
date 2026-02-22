@@ -1,0 +1,32 @@
+name: momoto_flutter
+description: "Momoto Engine Flutter bindings — WCAG/APCA contrast, HCT palettes, CVD simulation, glass materials"
+version: 1.0.0
+homepage: https://github.com/zuclubit/momoto-ui
+repository: https://github.com/zuclubit/momoto-ui
+
+environment:
+  sdk: ">=3.2.0 <4.0.0"
+  flutter: ">=3.16.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # flutter_rust_bridge connects Flutter to native Rust code via FFI
+  # Requires running: flutter_rust_bridge_codegen generate
+  flutter_rust_bridge: ^2.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  # Assets to bundle (WASM for web target)
+  assets:
+    - assets/momoto_bg.wasm
+
+# ── Platform-specific native libraries ────────────────────────────────────────
+# Android: libs/arm64-v8a/libmomoto_core.so
+# iOS:     Frameworks/MomotoCore.xcframework
+# Web:     assets/momoto_bg.wasm (via dart:js_interop)
+# Desktop: libs/{arch}/libmomoto_core.{so|dll|dylib}

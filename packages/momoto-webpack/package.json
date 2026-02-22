@@ -1,0 +1,32 @@
+{
+  "name": "@momoto-ui/webpack",
+  "version": "1.0.0",
+  "description": "Webpack plugin for Momoto Engine — WASM asset handling, dev-time accessibility audit, CSS token injection",
+  "type": "commonjs",
+  "main":  "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types":   "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import":  "./dist/index.mjs"
+    }
+  },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev":   "tsup src/index.ts --format cjs,esm --dts --watch"
+  },
+  "keywords": ["webpack", "plugin", "accessibility", "wcag", "momoto", "wasm"],
+  "author": "Zuclubit",
+  "license": "MIT",
+  "peerDependencies": {
+    "webpack": ">=5.0.0"
+  },
+  "devDependencies": {
+    "webpack": "^5.90.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0",
+    "@types/node": "^20.0.0"
+  }
+}

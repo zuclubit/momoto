@@ -53,3 +53,5 @@ momoto/crates/*/pkg/
 
 # Cargo.lock for libraries (keep in engine workspace, ignore here)
 momoto/Cargo.lock
+# Swift build artifacts
+examples/swift/.build/

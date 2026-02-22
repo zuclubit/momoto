@@ -101,7 +101,11 @@
     "build:engine": "cd momoto && cargo build --release",
     "test:engine": "cd momoto && cargo test",
     "build:crystal": "npm run build --workspace=packages/momoto-ui-crystal",
-    "build:all": "npm run build:wasm && npm run build && npm run build:crystal"
+    "build:tailwind": "npm run build --workspace=packages/momoto-tailwind",
+    "build:vite": "npm run build --workspace=packages/momoto-vite",
+    "build:webpack": "npm run build --workspace=packages/momoto-webpack",
+    "build:plugins": "npm run build:tailwind && npm run build:vite && npm run build:webpack",
+    "build:all": "npm run build:wasm && npm run build && npm run build:crystal && npm run build:plugins"
   },
   "keywords": [
     "design-system",

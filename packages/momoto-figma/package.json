@@ -1,0 +1,15 @@
+{
+  "name": "@momoto-ui/figma",
+  "version": "1.0.0",
+  "description": "Figma plugin for Momoto Engine — accessibility audit, HCT palettes, CVD simulation in Figma",
+  "private": true,
+  "scripts": {
+    "build":   "tsc",
+    "watch":   "tsc --watch",
+    "package": "zip -r momoto-figma.zip code.js ui.html manifest.json"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "*",
+    "typescript": "^5.3.0"
+  }
+}

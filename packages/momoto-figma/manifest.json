@@ -1,0 +1,12 @@
+{
+  "name": "Momoto — Color Intelligence",
+  "id": "momoto-color-intelligence",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "documentAccess": "dynamic-page",
+  "permissions": ["currentuser:read"],
+  "editorType": ["figma", "figjam"]
+}
