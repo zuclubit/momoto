@@ -1,7 +1,7 @@
 {
   "name": "momoto",
-  "version": "5.0.0",
-  "description": "The Perceptual Color Intelligence Standard for Accessible & AI-Safe Design Systems",
+  "version": "7.0.0",
+  "description": "Chromatic intelligence and material physics engine — Rust v7.0.0 compiled to WebAssembly",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -67,12 +67,13 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/zuclubit/momoto.git"
+    "url": "https://github.com/zuclubit/momoto-ui.git",
+    "directory": "momoto"
   },
   "bugs": {
-    "url": "https://github.com/zuclubit/momoto/issues"
+    "url": "https://github.com/zuclubit/momoto-ui/issues"
   },
-  "homepage": "https://github.com/zuclubit/momoto#readme",
+  "homepage": "https://zuclubit.github.io/momoto-ui/",
   "peerDependencies": {
     "react": ">=18.0.0"
   },
