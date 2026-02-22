@@ -5,6 +5,45 @@ All notable changes to the Momoto Design System will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+---
+
+## [Unreleased] — Monorepo Migration — 2026-02-22
+
+### Changed — Repository Architecture
+
+- **True monorepo**: Rust engine (`zuclubit/momoto`) merged into this repo via `git subtree add --squash`
+- **npm workspaces** configured: `packages/*` and `apps/*` automatically linked
+- **`@momoto-ui/wasm@7.0.0`** replaces old `momoto-wasm` (v5.0.0) as the canonical workspace package
+- **`@momoto-ui/crystal`** dependency on `@momoto-ui/wasm` now resolves via npm workspace (no `file:` path)
+- **`@momoto/topocho-crm`** now a proper workspace app in `apps/`
+- **Root `.gitignore`**: ignores `momoto/target/`, `momoto/crates/*/pkg/` (build artifacts) instead of `momoto/` entirely
+
+### Added — Monorepo Scripts
+
+| Script | Command |
+|--------|---------|
+| `build:wasm` | `wasm-pack build` → `packages/momoto-ui-wasm/` (bundler) |
+| `build:wasm:web` | `wasm-pack build` → web target (ES modules) |
+| `build:engine` | `cargo build --release` in `momoto/` |
+| `test:engine` | `cargo test` in `momoto/` |
+| `dev:crm` | Start `apps/topocho-crm` dev server |
+| `build:crystal` | Build `@momoto-ui/crystal` |
+| `build:all` | `build:wasm` + `build` + `build:crm` |
+
+### Engine — Documentation Updated (v7.0.0)
+
+- `README.md` fully rewritten: monorepo structure, all 9 WASM modules, installation, development workflow
+- `docs/API.md` fully rewritten: complete WASM API reference (188 entries, 280+ methods)
+- `docs/website/index.html`: interactive explorer with correct Sprint 3/4 physics presets
+- `docs/api/llms.txt`: LLM context document with complete API, constants, CVD matrices
+
+### Fixed — DynamicMieParams Preset Names
+
+Corrected 8 dynamic presets (previously hallucinated names):
+`stratocumulus`, `fog`, `smoke`, `milk`, `dust`, `iceCrystals`, `condensingFog`, `evaporatingMist`
+
+---
+
 ## [1.0.0-rc1] - 2026-01-31
 
 ### Release Candidate 1
