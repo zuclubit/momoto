@@ -41,5 +41,6 @@ tsup.config.bundled_*.mjs
 # Storybook
 storybook-static/
 
-# Subdirectories with their own git repos (use submodules instead)
-momoto/
+# Rust build artifacts inside engine (tracked as monorepo subtree)
+momoto/rust-wasm-migration/target/
+momoto/target/
