@@ -1,0 +1,28 @@
+[package]
+name = "momoto-haptics"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Haptic / vibrotactile output domain — energy budget, frequency-force mapping"
+keywords = ["haptics", "vibration", "tactile", "accessibility"]
+categories = ["multimedia", "science", "accessibility"]
+readme = "README.md"
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+momoto-core = { path = "../momoto-core" }
+
+[dev-dependencies]
+criterion.workspace = true
+
+[[example]]
+name = "06_haptics_feedback"
+path = "../../examples/06_haptics_feedback.rs"
+
+[features]
+default = []

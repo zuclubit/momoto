@@ -10,6 +10,8 @@ members = [
     # "crates/momoto-prelude",
     "crates/momoto-agent",
     "crates/momoto-events",
+    "crates/momoto-audio",
+    "crates/momoto-haptics",
     # momoto-cli: not yet implemented
     # "crates/momoto-cli",
     "crates/momoto-wasm",
@@ -19,21 +21,42 @@ members = [
 ]
 
 [workspace.package]
-version = "7.0.0"
+version = "7.1.0"
 authors = ["Momoto Team"]
 edition = "2021"
 rust-version = "1.70"
 license = "MIT"
 repository = "https://github.com/momoto/momoto"
 homepage = "https://momoto.dev"
-description = "Perceptual color intelligence system"
-keywords = ["color", "contrast", "accessibility", "perception", "apca"]
-categories = ["graphics", "accessibility", "algorithms", "wasm"]
+description = "Multimodal Perceptual Physics Engine — Color, Audio, and Haptics"
+keywords = ["color", "audio", "haptics", "perception", "multimodal"]
+categories = ["graphics", "multimedia", "accessibility", "algorithms", "wasm"]
+
+# ── Workspace feature matrix ──────────────────────────────────────────────────
+# Features are defined per-crate. This comment documents the canonical matrix:
+#
+# Feature      | momoto-core | momoto-audio | momoto-haptics | momoto-wasm
+# -------------|-------------|--------------|----------------|------------
+# color        | always      | —            | —              | optional (default ON)
+# audio        | —           | always       | —              | optional (default ON)
+# haptics      | —           | —            | always         | optional (default OFF)
+# multimodal   | —           | —            | —              | color+audio+haptics
+#
+# Build targets:
+#   cargo check --package momoto-wasm                    # color+audio (default)
+#   cargo check --package momoto-wasm --features haptics # color+audio+haptics
+#   cargo check --package momoto-wasm --features multimodal # all domains
+#   cargo check --package momoto-core                    # color only (always)
+#   cargo check --package momoto-audio                   # audio only
+#   cargo check --package momoto-haptics                 # haptics only
 
 [workspace.dependencies]
 # No external dependencies for core - pure Rust
 # WASM bindings
 wasm-bindgen = "0.2"
+
+# Fixed-capacity collections (no_std compatible, zero-heap-growth compliance reports)
+arrayvec = { version = "0.7", default-features = false }
 
 # CLI dependencies
 clap = { version = "4", features = ["derive"] }

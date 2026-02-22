@@ -1,54 +1,90 @@
 # Momoto
 
-**Physics-based material rendering for UI — Behavior over appearance**
+**Multimodal Perceptual Physics Engine — Color · Audio · Haptics**
 
-Momoto is a perceptual color and material system that models **optical behavior** rather than simulating visual effects. Materials are pure functions of physical parameters that evaluate to backend-agnostic optical properties.
+Momoto models **perceptual physics** across three sensory domains. Every algorithm
+is grounded in a published standard; every output is deterministic, energy-conserving,
+and WASM-ready.
 
-```rust
-// Materials are functions
-let glass = GlassMaterial::frosted();
-let context = MaterialContext::default();
-let evaluated = glass.evaluate(&context);
+```
+┌────────────────────────────────────────────────────────────────┐
+│                 MomotoEngine  (v7.1.0)                         │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐ │
+│  │  Color       │  │  Audio       │  │  Haptics             │ │
+│  │  OKLCH · HCT │  │  LUFS · FFT  │  │  LRA · ERM · Piezo   │ │
+│  │  APCA · CVD  │  │  Mel · EBU   │  │  Energy budget       │ │
+│  │  Harmony     │  │  R128        │  │  Waveform gen        │ │
+│  └──────────────┘  └──────────────┘  └──────────────────────┘ │
+│  Energy invariant: output + absorbed + scattered = input       │
+│  No dynamic dispatch · No heap in hot loops · No unsafe Rust   │
+└────────────────────────────────────────────────────────────────┘
+```
 
-// Backends convert physics → rendering
-let backend = CssBackend::new();
-let css = backend.render(&evaluated, RenderContext::desktop())?;
+---
+
+## Domain Comparison
+
+| Domain | Physical quantity | Standard | WASM exports |
+|--------|------------------|----------|-------------|
+| **Color** | Photon wavelength (380–780 nm) | WCAG 2.1, APCA-W3, CIE | 180+ |
+| **Audio** | Sound pressure (20 Hz–20 kHz) | ITU-R BS.1770-4, EBU R128 | 13 |
+| **Haptics** | Vibrotactile force (Hz, N) | IEEE 1451.4, Weber's law | planned |
+
+---
+
+## Energy Invariants
+
+All three domains satisfy `output + absorbed + scattered = input` (± tolerance):
+
+| Domain | Energy model | Absorption |
+|--------|-------------|------------|
+| Color | Lossless optical (R+T=1) | 0 in base model |
+| Audio | K-weighting is Parseval-conserving | 0 |
+| Haptics | budget: delivered + remaining = capacity | 0 |
+
+---
+
+## Feature Flags
+
+```toml
+# Minimal — color domain only (<350 KB WASM)
+momoto-wasm = { features = ["color"] }
+
+# Default — color + audio (<500 KB WASM)
+momoto-wasm = { features = ["color", "audio"] }
+
+# Full multimodal (<550 KB WASM)
+momoto-wasm = { features = ["multimodal"] }
 ```
 
 ---
 
 ## Why Momoto Exists
 
-Current UI rendering libraries conflate **physics** with **rendering**:
+Current UI systems conflate **physics** with **rendering** and ignore non-visual senses:
 
 | Problem | Consequence |
 |---------|-------------|
-| Blur measured in pixels | Cannot render to print, vector, or AR/VR |
 | Colors in sRGB only | No HDR, wide gamut, or perceptual accuracy |
-| Effects hardcoded for CSS | Cannot leverage WebGPU, Native, or Offline |
+| Audio loudness by feel | EBU R128 non-compliance, inconsistent UX |
+| Haptics by trial and error | Actuator damage, accessibility failures |
 | Magic numbers everywhere | Non-reproducible, non-deterministic |
 
-**Momoto separates concerns:**
-
-```
-Material (IOR, roughness, thickness)
-    ↓ evaluate(MaterialContext)
-EvaluatedMaterial (scattering_radius_mm, absorption, Fresnel)
-    ↓ render(Backend, RenderContext)
-CSS | WebGPU | Print | Native | Vector
-```
+**Momoto separates physics from rendering and unifies all three sensory domains.**
 
 ---
 
 ## Design Principles
 
-1. **Materials are functions** — Same input → same output, always
-2. **Physics first** — Fresnel equations, Beer-Lambert law, no hacks
-3. **Backend-agnostic** — One material, any target (CSS, GPU, Print, AR)
-4. **Performance is a feature** — Batch APIs, LUTs, SIMD-ready
-5. **Deterministic** — Reproducible across platforms and time
+1. **Physics first** — Fresnel equations, K-weighting, Weber's law, not hacks
+2. **Deterministic** — Same input → same output across all platforms
+3. **Energy-conserving** — `R + T + A + S = 1` enforced at runtime
+4. **No unsafe Rust** — Zero unsafe throughout all crates
+5. **No dynamic dispatch in hot paths** — `DomainVariant` enum, not `Box<dyn Domain>`
+6. **No heap in loops** — `Box<[f32]>` allocated once per call; inner loops are zero-alloc
+7. **Backend-agnostic** — WASM, native Rust, or direct Cargo dependency
 
-See [docs/architecture/MANIFESTO.md](./docs/architecture/manifesto-alignment-post-corrections.md) for full philosophy.
+See [`SCIENTIFIC_VALIDATION.md`](./SCIENTIFIC_VALIDATION.md) for algorithm-to-standard mappings.
 
 ---
 

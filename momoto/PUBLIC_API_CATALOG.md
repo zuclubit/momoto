@@ -1,8 +1,175 @@
 # Public API Catalog
 
-**Date:** 2026-01-07
-**Phase:** FASE 4.2 - Public API Surface Audit
-**Status:** 🔍 Comprehensive Audit Complete
+**Date:** 2026-02-22
+**Version:** 7.1.0 — Multimodal (Color + Audio + Haptics)
+**Status:** ✅ Complete — all domains documented
+
+---
+
+## 0. momoto-audio (Acoustic Domain)
+
+### 0.1 AudioDomain (`momoto_audio::domain`)
+
+| API | Type | Stability | Tests | Notes |
+|-----|------|-----------|-------|-------|
+| `AudioDomain::at_48khz()` | fn | ✅ Stable | ✅ Yes | 48 kHz domain root |
+| `AudioDomain::new(sr)` | fn | ✅ Stable | ✅ Yes | Custom rate — returns `Option<AudioDomain>` |
+| `AudioDomain::at_sample_rate(sr)` | fn | ✅ Stable | ✅ Yes | Custom sample rate |
+| `AudioDomain::lufs_analyzer(channels)` | fn | ✅ Stable | ✅ Yes | Returns `LufsAnalyzer` |
+| `AudioDomain::validate_broadcast(lufs)` | fn | ✅ Stable | ✅ Yes | EBU R128 compliance |
+| `AudioDomain::id()` / `name()` / `version()` | fn | ✅ Stable | ✅ Yes | Domain trait impl |
+
+### 0.2 LUFS Loudness (`momoto_audio::perceptual::lufs`)
+
+| API | Type | Stability | Tests | Notes |
+|-----|------|-----------|-------|-------|
+| `LufsAnalyzer::add_mono_block(&[f32])` | fn | ✅ Stable | ✅ Yes | Allocation-free hot path |
+| `LufsAnalyzer::momentary()` | fn | ✅ Stable | ✅ Yes | 400 ms window (LUFS) |
+| `LufsAnalyzer::short_term()` | fn | ✅ Stable | ✅ Yes | 3 s window (LUFS) |
+| `LufsAnalyzer::integrated()` | fn | ✅ Stable | ✅ Yes | Gated integrated LUFS |
+| `LoudnessBlock` | struct | ✅ Stable | ✅ Yes | 400 ms block with K-weighting |
+
+### 0.3 FFT (`momoto_audio::physical::fft`)
+
+| API | Type | Stability | Tests | Notes |
+|-----|------|-----------|-------|-------|
+| `FftPlan::new(n)` | fn | ✅ Stable | ✅ Yes | n must be power of two |
+| `FftPlan::fft(&mut samples)` | fn | ✅ Stable | ✅ Yes | In-place, interleaved re/im |
+
+### 0.4 Mel Filterbank (`momoto_audio::perceptual::mel`)
+
+| API | Type | Stability | Tests | Notes |
+|-----|------|-----------|-------|-------|
+| `MelFilterbank::new(n, fft, sr, f_min, f_max)` | fn | ✅ Stable | ✅ Yes | HTK + Slaney |
+| `MelFilterbank::apply_into(&spectrum, &mut out)` | fn | ✅ Stable | ✅ Yes | Allocation-free |
+| `hz_to_mel(hz)` | fn | ✅ Stable | ✅ Yes | HTK formula |
+| `mel_to_hz(mel)` | fn | ✅ Stable | ✅ Yes | HTK inverse |
+
+### 0.5 Spectral Features (`momoto_audio::perceptual::spectral`)
+
+| API | Type | Stability | Tests | Notes |
+|-----|------|-----------|-------|-------|
+| `spectral_centroid(spectrum, sr)` | fn | ✅ Stable | ✅ Yes | Weighted center of mass (Hz) |
+| `spectral_brightness(spectrum, sr, cutoff)` | fn | ✅ Stable | ✅ Yes | Energy above cutoff / total |
+| `spectral_flux(prev, curr)` | fn | ✅ Stable | ✅ Yes | Frame-to-frame change |
+| `spectral_rolloff(spectrum, sr, pct)` | fn | ✅ Stable | ✅ Yes | Frequency below pct% energy |
+| `spectral_flatness(spectrum)` | fn | ✅ Stable | ✅ Yes | Wiener entropy (0=tone, 1=noise) |
+
+### 0.6 IIR Filters (`momoto_audio::filters`)
+
+| API | Type | Stability | Tests | Notes |
+|-----|------|-----------|-------|-------|
+| `BiquadFilter::new(coeffs)` | fn | ✅ Stable | ✅ Yes | Generic IIR |
+| `BiquadFilter::process(sample)` | fn | ✅ Stable | ✅ Yes | Denormal-guarded hot path |
+| `BiquadCoeffs` | struct | ✅ Stable | ✅ Yes | b0/b1/b2/a1/a2 |
+| `KWeightingFilter::new(sr)` | fn | ✅ Stable | ✅ Yes | ITU-R BS.1770-4 two-stage |
+| `KWeightingFilter::process(sample)` | fn | ✅ Stable | ✅ Yes | High-shelf + high-pass |
+| `KWeightingCoeffs` | struct | ✅ Stable | ✅ Yes | Pre-computed stage coefficients |
+
+### 0.7 EBU R128 (`momoto_audio::compliance::ebur128`)
+
+| API | Type | Stability | Tests | Notes |
+|-----|------|-----------|-------|-------|
+| `EbuR128Limits` | struct | ✅ Stable | ✅ Yes | Target: −23 LUFS ±1, LRA ≤ 18 |
+| `EbuR128Measurement` | struct | ✅ Stable | ✅ Yes | `passes`, `margin_lu` |
+
+### 0.8 WASM Audio API (`momoto-wasm` — feature: `audio`)
+
+| JS name (camelCase) | Description |
+|--------------------|-------------|
+| `audioLufs(samples, sr, channels)` | Integrated LUFS → `f32` |
+| `audioMomentaryLufs(samples, sr, channels)` | 400 ms momentary LUFS |
+| `audioFftPowerSpectrum(samples, n)` | Power spectrum → `Float32Array` |
+| `audioMelSpectrum(samples, sr, n_mels)` | Mel filterbank → `Float32Array` |
+| `audioSpectralCentroid(spectrum, sr)` | Center of mass (Hz) |
+| `audioSpectralBrightness(spectrum, sr, cutoff)` | Brightness above cutoff |
+| `audioSpectralFlux(prev, curr)` | Frame change |
+| `audioSpectralRolloff(spectrum, sr, pct)` | Rolloff frequency |
+| `audioSpectralFlatness(spectrum)` | Wiener entropy |
+| `audioValidateEbuR128(lufs)` | JSON compliance report |
+| `domainProcess(domain_id, samples)` | Generic domain signal processing |
+| `domainPerceptualDistance(a_id, a_val, b_id, b_val)` | Cross-domain distance |
+| `audioDomainInfo()` | JSON domain metadata |
+
+---
+
+## 0b. momoto-haptics (Vibrotactile Domain)
+
+### 0b.1 HapticsDomain (`momoto_haptics::domain`)
+
+| API | Type | Stability | Tests | Notes |
+|-----|------|-----------|-------|-------|
+| `HapticsDomain::new(capacity_j)` | fn | ✅ Stable | ✅ Yes | LRA default: 0.050 J |
+| `HapticsDomain::with_recharge(j, j_per_s)` | fn | ✅ Stable | ✅ Yes | Passive recharge model |
+| `HapticsDomain::id()` / `name()` / `version()` | fn | ✅ Stable | ✅ Yes | Domain trait impl |
+| `HapticsDomain::energy_report(input)` | fn | ✅ Stable | ✅ Yes | EnergyConserving trait |
+
+### 0b.2 Energy Budget (`momoto_haptics::energy`)
+
+| API | Type | Stability | Tests | Notes |
+|-----|------|-----------|-------|-------|
+| `EnergyBudget::new(capacity_j)` | fn | ✅ Stable | ✅ Yes | Fixed capacity (joules) |
+| `EnergyBudget::with_recharge(j, j_per_s)` | fn | ✅ Stable | ✅ Yes | With passive recharge |
+| `EnergyBudget::try_consume(j)` | fn | ✅ Stable | ✅ Yes | Returns `Err` if exceeded |
+| `EnergyBudget::tick(secs)` | fn | ✅ Stable | ✅ Yes | Advance time, recover energy |
+| `EnergyBudget::available_j()` | fn | ✅ Stable | ✅ Yes | Remaining capacity |
+| `EnergyBudget::load_fraction()` | fn | ✅ Stable | ✅ Yes | consumed / capacity |
+| `EnergyBudget::can_afford(j)` | fn | ✅ Stable | ✅ Yes | Non-consuming check |
+| `EnergyBudget::reset()` | fn | ✅ Stable | ✅ Yes | Full recharge |
+| `EnergyBudgetError { required_j, available_j }` | struct | ✅ Stable | ✅ Yes | Budget exceeded error |
+
+### 0b.3 Frequency-Force Mapping (`momoto_haptics::mapping`)
+
+| API | Type | Stability | Tests | Notes |
+|-----|------|-----------|-------|-------|
+| `FrequencyForceMapper::new(model)` | fn | ✅ Stable | ✅ Yes | Build from actuator preset |
+| `FrequencyForceMapper::map(intensity, dur_ms)` | fn | ✅ Stable | ✅ Yes | Weber's law scaling |
+| `VibrationSpec { freq_hz, force_n, duration_ms, intensity }` | struct | ✅ Stable | ✅ Yes | Physical output |
+| `VibrationSpec::energy_j()` | fn | ✅ Stable | ✅ Yes | Estimated joules |
+| `FrequencyForcePoint { freq_hz, force_n }` | struct | ✅ Stable | ✅ Yes | Curve point |
+| `ActuatorModel::Lra` | variant | ✅ Stable | ✅ Yes | ~150–200 Hz narrow band |
+| `ActuatorModel::Erm` | variant | ✅ Stable | ✅ Yes | 80–300 Hz broad band |
+| `ActuatorModel::Piezo` | variant | ✅ Stable | ✅ Yes | 200–1000 Hz wide band |
+| `ActuatorModel::Custom { … }` | variant | ✅ Stable | ✅ Yes | Device-specific |
+
+### 0b.4 Waveform Generation (`momoto_haptics::waveform`)
+
+| API | Type | Stability | Tests | Notes |
+|-----|------|-----------|-------|-------|
+| `HapticWaveform::generate(kind, freq, dur, amp, sr)` | fn | ✅ Stable | ✅ Yes | Returns `Box<[f32]>` samples |
+| `HapticWaveform { kind, freq_hz, sample_rate, samples }` | struct | ✅ Stable | ✅ Yes | Generated waveform |
+| `WaveformKind::Sine` | variant | ✅ Stable | ✅ Yes | Pure sinusoid |
+| `WaveformKind::Pulse` | variant | ✅ Stable | ✅ Yes | Gaussian impulse |
+| `WaveformKind::Ramp` | variant | ✅ Stable | ✅ Yes | Linear envelope × sine |
+| `WaveformKind::Buzz` | variant | ✅ Stable | ✅ Yes | Clipped sine (rich harmonics) |
+
+---
+
+## 0c. momoto-engine (Multimodal Orchestrator)
+
+| API | Type | Stability | Tests | Notes |
+|-----|------|-----------|-------|-------|
+| `MomotoEngine::new()` | fn | ✅ Stable | ✅ Yes | ColorDomain always registered |
+| `MomotoEngine::with_scratch_len(n)` | fn | ✅ Stable | ✅ Yes | Override 4096-element default |
+| `engine.domain_count()` | fn | ✅ Stable | ✅ Yes | Registered domain count |
+| `engine.has_domain(id)` | fn | ✅ Stable | ✅ Yes | Check by DomainId |
+| `engine.is_fully_deterministic()` | fn | ✅ Stable | ✅ Yes | All domains deterministic |
+| `engine.is_fully_compliant()` | fn | ✅ Stable | ✅ Yes | All compliance reports pass |
+| `engine.scratch()` / `scratch_mut()` | fn | ✅ Stable | ✅ Yes | Shared work buffer |
+| `engine.total_energy_report(input)` | fn | ✅ Stable | ✅ Yes | Σ per-domain energy |
+| `engine.verify_all_conservation(input, tol)` | fn | ✅ Stable | ✅ Yes | Boolean conservation check |
+| `engine.validate_all()` | fn | ✅ Stable | ✅ Yes | `Vec<ComplianceReport>` |
+| `engine.normalize_perceptual_energy(id, raw)` | fn | ✅ Stable | ✅ Yes | Domain normalization |
+| `engine.perceptual_alignment(a, b, va, vb)` | fn | ✅ Stable | ✅ Yes | Cross-domain coherence |
+| `engine.validate_system_energy()` | fn | ✅ Stable | ✅ Yes | `SystemEnergyReport` |
+| `engine.domain_names()` | fn | ✅ Stable | ✅ Yes | Registered crate names |
+| `ColorDomain` | struct | ✅ Stable | ✅ Yes | Ideal lossless optical domain |
+| `DomainVariant` | enum | ✅ Stable | ✅ Yes | Enum dispatch (no vtable) |
+| `SystemEnergyReport` | struct | ✅ Stable | ✅ Yes | Per-domain + total + efficiency |
+
+---
+
+## Previous Audit (Phase 4.2 - 2026-01-07)
 
 ---
 

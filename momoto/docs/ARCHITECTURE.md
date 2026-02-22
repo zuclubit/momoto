@@ -1,8 +1,97 @@
 # Momoto Architecture
 
-**Version:** 5.0.0
-**Status:** Phase 4 Complete
-**Last Updated:** 2026-01-09
+**Version:** 7.1.0
+**Status:** Multimodal — Color + Audio + Haptics Complete
+**Last Updated:** 2026-02-22
+
+---
+
+## Multimodal Perceptual Physics Engine (v7.1.0)
+
+Momoto v7.1.0 is a **Multimodal Perceptual Physics Engine** that unifies three
+sensory domains under a single energy-conserving contract.
+
+### Domain Stack
+
+```text
+┌──────────────────────────────────────────────────────────────────┐
+│                     momoto-wasm  (WASM / JS / TS bindings)       │
+│  feature:color ──── feature:audio ──── feature:haptics           │
+└────────┬────────────────────┬────────────────────┬───────────────┘
+         │                    │                    │
+   ┌─────▼──────┐     ┌──────▼──────┐     ┌──────▼──────┐
+   │ Color      │     │ Audio       │     │ Haptics     │
+   │ OKLCH/HCT  │     │ LUFS/FFT    │     │ EnergyBudget│
+   │ APCA/WCAG  │     │ Mel/EBU R128│     │ Weber law   │
+   │ materials  │     │ K-weighting │     │ waveforms   │
+   └─────┬──────┘     └──────┬──────┘     └──────┬──────┘
+         │                   │                    │
+         └──────────────── ──┼────────────────────┘
+                             │
+              ┌──────────────▼───────────────┐
+              │       momoto-engine           │
+              │  DomainVariant (enum dispatch)│
+              │  shared scratch: Box<[f32]>   │
+              │  normalize_perceptual_energy()│
+              │  perceptual_alignment()       │
+              │  validate_system_energy()     │
+              └──────────────┬───────────────┘
+                             │
+              ┌──────────────▼───────────────┐
+              │       momoto-core             │
+              │  traits: Domain, EnergyConser-│
+              │  ving, PerceptualMetric,      │
+              │  PhysicalModel, Compliance    │
+              │  zero external dependencies  │
+              └──────────────────────────────┘
+```
+
+### DomainVariant Enum Dispatch
+
+```rust
+// No dyn, no vtable — LLVM inlines every match arm
+pub enum DomainVariant {
+    Color(ColorDomain),                     // always present
+    // #[cfg(feature = "audio")]
+    // Audio(momoto_audio::AudioDomain),
+    // #[cfg(feature = "haptics")]
+    // Haptics(momoto_haptics::HapticsDomain),
+}
+```
+
+### Cross-Domain Energy Normalization
+
+Each domain maps its raw physical value to a perceptual `[0, 1]` scale:
+
+| Domain | Physical input | Formula | Range |
+|--------|---------------|---------|-------|
+| Color | Relative luminance | pass-through | [0, 1] |
+| Audio | Integrated LUFS | `(lufs + 70.0) / 70.0` | [0, 1] |
+| Haptics | Vibration intensity | pass-through | [0, 1] |
+
+### Energy Conservation Invariant
+
+```text
+For all registered domains D_i:
+  EnergyReport { input, output, absorbed, scattered }
+  |input − (output + absorbed + scattered)| ≤ 1e-4
+
+  ColorDomain:    absorbed = 0, scattered = 0  (ideal lossless)
+  AudioDomain:    absorbed = heat from K-weighting filter
+  HapticsDomain:  absorbed = heat from actuator dissipation
+```
+
+### Implemented Phases (v7.1.0)
+
+| Phase | Crate | Standard | Tests |
+|-------|-------|---------|-------|
+| 1 — Core traits | `momoto-core/src/traits/` | — | 26 ✓ |
+| 2 — Engine | `momoto-engine` | — | 14 ✓ |
+| 3 — Audio | `momoto-audio` | ITU-R BS.1770-4 / EBU R128 | 70 ✓ |
+| 4 — WASM audio | `momoto-wasm/src/audio.rs` | — | 0 errors ✓ |
+| 5 — Haptics | `momoto-haptics` | Weber's law / IEEE | 34 ✓ |
+
+---
 
 ---
 

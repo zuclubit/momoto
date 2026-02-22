@@ -127,6 +127,7 @@ pub mod math;
 pub mod perception;
 pub mod render;
 pub mod space;
+pub mod traits;
 
 // ============================================================================
 // Core Type Re-exports

@@ -6,8 +6,10 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
-description = "Performance execution engine - batch processing, SIMD, WASM bindings"
-keywords = ["performance", "simd", "wasm", "batch"]
+description = "Multimodal perceptual orchestrator — Color/Audio/Haptics domain dispatch, cross-domain energy alignment, WASM bindings"
+keywords = ["multimodal", "audio", "haptics", "color", "wasm"]
+categories = ["multimedia", "rendering", "accessibility", "science", "wasm"]
+readme = "README.md"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -17,6 +19,10 @@ momoto-core = { path = "../momoto-core" }
 momoto-metrics = { path = "../momoto-metrics" }
 wasm-bindgen = { workspace = true, optional = true }
 
+[[example]]
+name = "07_multimodal_engine"
+path = "../../examples/07_multimodal_engine.rs"
+
 [dev-dependencies]
 criterion.workspace = true
 wasm-bindgen-test = "0.3"
@@ -25,3 +31,6 @@ wasm-bindgen-test = "0.3"
 default = ["wasm"]
 wasm = ["dep:wasm-bindgen"]
 simd = []
+# Future multimodal domain feature flags (uncomment when crates are ready)
+# audio   = ["dep:momoto-audio"]
+# haptics = ["dep:momoto-haptics"]

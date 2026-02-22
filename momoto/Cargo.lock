@@ -782,7 +782,7 @@ dependencies = [
 
 [[package]]
 name = "momoto-agent"
-version = "7.0.0"
+version = "7.1.0"
 dependencies = [
  "momoto-core",
  "momoto-intelligence",
@@ -792,9 +792,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "momoto-core"
-version = "7.0.0"
+name = "momoto-audio"
+version = "7.1.0"
 dependencies = [
+ "criterion",
+ "momoto-core",
+]
+
+[[package]]
+name = "momoto-core"
+version = "7.1.0"
+dependencies = [
+ "arrayvec",
  "criterion",
  "proptest",
  "serde",
@@ -803,7 +812,7 @@ dependencies = [
 
 [[package]]
 name = "momoto-engine"
-version = "7.0.0"
+version = "7.1.0"
 dependencies = [
  "criterion",
  "momoto-core",
@@ -814,15 +823,23 @@ dependencies = [
 
 [[package]]
 name = "momoto-events"
-version = "7.0.0"
+version = "7.1.0"
 dependencies = [
  "serde",
  "serde_json",
 ]
 
 [[package]]
+name = "momoto-haptics"
+version = "7.1.0"
+dependencies = [
+ "criterion",
+ "momoto-core",
+]
+
+[[package]]
 name = "momoto-intelligence"
-version = "7.0.0"
+version = "7.1.0"
 dependencies = [
  "criterion",
  "momoto-core",
@@ -834,7 +851,7 @@ dependencies = [
 
 [[package]]
 name = "momoto-materials"
-version = "7.0.0"
+version = "7.1.0"
 dependencies = [
  "approx",
  "bytemuck",
@@ -847,7 +864,7 @@ dependencies = [
 
 [[package]]
 name = "momoto-metrics"
-version = "7.0.0"
+version = "7.1.0"
 dependencies = [
  "criterion",
  "momoto-core",
@@ -856,13 +873,16 @@ dependencies = [
 
 [[package]]
 name = "momoto-wasm"
-version = "7.0.0"
+version = "7.1.0"
 dependencies = [
  "console_error_panic_hook",
  "js-sys",
  "momoto-agent",
+ "momoto-audio",
  "momoto-core",
+ "momoto-engine",
  "momoto-events",
+ "momoto-haptics",
  "momoto-intelligence",
  "momoto-materials",
  "momoto-metrics",

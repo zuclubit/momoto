@@ -1,12 +1,24 @@
 //! # Momoto WASM Bindings
 //!
-//! WebAssembly bindings for Momoto color perception metrics.
+//! WebAssembly bindings for the **Momoto Multimodal Perceptual Physics Engine**.
 //!
-//! This module provides JavaScript-friendly APIs for:
-//! - WCAG 2.1 contrast ratio calculations
-//! - APCA-W3 contrast (Lc values)
-//! - OKLCH color space operations
-//! - Batch operations for performance
+//! Provides JavaScript-friendly APIs for three perceptual domains:
+//!
+//! | Domain  | Feature flag | Capabilities |
+//! |---------|-------------|--------------|
+//! | Color   | `color`     | WCAG 2.1, APCA-W3, OKLCH, HCT, CVD, harmony |
+//! | Audio   | `audio`     | K-weighting, LUFS (momentary/short-term/integrated), FFT, Mel |
+//! | Haptics | `haptics`   | LRA/ERM/Piezo mapping, energy budget, waveform generation |
+//!
+//! ## Feature flags
+//!
+//! ```toml
+//! # Cargo.toml
+//! momoto-wasm = { features = ["color"]           }  # optical domain only
+//! momoto-wasm = { features = ["audio"]           }  # acoustic domain only
+//! momoto-wasm = { features = ["haptics"]         }  # vibrotactile domain only
+//! momoto-wasm = { features = ["multimodal"]      }  # all three domains
+//! ```
 //!
 //! ## Usage from JavaScript
 //!
@@ -39,6 +51,12 @@ mod siren;
 mod temporal;
 mod procedural;
 mod hct;
+#[cfg(feature = "audio")]
+mod audio;
+
+// ── Haptics module (gated by feature "haptics") ───────────────────────────────
+// #[cfg(feature = "haptics")]
+// mod haptics;
 
 pub use intelligence::*;
 pub use agent::*;
@@ -49,6 +67,8 @@ pub use siren::*;
 pub use temporal::*;
 pub use procedural::*;
 pub use hct::*;
+#[cfg(feature = "audio")]
+pub use audio::*;
 
 // const white = Color.from_rgb(255, 255, 255);
 // const ratio = wcag.evaluate(black, white);
@@ -7974,6 +7994,6 @@ pub fn list_workflows() -> String {
 #[wasm_bindgen(start)]
 pub fn init() {
     // Set up better panic messages for debugging
-    #[cfg(feature = "console_error_panic_hook")]
+    #[cfg(feature = "panic_hook")]
     console_error_panic_hook::set_once();
 }

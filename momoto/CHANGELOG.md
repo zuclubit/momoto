@@ -1,9 +1,107 @@
 # Changelog
 
-All notable changes to the Momoto perceptual color system will be documented in this file.
+All notable changes to the Momoto Multimodal Perceptual Physics Engine are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [7.1.0] - 2026-02-22
+
+### Multimodal Expansion — Color + Audio + Haptics
+
+Momoto evolves from a perceptual color system into a full **Multimodal Perceptual
+Physics Engine**, adding acoustic and vibrotactile domains alongside the existing
+optical domain. All three domains share a unified trait system, a cross-domain
+energy conservation invariant, and a feature-gated WASM build system.
+
+### Added
+
+#### Foundation Trait System (`momoto-core`)
+
+- `DomainId` enum (`#[repr(u8)]`): `Color = 0`, `Audio = 1`, `Haptics = 2`
+- `Domain` trait: `id()`, `name()`, `version()`, `is_deterministic()`, `max_inplace_samples()`
+- `EnergyReport` struct with `is_conserved(tolerance)`, `efficiency()`, `Add` impl
+- `EnergyConserving` trait: `energy_report(input)`, `verify_conservation()`, `transmission_efficiency()`
+- `PhysicalModel<Params: Copy>` trait for configurable physics models
+- `ComplianceReport` with `ArrayVec<ComplianceViolation, 8>` — fixed capacity, zero heap growth
+- `Compliance` trait: `standard()`, `validate()`, `is_compliant()`
+
+#### Audio Domain (`momoto-audio` — new crate)
+
+- **K-weighting filter** (ITU-R BS.1770-4): Direct Form II Transposed biquad cascade;
+  exact Table 1 coefficients for 44 100 / 48 000 / 96 000 Hz
+- **LUFS loudness** (EBU R128): momentary (400 ms), short-term (3 s), integrated
+  (two-pass gating: absolute −70 LUFS + relative −10 LU)
+- **FFT** (Cooley-Tukey Radix-2 DIT): pre-computed twiddle factors, zero-alloc
+  hot path, inverse via conjugation, Parseval-normalised power spectrum
+- **Mel filterbank** (HTK + Slaney): triangular filters, sparse weight storage,
+  `apply_into()` zero-allocation variant
+- **Spectral features**: centroid, brightness, flux (half-wave rectified),
+  rolloff, flatness (geometric/arithmetic ratio)
+- **EBU R128 compliance**: Broadcast (−23 LUFS ±1 LU), Streaming (−14 LUFS),
+  Podcast (−16 LUFS); returns typed `ComplianceReport`
+- **WASM exports** (13 functions): `audioLufs`, `audioMomentaryLufs`,
+  `audioFftPowerSpectrum`, `audioMelSpectrum`, `audioSpectralCentroid`,
+  `audioSpectralBrightness`, `audioSpectralFlux`, `audioSpectralRolloff`,
+  `audioSpectralFlatness`, `audioValidateEbuR128`, `domainProcess`,
+  `domainPerceptualDistance`, `audioDomainInfo`
+
+#### Haptics Domain (`momoto-haptics` — new crate)
+
+- **Energy budget** (`EnergyBudget`): capacity + linear recharge model,
+  `try_consume()` returning `Result<(), EnergyBudgetError>`, `tick(delta_secs)`
+- **Actuator models** (`FrequencyForceMapper`): LRA (150–200 Hz, 0.5 N),
+  ERM (50–300 Hz, 1.2 N), Piezo (200–400 Hz, 0.2 N), Custom
+- **Weber's law mapping**: `freq = f_min + (f_max − f_min) · √intensity`
+- **Waveform generation** (`HapticWaveform`): Sine, Pulse (Gaussian), Ramp
+  (linear envelope × sine), Buzz (clipped sine); returns `Box<[f32]>`
+- **`HapticsDomain`**: `try_generate()` (budget-gated event), implements
+  `Domain` + `EnergyConserving`
+
+#### Engine Cross-Domain Unification (`momoto-engine`)
+
+- `MomotoEngine` evolved from stub to production orchestrator
+- `SystemEnergyReport`: per-domain energy map + aggregate + worst efficiency
+- `normalize_perceptual_energy(domain_id, raw_value)`: domain-aware [0,1] normalisation
+  (Color: luminance pass-through; Audio: LUFS [−70,0] → [0,1]; Haptics: intensity)
+- `perceptual_alignment(a, b, val_a, val_b)`: symmetric coherence score [0,1]
+- `validate_system_energy()`: production-ready cross-domain energy audit
+
+#### Numerical Hardening
+
+- `BIQUAD_DENORMAL_EPSILON = 1e-30`, `BIQUAD_DIVERGENCE_LIMIT = 1e15`
+- `LUFS_MEAN_SQ_EPSILON = 1e-30`, `LUFS_MINIMUM = -100.0`
+- `FFT_POWER_EPSILON = 1e-30`
+- `HAPTIC_ENERGY_EPSILON = 1e-12`
+- NaN/Inf guards in `BiquadFilter::process()`, `LufsAnalyzer`, `FftPlan::power_spectrum_into()`,
+  `EnergyBudget::try_consume()`, `EnergyBudget::tick()`
+- Golden LUFS regression test at −23.0 LUFS reference (EBU R128 broadcast target)
+
+#### Feature-Gated WASM Build
+
+- `color = []` — optical domain (always present in core)
+- `audio = ["dep:momoto-audio"]` — acoustic domain
+- `haptics = ["dep:momoto-haptics"]` — vibrotactile domain
+- `multimodal = ["color", "audio", "haptics"]` — all domains
+- `panic_hook = ["dep:console_error_panic_hook"]`
+- `default = ["color", "audio", "panic_hook"]`
+- All combinations verified: `--no-default-features --features color`,
+  `--features audio`, `--features multimodal`
+
+#### Documentation
+
+- `SCIENTIFIC_VALIDATION.md` — algorithm-to-standard mapping (ITU-R BS.1770-4,
+  EBU R128, Cooley-Tukey 1965, Viénot 1999, Weber 1834, IEEE 1451.4, AES)
+- `BENCHMARKS.md` — throughput targets, WASM size budgets, memory model
+- `docs/wasm_memory_layout.md` — WASM memory contract and ownership rules
+
+### Changed
+
+- Workspace identity: "Multimodal Perceptual Physics Engine — Color, Audio, and Haptics"
+- Workspace version: 7.0.0 → **7.1.0**
+- `momoto-wasm` crate-level docs updated to reflect multimodal identity
+
+---
 
 ## [7.0.0] - 2026-02-21
 

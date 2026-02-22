@@ -1,0 +1,28 @@
+[package]
+name = "momoto-audio"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Acoustic signal processing domain — LUFS, FFT, Mel filterbank, EBU R128 compliance"
+keywords = ["audio", "lufs", "fft", "mel", "ebu-r128"]
+categories = ["multimedia", "science", "accessibility"]
+readme = "README.md"
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+momoto-core = { path = "../momoto-core" }
+
+[dev-dependencies]
+criterion.workspace = true
+
+[[example]]
+name = "05_audio_lufs"
+path = "../../examples/05_audio_lufs.rs"
+
+[features]
+default = []

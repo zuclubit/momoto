@@ -8,6 +8,8 @@ license.workspace = true
 repository.workspace = true
 description = "Canonical perceptual color foundation - color spaces, luminance, and perception primitives"
 keywords = ["color", "perception", "colorspace", "luminance"]
+categories = ["graphics", "multimedia", "accessibility", "science"]
+readme = "README.md"
 
 [lib]
 crate-type = ["rlib"]
@@ -26,6 +28,8 @@ experimental = []
 # Core has zero dependencies by default - pure Rust implementation
 # This ensures maximum portability and no platform drift
 serde = { version = "1.0", features = ["derive"], optional = true }
+# Fixed-capacity collections for bounded compliance reports (no_std, no heap growth)
+arrayvec = { workspace = true }
 
 [dev-dependencies]
 criterion.workspace = true
