@@ -39,7 +39,7 @@ Add to `~/.claude/claude_desktop_config.json`:
   "mcpServers": {
     "momoto": {
       "command": "node",
-      "args": ["/absolute/path/to/momoto-ui/docs/mcp/server.js"]
+      "args": ["/absolute/path/to/momoto/docs/mcp/server.js"]
     }
   }
 }

@@ -3,7 +3,7 @@
 > Complete API reference for the Momoto WASM engine.
 > See [docs/API.md](../docs/API.md) for the full reference with all 9 modules.
 
-**Interactive explorer**: [zuclubit.github.io/momoto-ui](https://zuclubit.github.io/momoto-ui/)
+**Interactive explorer**: [zuclubit.github.io/momoto](https://zuclubit.github.io/momoto/)
 
 ---
 
@@ -382,4 +382,4 @@ selfCertify() → JSON { passed, tests, timestamp }
 
 ---
 
-*Full reference: [docs/API.md](../docs/API.md) | Interactive: [zuclubit.github.io/momoto-ui](https://zuclubit.github.io/momoto-ui/)*
+*Full reference: [docs/API.md](../docs/API.md) | Interactive: [zuclubit.github.io/momoto](https://zuclubit.github.io/momoto/)*

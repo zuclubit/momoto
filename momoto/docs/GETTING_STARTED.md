@@ -310,5 +310,5 @@ cargo run --example 07_multimodal_engine --package momoto-engine
 
 ## Support
 
-- GitHub: https://github.com/zuclubit/momoto-ui
-- Issues: https://github.com/zuclubit/momoto-ui/issues
+- GitHub: https://github.com/zuclubit/momoto
+- Issues: https://github.com/zuclubit/momoto/issues

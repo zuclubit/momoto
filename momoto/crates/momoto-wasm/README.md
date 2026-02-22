@@ -2,9 +2,9 @@
 
 > Chromatic intelligence and material physics engine — Rust v7.0.0 compiled to WebAssembly.
 
-[![Version](https://img.shields.io/badge/version-7.0.0-6c63ff.svg)](https://zuclubit.github.io/momoto-ui/)
+[![Version](https://img.shields.io/badge/version-7.0.0-6c63ff.svg)](https://zuclubit.github.io/momoto/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](../../../../LICENSE)
-[![Docs](https://img.shields.io/badge/docs-interactive-7c3aed.svg)](https://zuclubit.github.io/momoto-ui/)
+[![Docs](https://img.shields.io/badge/docs-interactive-7c3aed.svg)](https://zuclubit.github.io/momoto/)
 
 ---
 
@@ -368,7 +368,7 @@ requestAnimationFrame(function tick() {
 | **events** | `MomotoEventBus`, `MomotoEventStream` |
 | **agent** | `agentValidatePair`, `agentRecommendForeground`, `ContractBuilder`, `executeWorkflow` |
 
-Full interactive reference: **[zuclubit.github.io/momoto-ui](https://zuclubit.github.io/momoto-ui/)**
+Full interactive reference: **[zuclubit.github.io/momoto](https://zuclubit.github.io/momoto/)**
 
 ---
 

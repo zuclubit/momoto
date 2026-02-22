@@ -6,10 +6,10 @@ Momoto is a Rust library (v7.0.0) compiled to WASM via wasm-bindgen. It implemen
 
 ## Modules
 
-- [HCT Color Space](https://zuclubit.github.io/momoto-ui/#module-hct): Google Material Design 3 color space (CAM16 + CIELAB). Functions: hexToHct, hctToHex, hctTonalPalette, hctMaxChroma, hctToOklch, oklchToHct, HCT class.
-- [Core: Color & Luminance](https://zuclubit.github.io/momoto-ui/#module-core): OKLCH, OKLab, Color, LinearRgba. WCAG contrast, APCA luminance, gamma, math utilities. Batch operations.
-- [Intelligence: Recommendations](https://zuclubit.github.io/momoto-ui/#module-intelligence): RecommendationEngine, ExplanationGenerator, AdvancedScorer, ConvergenceDetector, StepSelector, CostEstimator. Color harmony (7 types), CVD simulation (Viénot 1999), constraint solving (penalty method, 6 constraint types). Usage utilities: usageMinWcagAA/AAA/ApcaLc(usageContext), complianceTargetDescription(target).
-- [Materials: Glass Physics](https://zuclubit.github.io/momoto-ui/#module-materials): Full Sprint 1–4 physics implementation.
+- [HCT Color Space](https://zuclubit.github.io/momoto/#module-hct): Google Material Design 3 color space (CAM16 + CIELAB). Functions: hexToHct, hctToHex, hctTonalPalette, hctMaxChroma, hctToOklch, oklchToHct, HCT class.
+- [Core: Color & Luminance](https://zuclubit.github.io/momoto/#module-core): OKLCH, OKLab, Color, LinearRgba. WCAG contrast, APCA luminance, gamma, math utilities. Batch operations.
+- [Intelligence: Recommendations](https://zuclubit.github.io/momoto/#module-intelligence): RecommendationEngine, ExplanationGenerator, AdvancedScorer, ConvergenceDetector, StepSelector, CostEstimator. Color harmony (7 types), CVD simulation (Viénot 1999), constraint solving (penalty method, 6 constraint types). Usage utilities: usageMinWcagAA/AAA/ApcaLc(usageContext), complianceTargetDescription(target).
+- [Materials: Glass Physics](https://zuclubit.github.io/momoto/#module-materials): Full Sprint 1–4 physics implementation.
   - Sprint 1 — Thin-Film Optics: ThinFilm class (12 presets: soapBubbleThin/Medium/Thick, oilThin/Medium/Thick, arCoating, oxideThin/Medium/Thick, beetleShell, nacre). Airy formula, 380–700nm.
   - Sprint 2 — Chromatic Dispersion & Metals: CauchyDispersion (7 glass presets, Abbe numbers), SellmeierDispersion (5 presets), ComplexIOR (12 metal presets: gold n=0.17 k=3.5, silver n=0.05 k=4.2, copper n=0.25 k=2.8, iron, nickel, platinum, titanium, chromium, tungsten, aluminum, cobalt, zinc), SpectralComplexIOR, DrudeParams (7 presets), f0FromIor.
   - Sprint 3 — Mie Scattering: MieParams (9 presets: fineDust Rayleigh x~0.3, coarseDust, fogSmall 2µm, fogLarge 10µm, cloud 8µm, mist 3µm, smoke 0.3µm soot, milkGlobule 2.5µm, pollen 25µm), DynamicMieParams (8 presets: stratocumulus, fog, smoke, milk, dust, iceCrystals, condensingFog, evaporatingMist; toCssFog(), toCssSmoke()), henyeyGreenstein, doubleHenyeyGreenstein, rayleighPhase, rayleighEfficiency, rayleighIntensityRgb.
@@ -25,12 +25,12 @@ Momoto is a Rust library (v7.0.0) compiled to WASM via wasm-bindgen. It implemen
   - Batch: evaluateDielectricBatch, evaluateDielectricBSDF, evaluateMicrofacetBSDF, evaluateMaterialBatch, ggxNDF, cookTorranceBRDF, orenNayarBRDF, materialToDominantColor.
   - Spectral: SpectralSignal (uniformDefault, d65Illuminant, toXyz, toRgb, multiply, scale), EvaluationContext (withAngle, withTemperature, withStress, withPosition), SpectralPipeline (addThinFilm, addDispersion, addMieScattering, addGold/Silver/Copper, evaluate, verifyEnergyConservation).
   - Utility free functions: f0FromIor, calculateArCoatingThickness, findDominantWavelength, getThinFilmPresets, getMetalPresets, getDrudeMetalPresets, getDispersionWavelengths, getMieParticlePresets, getMieDynamicPresets, scatteringColorFromRadius, getMieLutMemory.
-- [Temporal Materials](https://zuclubit.github.io/momoto-ui/#module-temporal): High-level: TemporalMaterial (dryingPaint/weatheringGlass, evalAtTime, sampleTimeline), TemporalThinFilmMaterial (soapBubble/oilSlick), TemporalConductorMaterial (heatedGold/heatedCopper, evalAtTemperature). Lightweight: TemporalDielectric, TemporalThinFilm, TemporalConductor. Free functions: temporalDryingPaint(t,cosTheta), temporalSoapBubble(t,cosTheta). All R+T+A=1.
-- [Procedural Noise](https://zuclubit.github.io/momoto-ui/#module-procedural): ProceduralNoise Perlin fBm (frosted 6oct/regular 3oct/clear 1oct/thick 4oct). Deterministic seed → same field. variationField() for IOR distortion maps. roughnessVariationField() for PBR micro-texture maps.
-- [SIREN Neural Network](https://zuclubit.github.io/momoto-ui/#module-siren): Perceptual color correction via SIREN (9→16→16→3, 483 params, ω₀=30, Mulberry32 seed=421337). computeSirenCorrection, applySirenCorrection, computeSirenCorrectionBatch, sirenMetadata, sirenWeights.
-- [Events](https://zuclubit.github.io/momoto-ui/#module-events): MomotoEventBus pub/sub (subscribe, subscribeFiltered, emitProgress, emitMetric, emitRecommendation, emitValidation, emitError, emitCustom, emitJson, bufferedEvents, clearBuffer). MomotoEventStream SSE-compatible (fromBus, fromBusBatched, standalone, poll, flush, pause, resume, close, stats).
-- [Agent API](https://zuclubit.github.io/momoto-ui/#module-agent): High-level JSON interface. agentValidate, agentValidatePair, agentValidatePairsBatch, agentGetMetrics, agentRecommendForeground, agentImproveForeground, agentScorePair, createColorTransition, generateExperience, getMomotoIdentity, selfCertify, agentGetMaterial, agentListMaterials, agentGetMetricsBatch. AgentExecutor class. ContractBuilder (minContrastWcagAA, minContrastWcagAAA, inSrgb, inP3, lightnessRange, chromaRange, hueRange, build). Workflow engine: executeWorkflow, createSession, executeWithSession, generateReport, listWorkflows.
-- [Full API Reference (JSON)](https://zuclubit.github.io/momoto-ui/momoto.json): Machine-readable complete API spec.
+- [Temporal Materials](https://zuclubit.github.io/momoto/#module-temporal): High-level: TemporalMaterial (dryingPaint/weatheringGlass, evalAtTime, sampleTimeline), TemporalThinFilmMaterial (soapBubble/oilSlick), TemporalConductorMaterial (heatedGold/heatedCopper, evalAtTemperature). Lightweight: TemporalDielectric, TemporalThinFilm, TemporalConductor. Free functions: temporalDryingPaint(t,cosTheta), temporalSoapBubble(t,cosTheta). All R+T+A=1.
+- [Procedural Noise](https://zuclubit.github.io/momoto/#module-procedural): ProceduralNoise Perlin fBm (frosted 6oct/regular 3oct/clear 1oct/thick 4oct). Deterministic seed → same field. variationField() for IOR distortion maps. roughnessVariationField() for PBR micro-texture maps.
+- [SIREN Neural Network](https://zuclubit.github.io/momoto/#module-siren): Perceptual color correction via SIREN (9→16→16→3, 483 params, ω₀=30, Mulberry32 seed=421337). computeSirenCorrection, applySirenCorrection, computeSirenCorrectionBatch, sirenMetadata, sirenWeights.
+- [Events](https://zuclubit.github.io/momoto/#module-events): MomotoEventBus pub/sub (subscribe, subscribeFiltered, emitProgress, emitMetric, emitRecommendation, emitValidation, emitError, emitCustom, emitJson, bufferedEvents, clearBuffer). MomotoEventStream SSE-compatible (fromBus, fromBusBatched, standalone, poll, flush, pause, resume, close, stats).
+- [Agent API](https://zuclubit.github.io/momoto/#module-agent): High-level JSON interface. agentValidate, agentValidatePair, agentValidatePairsBatch, agentGetMetrics, agentRecommendForeground, agentImproveForeground, agentScorePair, createColorTransition, generateExperience, getMomotoIdentity, selfCertify, agentGetMaterial, agentListMaterials, agentGetMetricsBatch. AgentExecutor class. ContractBuilder (minContrastWcagAA, minContrastWcagAAA, inSrgb, inP3, lightnessRange, chromaRange, hueRange, build). Workflow engine: executeWorkflow, createSession, executeWithSession, generateReport, listWorkflows.
+- [Full API Reference (JSON)](https://zuclubit.github.io/momoto/momoto.json): Machine-readable complete API spec.
 
 ## Key Facts
 
@@ -95,7 +95,7 @@ npm install momoto-wasm
 
 ## Repository
 
-- Source: https://github.com/zuclubit/momoto-ui
+- Source: https://github.com/zuclubit/momoto
 - Rust workspace: `/momoto/crates/`
 - WASM bindings: `/momoto/crates/momoto-wasm/src/` (lib.rs 7979 lines + 9 module files)
 - TypeScript UI: `/src/` (hexagonal architecture: domain/application/adapters/infrastructure)

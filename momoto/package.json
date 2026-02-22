@@ -1,7 +1,7 @@
 {
   "name": "momoto",
-  "version": "7.0.0",
-  "description": "Chromatic intelligence and material physics engine — Rust v7.0.0 compiled to WebAssembly",
+  "version": "7.1.0",
+  "description": "Multimodal Perceptual Physics Engine — Color · Audio · Haptics — Rust v7.1.0 compiled to WebAssembly",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -50,30 +50,33 @@
   },
   "keywords": [
     "color",
+    "audio",
+    "haptics",
     "accessibility",
     "wcag",
     "apca",
     "oklch",
     "oklab",
     "hct",
+    "lufs",
+    "ebu-r128",
+    "perceptual-physics",
     "design-tokens",
     "design-system",
-    "ai-safety",
     "contrast",
-    "perceptual",
-    "color-science"
+    "wasm"
   ],
   "author": "Zuclubit",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/zuclubit/momoto-ui.git",
+    "url": "https://github.com/zuclubit/momoto.git",
     "directory": "momoto"
   },
   "bugs": {
-    "url": "https://github.com/zuclubit/momoto-ui/issues"
+    "url": "https://github.com/zuclubit/momoto/issues"
   },
-  "homepage": "https://zuclubit.github.io/momoto-ui/",
+  "homepage": "https://zuclubit.github.io/momoto/",
   "peerDependencies": {
     "react": ">=18.0.0"
   },

@@ -1,12 +1,12 @@
 {
-  "$schema": "https://zuclubit.github.io/momoto-ui/momoto.json",
+  "$schema": "https://zuclubit.github.io/momoto/momoto.json",
   "info": {
     "title": "Momoto Engine API",
     "version": "7.0.0",
     "description": "Chromatic intelligence and material physics engine compiled to WebAssembly. Provides perceptual color science, accessibility metrics, glass physics, and AI-powered design recommendations.",
-    "homepage": "https://zuclubit.github.io/momoto-ui/",
+    "homepage": "https://zuclubit.github.io/momoto/",
     "license": { "name": "MIT" },
-    "contact": { "name": "Zuclubit", "url": "https://github.com/zuclubit/momoto-ui" },
+    "contact": { "name": "Zuclubit", "url": "https://github.com/zuclubit/momoto" },
     "tags": ["color", "accessibility", "materials", "wasm", "design-system"],
     "runtime": {
       "language": "Rust",

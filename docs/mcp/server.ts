@@ -26,7 +26,7 @@
  *   "mcpServers": {
  *     "momoto": {
  *       "command": "node",
- *       "args": ["/path/to/momoto-ui/docs/mcp/server.js"]
+ *       "args": ["/path/to/momoto/docs/mcp/server.js"]
  *     }
  *   }
  * }
