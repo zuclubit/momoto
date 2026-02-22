@@ -12,7 +12,67 @@
 
 use momoto_core::color::Color;
 use momoto_core::space::oklch::OKLCH;
-use momoto_materials::glass_physics::unified_bsdf::{DielectricBSDF, BSDF, BSDFContext};
+
+// =============================================================================
+// Local Fresnel computation (avoids momoto-materials dependency in agent crate)
+// Exact Fresnel equations for a dielectric interface (air → material).
+// Reference: Born & Wolf, "Principles of Optics", §1.5.2
+// =============================================================================
+
+/// Local BSDF evaluation result (reflectance + transmittance for a dielectric).
+struct DielectricResponse {
+    reflectance: f64,
+    transmittance: f64,
+}
+
+/// Exact Fresnel reflectance for an unpolarized plane wave at an air–dielectric interface.
+///
+/// Computes both Rs (s-polarized) and Rp (p-polarized) components then averages them.
+/// Handles total internal reflection (TIR) when `ior < 1` and `cos_theta` is small.
+///
+/// # Arguments
+/// * `ior` — real part of the index of refraction of the medium (n1 = 1 for air)
+/// * `roughness` — surface roughness ∈ [0, 1]; reduces effective specular peak
+///   via an empirical Beckmann width factor: `R_eff = R * exp(-4·k²)` where k = roughness.
+/// * `cos_theta` — cosine of the angle of incidence (1 = normal, 0 = grazing)
+///
+/// # Returns
+/// `DielectricResponse { reflectance, transmittance }` with R + T ≤ 1 (equality for lossless).
+fn evaluate_dielectric(ior: f64, roughness: f64, cos_theta: f64) -> DielectricResponse {
+    let cos_i = cos_theta.clamp(0.0, 1.0);
+    let sin_i2 = (1.0 - cos_i * cos_i).max(0.0);
+    let sin_t2 = sin_i2 / (ior * ior);
+
+    if sin_t2 >= 1.0 {
+        // Total internal reflection
+        return DielectricResponse { reflectance: 1.0, transmittance: 0.0 };
+    }
+
+    let cos_t = (1.0 - sin_t2).sqrt();
+
+    // s-polarization (TE): Rs = ((n1·cos_i − n2·cos_t) / (n1·cos_i + n2·cos_t))²
+    let rs_num = cos_i - ior * cos_t;
+    let rs_den = cos_i + ior * cos_t;
+    let rs = if rs_den.abs() < 1e-15 { 1.0 } else { (rs_num / rs_den).powi(2) };
+
+    // p-polarization (TM): Rp = ((n2·cos_i − n1·cos_t) / (n2·cos_i + n1·cos_t))²
+    let rp_num = ior * cos_i - cos_t;
+    let rp_den = ior * cos_i + cos_t;
+    let rp = if rp_den.abs() < 1e-15 { 1.0 } else { (rp_num / rp_den).powi(2) };
+
+    // Unpolarized reflectance (equal weighting)
+    let r_spec = (rs + rp) * 0.5;
+
+    // Roughness attenuation: Beckmann factor reduces coherent specular peak.
+    // For rough surfaces energy redistributes into scattered lobes; total R+T preserved.
+    let k = roughness.clamp(0.0, 1.0);
+    let r = r_spec * (-4.0 * k * k).exp();
+
+    DielectricResponse {
+        reflectance: r.clamp(0.0, 1.0),
+        transmittance: (1.0 - r).clamp(0.0, 1.0),
+    }
+}
 
 // =============================================================================
 // CIE 1931 2-degree Observer Color Matching Functions
@@ -108,9 +168,8 @@ pub fn bsdf_to_dominant_color(ior: f64, roughness: f64, cos_theta: f64) -> Mater
         let lambda_um = lambda / 1000.0;
         let spectral_ior = ior + 0.004 / (lambda_um * lambda_um);
 
-        let bsdf = DielectricBSDF::new(spectral_ior, roughness);
-        let ctx = BSDFContext::new_simple(cos_theta);
-        let resp = bsdf.evaluate(&ctx);
+        // Exact Fresnel for this wavelength's IOR
+        let resp = evaluate_dielectric(spectral_ior, roughness, cos_theta);
 
         // Reflected spectrum under D65 illuminant
         let spectrum_r = resp.reflectance * d65;
