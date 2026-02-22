@@ -59,7 +59,7 @@ every output is deterministic, energy-conserving, and allocation-free in hot pat
 |-------|---------|-------|
 | [`momoto-core`](momoto/crates/momoto-core) | OKLCH · HCT · CAM16 · traits · zero deps | 290 |
 | [`momoto-metrics`](momoto/crates/momoto-metrics) | WCAG 2.1 + APCA-W3 contrast | 50 |
-| [`momoto-intelligence`](momoto/crates/momoto-intelligence) | Harmony (7 tipos) · CVD (Viénot 1999) · constraint solver | 18 |
+| [`momoto-intelligence`](momoto/crates/momoto-intelligence) | Harmony (7 tipos) · CVD (Viénot 1999) · constraint solver | 44 |
 | [`momoto-materials`](momoto/crates/momoto-materials) | Glass · GGX PBR · SSS · thin-film · shadows | 1 616 |
 | [`momoto-audio`](momoto/crates/momoto-audio) | ITU-R BS.1770-4 · EBU R128 · FFT radix-2 · Mel filterbank | 70 |
 | [`momoto-haptics`](momoto/crates/momoto-haptics) | Weber's law · LRA/ERM/Piezo · energy budget · waveforms | 36 |
@@ -67,7 +67,7 @@ every output is deterministic, energy-conserving, and allocation-free in hot pat
 | [`momoto-events`](momoto/crates/momoto-events) | PubSub · EventBroadcaster · EventStream (RAII) | — |
 | [`momoto-agent`](momoto/crates/momoto-agent) | Workflow · session · visual generation · audit | — |
 | [`momoto-wasm`](momoto/crates/momoto-wasm) | WASM bindings JS/TS | — |
-| **Total** | | **2 104** |
+| **Total** | | **2 132** |
 
 ---
 
@@ -543,7 +543,7 @@ stream.pause(), stream.resume(), stream.close()
 cd momoto
 
 # Full suite
-cargo test --workspace          # 2 104 tests, 0 failures
+cargo test --workspace          # 2 132 tests, 0 failures
 
 # Per domain
 cargo test --package momoto-audio    # 70 tests

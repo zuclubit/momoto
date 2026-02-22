@@ -28,7 +28,7 @@ and WASM-ready.
 |-------|---------|-------------|-------|
 | [`momoto-core`](./crates/momoto-core) | Foundation | OKLCH · HCT · CAM16 · traits · zero deps | 290 |
 | [`momoto-metrics`](./crates/momoto-metrics) | Color | WCAG 2.1 + APCA-W3 contrast | 14 |
-| [`momoto-intelligence`](./crates/momoto-intelligence) | Color | Harmony (7 tipos) · CVD (Viénot 1999) · constraint solver | 18 |
+| [`momoto-intelligence`](./crates/momoto-intelligence) | Color | Harmony (7 tipos) · CVD (Viénot 1999) · constraint solver | 44 |
 | [`momoto-materials`](./crates/momoto-materials) | Color | Glass physics · GGX PBR · SSS · thin-film · shadows | 1 616 |
 | [`momoto-audio`](./crates/momoto-audio) | Audio | ITU-R BS.1770-4 · EBU R128 · FFT radix-2 · Mel filterbank | 70 |
 | [`momoto-haptics`](./crates/momoto-haptics) | Haptics | Weber's law · LRA/ERM/Piezo · energy budget · waveforms | 36 |
@@ -253,8 +253,8 @@ cargo run --example 07_multimodal_engine --package momoto-engine
 | Crate | Status | Unit tests | Doc tests | Total |
 |-------|--------|-----------|-----------|-------|
 | momoto-core | STABLE | 222 | 68 | **290** |
-| momoto-metrics | STABLE | 7 | 7 | **14** |
-| momoto-intelligence | STABLE | 18 | — | **18** |
+| momoto-metrics | STABLE | 43 | 7 | **50** |
+| momoto-intelligence | STABLE | 44 | — | **44** |
 | momoto-materials | STABLE | 1 556 | 60 | **1 616** |
 | momoto-audio | STABLE | 70 | — | **70** |
 | momoto-haptics | STABLE | 34 | 2 | **36** |
@@ -262,7 +262,7 @@ cargo run --example 07_multimodal_engine --package momoto-engine
 | momoto-events | STABLE | — | — | — |
 | momoto-agent | BETA | — | — | — |
 | momoto-wasm | STABLE | — | — | — |
-| **Total** | | **2 029** | **139** | **2 068** |
+| **Total** | | **1 993** | **139** | **2 132** |
 
 ---
 
