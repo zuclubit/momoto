@@ -1,3 +1,16 @@
+# Momoto UI — Rust Workspace (UI bindings layer)
+#
+# This monorepo has TWO Cargo workspaces:
+#   1. /Cargo.toml          → UI bindings (crates/momoto-ui-core)
+#   2. /momoto/Cargo.toml   → Chromatic engine (momoto-core, momoto-wasm, etc. v7.0.0)
+#
+# To build the WASM engine:
+#   cd momoto/crates/momoto-wasm && wasm-pack build --target bundler
+#   (or: npm run build:wasm from repo root)
+#
+# To build Rust UI bindings:
+#   cargo build  (from repo root)
+
 [workspace]
 resolver = "2"
 members = [
@@ -6,12 +19,12 @@ members = [
 
 [workspace.package]
 version = "1.0.0-rc1"
-authors = ["Momoto UI Team"]
+authors = ["Zuclubit"]
 edition = "2021"
 rust-version = "1.70"
 license = "MIT"
-repository = "https://github.com/momoto/momoto-ui"
-description = "Momoto UI - Perceptual Design System with Rust/WASM core"
+repository = "https://github.com/zuclubit/momoto-ui"
+description = "Momoto UI — Perceptual Design System with Rust/WASM core"
 keywords = ["ui", "design-system", "wasm", "perceptual", "color"]
 categories = ["wasm", "web-programming", "gui"]
 

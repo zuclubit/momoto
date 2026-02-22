@@ -1,24 +1,28 @@
 {
-  "name": "momoto-wasm",
+  "name": "@momoto-ui/wasm",
   "type": "module",
   "collaborators": [
     "Momoto Team"
   ],
-  "description": "WASM bindings for Momoto color perception metrics",
-  "version": "5.0.0",
+  "description": "WASM bindings for Momoto chromatic intelligence engine v7.0.0",
+  "version": "7.0.0",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/momoto/momoto"
+    "url": "https://github.com/zuclubit/momoto-ui"
   },
   "files": [
     "momoto_wasm_bg.wasm",
     "momoto_wasm.js",
-    "momoto_wasm.d.ts"
+    "momoto_wasm.d.ts",
+    "momoto_wasm_bg.wasm.d.ts"
   ],
   "main": "momoto_wasm.js",
-  "homepage": "https://momoto.dev",
   "types": "momoto_wasm.d.ts",
+  "scripts": {
+    "build": "wasm-pack build ../../momoto/crates/momoto-wasm --target bundler --out-dir ../../packages/momoto-ui-wasm"
+  },
+  "homepage": "https://zuclubit.github.io/momoto-ui/",
   "sideEffects": [
     "./snippets/*"
   ],
@@ -26,6 +30,10 @@
     "wasm",
     "color",
     "contrast",
-    "accessibility"
+    "accessibility",
+    "oklch",
+    "hct",
+    "apca",
+    "wcag"
   ]
 }

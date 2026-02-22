@@ -41,6 +41,15 @@ tsup.config.bundled_*.mjs
 # Storybook
 storybook-static/
 
-# Rust build artifacts inside engine (tracked as monorepo subtree)
-momoto/rust-wasm-migration/target/
+# Rust build artifacts (engine is tracked as monorepo subtree via git subtree)
 momoto/target/
+momoto/rust-wasm-migration/target/
+momoto/benches/target/
+crates/*/target/
+
+# WASM build output (generated — rebuild with: npm run build:wasm)
+momoto/crates/momoto-wasm/pkg/
+momoto/crates/*/pkg/
+
+# Cargo.lock for libraries (keep in engine workspace, ignore here)
+momoto/Cargo.lock

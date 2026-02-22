@@ -1,7 +1,12 @@
 {
   "name": "@zuclubit/momoto-ui",
   "version": "1.0.0-rc1",
-  "description": "Color Intelligence Design System - Hexagonal Architecture UI Kit",
+  "private": true,
+  "description": "Momoto — Chromatic Intelligence Monorepo (UI + Rust Engine)",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -91,7 +96,15 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "clean": "rm -rf dist",
-    "verify:contract": "ts-node scripts/verify-contract/index.ts"
+    "verify:contract": "ts-node scripts/verify-contract/index.ts",
+    "build:wasm": "cd momoto/crates/momoto-wasm && wasm-pack build --target bundler --out-dir ../../../packages/momoto-ui-wasm",
+    "build:wasm:web": "cd momoto/crates/momoto-wasm && wasm-pack build --target web --out-dir ../../../packages/momoto-ui-wasm",
+    "build:engine": "cd momoto && cargo build --release",
+    "test:engine": "cd momoto && cargo test",
+    "dev:crm": "npm run dev --workspace=apps/topocho-crm",
+    "build:crm": "npm run build --workspace=apps/topocho-crm",
+    "build:crystal": "npm run build --workspace=packages/momoto-ui-crystal",
+    "build:all": "npm run build:wasm && npm run build && npm run build:crm"
   },
   "keywords": [
     "design-system",
@@ -119,7 +132,7 @@
     }
   },
   "dependencies": {
-    "momoto-wasm": "file:./momoto/crates/momoto-wasm/pkg"
+    "@momoto-ui/wasm": "*"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
