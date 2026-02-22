@@ -487,6 +487,140 @@
       margin-top: 6px; letter-spacing: 0.04em;
     }
 
+    /* ── PIPELINE DEMO ─────────────────────────────────────────────────── */
+    .pipeline { display: flex; flex-direction: column; gap: 0; }
+    .pipeline-step {
+      border: 1px solid var(--m-border); border-radius: var(--m-radius);
+      background: var(--m-surface); overflow: hidden; margin-bottom: 8px;
+      transition: border-color .2s;
+    }
+    .pipeline-step.active { border-color: var(--m-border-glow); }
+    .pipeline-step-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 1rem 1.25rem; cursor: pointer; user-select: none;
+    }
+    .pipeline-step-header:hover { background: var(--m-surface-2); }
+    .step-num {
+      width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+      background: var(--m-grad); display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800; color: white;
+    }
+    .pipeline-step.active .step-num { box-shadow: 0 0 12px rgba(108,99,255,0.5); }
+    .step-label { font-size: 14px; font-weight: 700; color: var(--m-text); flex: 1; }
+    .step-tag {
+      font-family: var(--m-mono); font-size: 10px; padding: 2px 8px;
+      border-radius: 999px; background: var(--m-surface-2);
+      border: 1px solid var(--m-border); color: var(--m-text-3);
+    }
+    .pipeline-step.active .step-tag { border-color: rgba(108,99,255,0.3); color: oklch(0.75 0.15 265); }
+    .step-arrow { color: var(--m-text-3); transition: transform .2s; font-size: 12px; }
+    .pipeline-step.active .step-arrow { transform: rotate(90deg); }
+    .pipeline-body {
+      display: none; padding: 1.25rem 1.5rem;
+      border-top: 1px solid var(--m-border); background: rgba(7,7,14,.6);
+    }
+    .pipeline-step.active .pipeline-body { display: block; }
+
+    /* Color swatch row */
+    .swatch-row { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .swatch { width: 48px; height: 48px; border-radius: 10px; border: 1px solid var(--m-border); flex-shrink: 0; }
+    .swatch-info { font-family: var(--m-mono); font-size: 13px; line-height: 1.9; }
+    .swatch-hex { font-size: 16px; font-weight: 700; color: var(--m-text); }
+    .swatch-sub { color: var(--m-text-3); font-size: 12px; }
+
+    /* Color space cards */
+    .cs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; margin-bottom: 1rem; }
+    .cs-card {
+      background: var(--m-surface-2); border: 1px solid var(--m-border);
+      border-radius: var(--m-radius-sm); padding: 0.9rem 1.1rem;
+    }
+    .cs-name { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--m-text-3); margin-bottom: 6px; }
+    .cs-vals { font-family: var(--m-mono); font-size: 13px; line-height: 1.8; color: var(--m-text-2); }
+    .cs-vals b { color: var(--m-accent); }
+
+    /* Metric bars */
+    .metric-row { margin-bottom: 12px; }
+    .metric-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+    .metric-name { font-size: 12px; color: var(--m-text-2); }
+    .metric-val { font-family: var(--m-mono); font-size: 13px; font-weight: 700; }
+    .metric-bar-wrap { height: 8px; background: var(--m-surface-2); border-radius: 999px; overflow: hidden; }
+    .metric-bar { height: 100%; border-radius: 999px; transition: width 0.6s ease; }
+    .bar-fail { background: var(--m-red); }
+    .bar-warn { background: var(--m-amber); }
+    .bar-pass { background: var(--m-green); }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; font-family: var(--m-mono); }
+    .badge-fail { background: rgba(220,60,60,.1); border: 1px solid rgba(220,60,60,.25); color: var(--m-red); }
+    .badge-pass { background: rgba(60,180,100,.1); border: 1px solid rgba(60,180,100,.25); color: var(--m-green); }
+
+    /* Neural diff */
+    .neural-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 1rem; }
+    .neural-card {
+      background: var(--m-surface-2); border: 1px solid var(--m-border);
+      border-radius: var(--m-radius-sm); padding: .85rem 1rem; text-align: center;
+    }
+    .neural-delta { font-family: var(--m-mono); font-size: 18px; font-weight: 800; color: var(--m-accent); }
+    .neural-label { font-size: 11px; color: var(--m-text-3); margin-top: 3px; }
+
+    /* Tonal palette swatches */
+    .tonal-row { display: flex; gap: 4px; flex-wrap: wrap; margin-top: .75rem; }
+    .tone-swatch {
+      flex: 1; min-width: 36px; height: 44px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,.06); cursor: pointer;
+      transition: transform .15s; position: relative;
+    }
+    .tone-swatch:hover { transform: scaleY(1.12); z-index: 1; }
+    .tone-label { text-align: center; font-size: 9px; color: var(--m-text-3); margin-top: 3px; font-family: var(--m-mono); }
+
+    /* ── CODE VIEWER (Rust→WASM→TS) ─────────────────────────────────────── */
+    .code-viewer { border: 1px solid var(--m-border); border-radius: var(--m-radius); overflow: hidden; }
+    .code-tabs { display: flex; border-bottom: 1px solid var(--m-border); background: var(--m-surface-2); }
+    .code-tab {
+      padding: 10px 20px; font-size: 12px; font-weight: 600; cursor: pointer;
+      border: none; background: none; color: var(--m-text-3); font-family: var(--m-mono);
+      border-bottom: 2px solid transparent; transition: all .2s; white-space: nowrap;
+    }
+    .code-tab:hover { color: var(--m-text-2); }
+    .code-tab.active { color: var(--m-accent); border-bottom-color: var(--m-accent); background: var(--m-surface); }
+    .code-panel { display: none; }
+    .code-panel.active { display: block; }
+    .code-panel-inner {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }
+    .code-col { border-right: 1px solid var(--m-border); }
+    .code-col:last-child { border-right: none; }
+    .code-col-header {
+      padding: 8px 14px; border-bottom: 1px solid var(--m-border);
+      background: var(--m-surface-2); font-size: 11px; font-family: var(--m-mono);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .code-lang-badge {
+      padding: 1px 7px; border-radius: 4px; font-size: 10px; font-weight: 700;
+    }
+    .lang-rust { background: rgba(255,120,60,.12); color: #ff784b; border: 1px solid rgba(255,120,60,.2); }
+    .lang-wasm { background: rgba(100,99,255,.12); color: oklch(0.72 0.18 265); border: 1px solid rgba(100,99,255,.2); }
+    .lang-ts { background: rgba(60,160,255,.12); color: #4aaeff; border: 1px solid rgba(60,160,255,.2); }
+    .code-col pre {
+      margin: 0; padding: 1rem 1.25rem;
+      font-family: var(--m-mono); font-size: 11.5px; line-height: 1.75;
+      color: #c8d0e0; overflow-x: auto; white-space: pre;
+      background: #050510;
+    }
+    /* Syntax tokens */
+    .tk-kw  { color: #c792ea; }
+    .tk-fn  { color: #82aaff; }
+    .tk-ty  { color: #ffcb6b; }
+    .tk-st  { color: #c3e88d; }
+    .tk-cm  { color: #546e7a; font-style: italic; }
+    .tk-nm  { color: #f78c6c; }
+    .tk-at  { color: #89ddff; }
+
+    /* Flow arrow between pipeline connector */
+    .flow-arrow {
+      display: flex; align-items: center; justify-content: center;
+      color: var(--m-text-3); font-size: 11px; font-family: var(--m-mono);
+      padding: 4px 0 2px; letter-spacing: .05em;
+    }
+
     /* ── RESPONSIVE ────────────────────────────────────────────────────── */
     @media (max-width: 768px) {
       header { padding: 0 1rem; }
@@ -496,6 +630,8 @@
       .qs-grid { grid-template-columns: 1fr; }
       .diagrams-grid { grid-template-columns: 1fr; }
       .hero { padding: 4rem 1rem 3rem; }
+      .code-panel-inner { grid-template-columns: 1fr; }
+      .neural-grid { grid-template-columns: 3fr; }
     }
   </style>
 </head>
@@ -511,7 +647,8 @@
     </div>
   </a>
   <nav>
-    <a href="#architecture" class="nav-link">Architecture</a>
+    <a href="#how-it-works" class="nav-link">Pipeline</a>
+    <a href="#architecture" class="nav-link">Rust→WASM</a>
     <a href="#api" class="nav-link">API</a>
     <a href="#quickstart" class="nav-link">Quickstart</a>
     <a href="https://github.com/zuclubit/momoto-ui" class="nav-link" target="_blank">GitHub ↗</a>
@@ -531,43 +668,252 @@
     <a href="https://github.com/zuclubit/momoto-ui" class="btn btn-ghost" target="_blank">★ GitHub</a>
   </div>
   <div class="hero-stats">
-    <div class="stat"><div class="stat-n">9</div><div class="stat-l">WASM Modules</div></div>
-    <div class="stat"><div class="stat-n">150+</div><div class="stat-l">Public Functions</div></div>
+    <div class="stat"><div class="stat-n">10</div><div class="stat-l">WASM Modules</div></div>
+    <div class="stat"><div class="stat-n">400+</div><div class="stat-l">Public Methods</div></div>
+    <div class="stat"><div class="stat-n">80+</div><div class="stat-l">WASM Classes</div></div>
     <div class="stat"><div class="stat-n">483</div><div class="stat-l">SIREN Params</div></div>
     <div class="stat"><div class="stat-n">7</div><div class="stat-l">Harmony Types</div></div>
-    <div class="stat"><div class="stat-n">40+</div><div class="stat-l">Physics Files</div></div>
     <div class="stat"><div class="stat-n">3</div><div class="stat-l">CVD Types</div></div>
   </div>
 </div>
 
 <div class="divider"></div>
 
-<!-- ── VISUAL DIAGRAMS ─────────────────────────────────────────────────── -->
+<!-- ── HOW MOMOTO WORKS ────────────────────────────────────────────────── -->
 <section id="how-it-works">
-  <p class="section-label">Visual Architecture</p>
+  <p class="section-label">Live Pipeline</p>
   <h2>How <span>Momoto</span> Works</h2>
-  <p class="section-desc">Momoto is not a palette picker. It is a physics-accurate perceptual pipeline: from raw OKLCH mathematics through neural correction to validated, accessible output.</p>
+  <p class="section-desc">Trace a brand color through Momoto's full perceptual pipeline: from raw hex input through physics-accurate color science, accessibility validation, SIREN neural correction, and final tonal palette generation.</p>
 
-  <div class="diagrams-grid">
-    <div class="diagram-card" onclick="openModal('assets/momoto-ui-geno1.png', 'SIREN Neural Correction Flow')">
-      <img src="assets/momoto-ui-geno1.png"
-           alt="Flujo de Corrección Neural en Momoto — pipeline from rendered input through SIREN neural analysis to perceptually corrected output"
-           loading="lazy" />
-      <div class="diagram-caption">
-        <h3>SIREN Neural Correction Flow</h3>
-        <p>The SIREN network (9→16→16→3, 483 params) analyzes background/foreground OKLCH pairs and computes perceptual correction deltas (ΔL, ΔC, ΔH) to maximize both contrast compliance and visual harmony.</p>
-        <span class="diagram-tag">momoto-wasm · siren.rs</span>
+  <div class="pipeline" id="pipeline">
+
+    <!-- STEP 1 -->
+    <div class="pipeline-step active" id="ps1">
+      <div class="pipeline-step-header" onclick="toggleStep('ps1')">
+        <span class="step-num">1</span>
+        <span class="step-label">Color Input — parse &amp; decode</span>
+        <span class="step-tag">Color.fromHex · sRGB decode</span>
+        <span class="step-arrow">›</span>
+      </div>
+      <div class="pipeline-body">
+        <div class="swatch-row">
+          <div class="swatch" style="background:#5577cc"></div>
+          <div class="swatch-info">
+            <div class="swatch-hex">#5577cc</div>
+            <div class="swatch-sub">sRGB &nbsp; r=85 &nbsp; g=119 &nbsp; b=204</div>
+            <div class="swatch-sub">Linear &nbsp; R=0.1007 &nbsp; G=0.2122 &nbsp; B=0.6038</div>
+          </div>
+        </div>
+        <div class="code-block" style="margin-top:.5rem">
+          <pre style="white-space:pre-wrap">import init, { Color } from 'momoto-wasm';
+await init();
+const fg = Color.fromHex('#5577cc');
+// → r:85  g:119  b:204  alpha:1.0</pre>
+        </div>
       </div>
     </div>
 
-    <div class="diagram-card" onclick="openModal('assets/momoto-ui-geno2.png', 'Momoto AI Visual Generator Process')">
-      <img src="assets/momoto-ui-geno2.png"
-           alt="Proceso Esperado para Momoto AI Visual Generator — 4-phase pipeline: Recommendation, Configuration, Rendering, Validation"
-           loading="lazy" />
-      <div class="diagram-caption">
-        <h3>AI Visual Generator Pipeline</h3>
-        <p>Four-phase AI pipeline: the agent recommends colors from momoto-intelligence, applies advanced materials from momoto-materials, generates visuals through the GPU/WebGL pipeline, and validates output through momoto-metrics.</p>
-        <span class="diagram-tag">momoto-agent · momoto-materials</span>
+    <div class="flow-arrow">↓ &nbsp; color space transforms</div>
+
+    <!-- STEP 2 -->
+    <div class="pipeline-step" id="ps2">
+      <div class="pipeline-step-header" onclick="toggleStep('ps2')">
+        <span class="step-num">2</span>
+        <span class="step-label">Color Space Conversion — OKLCH · OKLab · HCT</span>
+        <span class="step-tag">hexToHct · oklchToHct · OKLab.fromColor</span>
+        <span class="step-arrow">›</span>
+      </div>
+      <div class="pipeline-body">
+        <div class="cs-grid">
+          <div class="cs-card">
+            <div class="cs-name">OKLCH — Perceptual Polar</div>
+            <div class="cs-vals">
+              L <b>0.537</b> &nbsp; C <b>0.165</b> &nbsp; H <b>265°</b><br/>
+              <span style="font-size:11px;color:var(--m-text-3)">L∈[0,1] · C≥0 · H∈[0,360)</span>
+            </div>
+          </div>
+          <div class="cs-card">
+            <div class="cs-name">OKLab — Perceptual Cartesian</div>
+            <div class="cs-vals">
+              L <b>0.537</b> &nbsp; a <b>-0.019</b> &nbsp; b <b>-0.164</b><br/>
+              <span style="font-size:11px;color:var(--m-text-3)">uniform for interpolation</span>
+            </div>
+          </div>
+          <div class="cs-card">
+            <div class="cs-name">HCT — CAM16 + CIELAB</div>
+            <div class="cs-vals">
+              H <b>263.8°</b> &nbsp; C <b>37.4</b> &nbsp; T <b>44.1</b><br/>
+              <span style="font-size:11px;color:var(--m-text-3)">Material Design 3 model</span>
+            </div>
+          </div>
+        </div>
+        <div class="code-block">
+          <pre style="white-space:pre-wrap">const [hue, chroma, tone] = hexToHct('#5577cc');
+// hue=263.8  chroma=37.4  tone=44.1
+
+const oklch = new OKLCH(0.537, 0.165, 265);
+const lab   = OKLab.fromColor(fg);
+// L=0.537  a=-0.019  b=-0.164</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-arrow">↓ &nbsp; WCAG 2.1 + APCA-W3 v0.1.9</div>
+
+    <!-- STEP 3 -->
+    <div class="pipeline-step" id="ps3">
+      <div class="pipeline-step-header" onclick="toggleStep('ps3')">
+        <span class="step-num">3</span>
+        <span class="step-label">Accessibility Analysis — WCAG &amp; APCA metrics</span>
+        <span class="step-tag">wcagContrastRatio · APCAMetric · wcagPasses</span>
+        <span class="step-arrow">›</span>
+      </div>
+      <div class="pipeline-body">
+        <p style="font-size:12px;color:var(--m-text-3);margin-bottom:1rem">Foreground <b style="color:var(--m-text)">#5577cc</b> on background <b style="color:var(--m-text)">#07070e</b></p>
+        <div class="metric-row">
+          <div class="metric-header">
+            <span class="metric-name">WCAG 2.1 Contrast Ratio</span>
+            <span class="metric-val" style="color:var(--m-amber)">4.21 : 1 &nbsp;<span class="badge badge-fail">✗ AA</span></span>
+          </div>
+          <div class="metric-bar-wrap"><div class="metric-bar bar-warn" style="width:40%"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--m-text-3);margin-top:3px"><span>1:1</span><span>AA 4.5</span><span>AAA 7.0</span><span>21:1</span></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-header">
+            <span class="metric-name">APCA-W3 v0.1.9 Lightness Contrast (Lc)</span>
+            <span class="metric-val" style="color:var(--m-amber)">Lc 58.3 &nbsp;<span class="badge badge-fail">✗ Body</span></span>
+          </div>
+          <div class="metric-bar-wrap"><div class="metric-bar bar-warn" style="width:55%"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--m-text-3);margin-top:3px"><span>0</span><span>heading 60</span><span>body 75</span><span>106</span></div>
+        </div>
+        <div class="code-block" style="margin-top:.75rem">
+          <pre style="white-space:pre-wrap">const fg = Color.fromHex('#5577cc');
+const bg = Color.fromHex('#07070e');
+const ratio = wcagContrastRatio(fg, bg);   // 4.21
+const passes = wcagPasses(ratio, 0, false); // false — AA needs 4.5
+
+const apca = new APCAMetric();
+const lc = apca.evaluate(fg, bg).value;    // 58.3 Lc (body needs ≥75)</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-arrow">↓ &nbsp; SIREN [9→16→16→3] ω₀=30 · 483 params</div>
+
+    <!-- STEP 4 -->
+    <div class="pipeline-step" id="ps4">
+      <div class="pipeline-step-header" onclick="toggleStep('ps4')">
+        <span class="step-num">4</span>
+        <span class="step-label">SIREN Neural Correction — perceptual delta computation</span>
+        <span class="step-tag">computeSirenCorrection · applySirenCorrection</span>
+        <span class="step-arrow">›</span>
+      </div>
+      <div class="pipeline-body">
+        <p style="font-size:12px;color:var(--m-text-3);margin-bottom:.85rem">The SIREN network takes 9 inputs (bg OKLCH, fg OKLCH, APCA Lc, WCAG ratio, quality score) and outputs perceptual correction deltas clamped to safe ranges.</p>
+        <div class="neural-grid">
+          <div class="neural-card">
+            <div class="neural-delta">+0.042</div>
+            <div class="neural-label">ΔL &nbsp;∈ [−0.15, +0.15]</div>
+          </div>
+          <div class="neural-card">
+            <div class="neural-delta">+0.008</div>
+            <div class="neural-label">ΔC &nbsp;∈ [−0.05, +0.05]</div>
+          </div>
+          <div class="neural-card">
+            <div class="neural-delta">−1.2°</div>
+            <div class="neural-label">ΔH &nbsp;∈ [−10°, +10°]</div>
+          </div>
+        </div>
+        <div class="code-block">
+          <pre style="white-space:pre-wrap">// bg OKLCH: L=0.04, C=0.02, H=270
+// fg OKLCH: L=0.537, C=0.165, H=265
+const corr = computeSirenCorrection(
+  0.04, 0.02, 270,    // background
+  0.537, 0.165, 265,  // foreground
+  58.3, 4.21, 62.0    // APCA Lc, WCAG ratio, quality
+);
+// → deltaL=+0.042  deltaC=+0.008  deltaH=-1.2°
+
+const [L2, C2, H2] = applySirenCorrection(
+  0.537, 0.165, 265,
+  corr.deltaL, corr.deltaC, corr.deltaH
+);
+// → L=0.579  C=0.173  H=263.8°</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-arrow">↓ &nbsp; gamut clamp → validated output</div>
+
+    <!-- STEP 5 -->
+    <div class="pipeline-step" id="ps5">
+      <div class="pipeline-step-header" onclick="toggleStep('ps5')">
+        <span class="step-num">5</span>
+        <span class="step-label">Validated Output — accessible pair + 13-tone MD3 palette</span>
+        <span class="step-tag">hctTonalPalette · hctToHex · agentValidatePair</span>
+        <span class="step-arrow">›</span>
+      </div>
+      <div class="pipeline-body">
+        <div class="swatch-row" style="margin-bottom:1.25rem">
+          <div class="swatch" style="background:oklch(0.579 0.173 264)"></div>
+          <div class="swatch-info">
+            <div class="swatch-hex">#6188d8 &nbsp; <span class="badge badge-pass">✓ AA &nbsp; 5.1:1</span></div>
+            <div class="swatch-sub">OKLCH(0.579, 0.173, 264°) &nbsp;|&nbsp; HCT(264, 39, 47)</div>
+            <div class="swatch-sub">APCA Lc = 76.4 &nbsp; <span style="color:var(--m-green)">✓ Body text</span></div>
+          </div>
+        </div>
+        <p style="font-size:11px;color:var(--m-text-3);margin-bottom:.6rem">13-TONE HCT TONAL PALETTE &nbsp;(tones 0 → 100)</p>
+        <div class="tonal-row">
+          <div><div class="tone-swatch" style="background:oklch(0 0 264)" title="Tone 0: #000000"></div><div class="tone-label">0</div></div>
+          <div><div class="tone-swatch" style="background:oklch(0.13 0.05 264)" title="Tone 10"></div><div class="tone-label">10</div></div>
+          <div><div class="tone-swatch" style="background:oklch(0.23 0.10 264)" title="Tone 20"></div><div class="tone-label">20</div></div>
+          <div><div class="tone-swatch" style="background:oklch(0.33 0.15 264)" title="Tone 30"></div><div class="tone-label">30</div></div>
+          <div><div class="tone-swatch" style="background:oklch(0.43 0.18 264)" title="Tone 40"></div><div class="tone-label">40</div></div>
+          <div><div class="tone-swatch" style="background:oklch(0.537 0.165 264)" title="Tone 50 (original)"></div><div class="tone-label">50</div></div>
+          <div><div class="tone-swatch" style="background:oklch(0.63 0.165 264)" title="Tone 60"></div><div class="tone-label">60</div></div>
+          <div><div class="tone-swatch" style="background:oklch(0.73 0.14 264)" title="Tone 70"></div><div class="tone-label">70</div></div>
+          <div><div class="tone-swatch" style="background:oklch(0.82 0.10 264)" title="Tone 80"></div><div class="tone-label">80</div></div>
+          <div><div class="tone-swatch" style="background:oklch(0.90 0.05 264)" title="Tone 90"></div><div class="tone-label">90</div></div>
+          <div><div class="tone-swatch" style="background:oklch(0.95 0.025 264)" title="Tone 95"></div><div class="tone-label">95</div></div>
+          <div><div class="tone-swatch" style="background:oklch(0.99 0.005 264)" title="Tone 99"></div><div class="tone-label">99</div></div>
+          <div><div class="tone-swatch" style="background:oklch(1.0 0 264)" title="Tone 100: #ffffff"></div><div class="tone-label">100</div></div>
+        </div>
+        <div class="code-block" style="margin-top:1rem">
+          <pre style="white-space:pre-wrap">const [h, c] = hexToHct('#6188d8');          // h=264, c=39
+const palette = hctTonalPalette(h, c);        // 39 values [H,C,T × 13]
+const tones   = [0,10,20,30,40,50,60,70,80,90,95,99,100];
+tones.forEach((t,i) =>
+  console.log(`Tone ${t}: ${hctToHex(palette[i*3], palette[i*3+1], palette[i*3+2])}`)
+);
+
+// Validate the corrected pair
+const check = JSON.parse(agentValidatePair('#6188d8','#07070e','wcag','aa'));
+// → { passes: true, ratio: 5.1, level: "aa" }</pre>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /pipeline -->
+
+  <!-- Reference diagrams -->
+  <div style="margin-top:2.5rem">
+    <p style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--m-text-3);margin-bottom:1rem">Reference diagrams</p>
+    <div class="diagrams-grid">
+      <div class="diagram-card" onclick="openModal('assets/momoto-ui-geno1.png','SIREN Neural Correction Flow')">
+        <img src="assets/momoto-ui-geno1.png" alt="SIREN Neural Correction Flow" loading="lazy" />
+        <div class="diagram-caption">
+          <h3>SIREN Neural Correction Flow</h3>
+          <p>9→16→16→3 network, 483 params, ω₀=30. Corrects OKLCH pairs for perceptual quality.</p>
+          <span class="diagram-tag">siren.rs</span>
+        </div>
+      </div>
+      <div class="diagram-card" onclick="openModal('assets/momoto-ui-geno2.png','AI Visual Generator Pipeline')">
+        <img src="assets/momoto-ui-geno2.png" alt="AI Visual Generator Pipeline" loading="lazy" />
+        <div class="diagram-caption">
+          <h3>AI Visual Generator Pipeline</h3>
+          <p>4-phase agent pipeline: recommend → configure materials → render → validate.</p>
+          <span class="diagram-tag">agent.rs · materials_ext.rs</span>
+        </div>
       </div>
     </div>
   </div>
@@ -577,10 +923,377 @@
 
 <!-- ── ARCHITECTURE ─────────────────────────────────────────────────────── -->
 <section id="architecture">
-  <p class="section-label">Technical Architecture</p>
+  <p class="section-label">End-to-End Pipeline</p>
   <h2>Rust → WASM → <span>TypeScript</span></h2>
-  <p class="section-desc">Nine specialized crates, compiled to a single WASM module via wasm-bindgen. The TypeScript layer follows hexagonal architecture: domain → application → adapters → infrastructure.</p>
-  <div class="arch-box" id="arch-diagram"></div>
+  <p class="section-desc">Follow a real API call from the Rust implementation, through wasm-bindgen bindings, to TypeScript consumption. Pick a function to trace the full stack.</p>
+
+  <div class="code-viewer">
+    <div class="code-tabs">
+      <button class="code-tab active" onclick="showCodePanel('hct-panel', this)">hexToHct &amp; Palette</button>
+      <button class="code-tab" onclick="showCodePanel('siren-panel', this)">SIREN Neural Correction</button>
+      <button class="code-tab" onclick="showCodePanel('brdf-panel', this)">Cook-Torrance BRDF</button>
+      <button class="code-tab" onclick="showCodePanel('cvd-panel', this)">CVD Simulation</button>
+    </div>
+
+    <!-- HCT PANEL -->
+    <div class="code-panel active" id="hct-panel">
+      <div class="code-panel-inner">
+        <div class="code-col">
+          <div class="code-col-header"><span class="code-lang-badge lang-rust">Rust</span>momoto-wasm/src/hct.rs</div>
+          <pre><span class="tk-at">#[wasm_bindgen(js_name = hexToHct)]</span>
+<span class="tk-kw">pub fn</span> <span class="tk-fn">hex_to_hct</span>(hex: &amp;<span class="tk-ty">str</span>) -&gt; <span class="tk-ty">Float64Array</span> {
+    <span class="tk-kw">let</span> color = <span class="tk-ty">Argb</span>::from_hex_str(hex)
+        .expect(<span class="tk-st">"invalid hex"</span>);
+    <span class="tk-kw">let</span> hct = <span class="tk-ty">Hct</span>::from_argb(color);
+    <span class="tk-ty">Float64Array</span>::from(&amp;[
+        hct.hue, hct.chroma, hct.tone
+    ][..])
+}
+
+<span class="tk-at">#[wasm_bindgen(js_name = hctTonalPalette)]</span>
+<span class="tk-kw">pub fn</span> <span class="tk-fn">hct_tonal_palette</span>(
+    hue: <span class="tk-ty">f64</span>, chroma: <span class="tk-ty">f64</span>
+) -&gt; <span class="tk-ty">Float64Array</span> {
+    <span class="tk-cm">// 13 tones: 0,10,20,30,40,50,60,70,80,90,95,99,100</span>
+    <span class="tk-kw">const</span> TONES: [<span class="tk-ty">f64</span>; <span class="tk-nm">13</span>] = [
+        <span class="tk-nm">0.,10.,20.,30.,40.,50.,</span>
+        <span class="tk-nm">60.,70.,80.,90.,95.,99.,100.</span>
+    ];
+    <span class="tk-kw">let mut</span> out = <span class="tk-ty">Vec</span>::with_capacity(<span class="tk-nm">39</span>);
+    <span class="tk-kw">for</span> &amp;tone <span class="tk-kw">in</span> &amp;TONES {
+        <span class="tk-kw">let</span> h = <span class="tk-ty">Hct</span>::from(hue, chroma, tone);
+        out.extend_from_slice(&amp;[h.hue, h.chroma, h.tone]);
+    }
+    <span class="tk-ty">Float64Array</span>::from(out.as_slice())
+}</pre>
+        </div>
+        <div class="code-col">
+          <div class="code-col-header"><span class="code-lang-badge lang-wasm">WASM</span>pkg/momoto_wasm.js (generated)</div>
+          <pre><span class="tk-cm">// wasm-bindgen auto-generated JS glue</span>
+<span class="tk-kw">export function</span> <span class="tk-fn">hexToHct</span>(hex) {
+    <span class="tk-kw">const</span> ptr = passStringToWasm0(hex, wasm.__wbindgen_malloc,
+                                   wasm.__wbindgen_realloc);
+    <span class="tk-kw">const</span> len = WASM_VECTOR_LEN;
+    wasm.hex_to_hct(retptr, ptr, len);
+    <span class="tk-kw">var</span> r0 = getInt32Memory0()[retptr / <span class="tk-nm">4</span> + <span class="tk-nm">0</span>];
+    <span class="tk-kw">var</span> r1 = getInt32Memory0()[retptr / <span class="tk-nm">4</span> + <span class="tk-nm">1</span>];
+    <span class="tk-kw">var</span> v1 = getArrayF64FromWasm0(r0, r1).slice();
+    wasm.__wbindgen_free(r0, r1 * <span class="tk-nm">8</span>);
+    <span class="tk-kw">return</span> v1; <span class="tk-cm">// Float64Array [hue, chroma, tone]</span>
+}
+
+<span class="tk-kw">export function</span> <span class="tk-fn">hctTonalPalette</span>(hue, chroma) {
+    <span class="tk-cm">// same pattern → Float64Array(39)</span>
+    <span class="tk-cm">// [H0,C0,T0, H1,C1,T1, ... × 13 tones]</span>
+}</pre>
+        </div>
+        <div class="code-col">
+          <div class="code-col-header"><span class="code-lang-badge lang-ts">TypeScript</span>Consumer</div>
+          <pre><span class="tk-kw">import</span> init, {
+    hexToHct, hctTonalPalette, hctToHex
+} <span class="tk-kw">from</span> <span class="tk-st">'momoto-wasm'</span>;
+
+<span class="tk-kw">await</span> init(); <span class="tk-cm">// load .wasm binary</span>
+
+<span class="tk-cm">// 1. Convert hex → HCT</span>
+<span class="tk-kw">const</span> [hue, chroma, tone] =
+    hexToHct(<span class="tk-st">'#5577cc'</span>);
+<span class="tk-cm">// → [263.8, 37.4, 44.1]</span>
+
+<span class="tk-cm">// 2. Generate 13-tone palette</span>
+<span class="tk-kw">const</span> pal = hctTonalPalette(hue, chroma);
+<span class="tk-cm">// Float64Array(39) [H,C,T × 13]</span>
+
+<span class="tk-cm">// 3. Convert each tone to hex</span>
+<span class="tk-kw">const</span> tones = [<span class="tk-nm">0,10,20,30,40,50,60,70,80,90,95,99,100</span>];
+tones.forEach((t, i) =&gt; {
+    <span class="tk-kw">const</span> hex = hctToHex(
+        pal[i*<span class="tk-nm">3</span>], pal[i*<span class="tk-nm">3</span>+<span class="tk-nm">1</span>], pal[i*<span class="tk-nm">3</span>+<span class="tk-nm">2</span>]
+    );
+    console.log(<span class="tk-st">`Tone </span>${t}<span class="tk-st">: </span>${hex}<span class="tk-st">`</span>);
+});</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIREN PANEL -->
+    <div class="code-panel" id="siren-panel">
+      <div class="code-panel-inner">
+        <div class="code-col">
+          <div class="code-col-header"><span class="code-lang-badge lang-rust">Rust</span>momoto-wasm/src/siren.rs</div>
+          <pre><span class="tk-cm">// Architecture: [9 → 16 → 16 → 3]</span>
+<span class="tk-cm">// 483 params · ω₀=30 · seed=421337</span>
+
+<span class="tk-at">#[wasm_bindgen(js_name = computeSirenCorrection)]</span>
+<span class="tk-kw">pub fn</span> <span class="tk-fn">compute_siren_correction</span>(
+    bg_l: <span class="tk-ty">f64</span>, bg_c: <span class="tk-ty">f64</span>, bg_h: <span class="tk-ty">f64</span>,
+    fg_l: <span class="tk-ty">f64</span>, fg_c: <span class="tk-ty">f64</span>, fg_h: <span class="tk-ty">f64</span>,
+    apca_lc: <span class="tk-ty">f64</span>, wcag_ratio: <span class="tk-ty">f64</span>,
+    quality: <span class="tk-ty">f64</span>,
+) -&gt; <span class="tk-ty">SirenCorrection</span> {
+    <span class="tk-kw">let</span> inp = normalize_input([
+        bg_l, bg_c, bg_h/<span class="tk-nm">360.</span>,
+        fg_l, fg_c, fg_h/<span class="tk-nm">360.</span>,
+        apca_lc/<span class="tk-nm">100.</span>, wcag_ratio/<span class="tk-nm">21.</span>,
+        quality/<span class="tk-nm">100.</span>,
+    ]);
+    <span class="tk-kw">let</span> h1 = <span class="tk-fn">siren_layer</span>(&amp;inp, &amp;W1, &amp;B1);
+    <span class="tk-kw">let</span> h2 = <span class="tk-fn">siren_layer</span>(&amp;h1,  &amp;W2, &amp;B2);
+    <span class="tk-kw">let</span> out = <span class="tk-fn">linear_layer</span>(&amp;h2, &amp;W3, &amp;B3);
+    <span class="tk-ty">SirenCorrection</span> {
+        delta_l: out[<span class="tk-nm">0</span>].clamp(<span class="tk-nm">-0.15</span>, <span class="tk-nm">0.15</span>),
+        delta_c: out[<span class="tk-nm">1</span>].clamp(<span class="tk-nm">-0.05</span>, <span class="tk-nm">0.05</span>),
+        delta_h: out[<span class="tk-nm">2</span>].clamp(<span class="tk-nm">-10.</span>, <span class="tk-nm">10.</span>),
+    }
+}</pre>
+        </div>
+        <div class="code-col">
+          <div class="code-col-header"><span class="code-lang-badge lang-wasm">WASM</span>SirenCorrection class</div>
+          <pre><span class="tk-cm">// Generated wrapper class</span>
+<span class="tk-kw">export class</span> <span class="tk-ty">SirenCorrection</span> {
+    <span class="tk-fn">free</span>() { <span class="tk-cm">/* drop WASM memory */</span> }
+
+    <span class="tk-kw">get</span> <span class="tk-fn">deltaL</span>() {
+        <span class="tk-kw">return</span> wasm
+          .__wbg_get_sirencorrection_delta_l(
+            <span class="tk-kw">this</span>.__wbg_ptr
+          );
+    }
+    <span class="tk-kw">get</span> <span class="tk-fn">deltaC</span>() { <span class="tk-cm">/* same pattern */</span> }
+    <span class="tk-kw">get</span> <span class="tk-fn">deltaH</span>() { <span class="tk-cm">/* same pattern */</span> }
+}
+
+<span class="tk-kw">export function</span> <span class="tk-fn">computeSirenCorrection</span>(
+    bg_l, bg_c, bg_h,
+    fg_l, fg_c, fg_h,
+    apca_lc, wcag_ratio, quality
+) {
+    <span class="tk-kw">const</span> ret = wasm.compute_siren_correction(
+        bg_l, bg_c, bg_h,
+        fg_l, fg_c, fg_h,
+        apca_lc, wcag_ratio, quality
+    );
+    <span class="tk-kw">return</span> <span class="tk-ty">SirenCorrection</span>.__wrap(ret);
+}</pre>
+        </div>
+        <div class="code-col">
+          <div class="code-col-header"><span class="code-lang-badge lang-ts">TypeScript</span>Consumer</div>
+          <pre><span class="tk-kw">import</span> init, {
+    computeSirenCorrection,
+    applySirenCorrection,
+    sirenMetadata,
+} <span class="tk-kw">from</span> <span class="tk-st">'momoto-wasm'</span>;
+
+<span class="tk-kw">await</span> init();
+
+<span class="tk-cm">// Inspect network metadata</span>
+<span class="tk-kw">const</span> meta = sirenMetadata();
+<span class="tk-cm">// { arch:[9,16,16,3], totalParams:483,</span>
+<span class="tk-cm">//   omega0:30, seed:421337 }</span>
+
+<span class="tk-cm">// Run forward pass</span>
+<span class="tk-kw">const</span> corr = computeSirenCorrection(
+    <span class="tk-nm">0.04</span>, <span class="tk-nm">0.02</span>, <span class="tk-nm">270</span>,  <span class="tk-cm">// bg OKLCH</span>
+    <span class="tk-nm">0.537</span>, <span class="tk-nm">0.165</span>, <span class="tk-nm">265</span>, <span class="tk-cm">// fg OKLCH</span>
+    <span class="tk-nm">58.3</span>, <span class="tk-nm">4.21</span>, <span class="tk-nm">62.0</span>   <span class="tk-cm">// metrics</span>
+);
+console.log(corr.deltaL, corr.deltaC, corr.deltaH);
+<span class="tk-cm">// +0.042  +0.008  -1.2</span>
+
+<span class="tk-cm">// Apply to get corrected OKLCH</span>
+<span class="tk-kw">const</span> [L, C, H] = applySirenCorrection(
+    <span class="tk-nm">0.537</span>, <span class="tk-nm">0.165</span>, <span class="tk-nm">265</span>,
+    corr.deltaL, corr.deltaC, corr.deltaH
+);
+<span class="tk-cm">// L=0.579  C=0.173  H=263.8</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- BRDF PANEL -->
+    <div class="code-panel" id="brdf-panel">
+      <div class="code-panel-inner">
+        <div class="code-col">
+          <div class="code-col-header"><span class="code-lang-badge lang-rust">Rust</span>momoto-wasm/src/materials_ext.rs</div>
+          <pre><span class="tk-at">#[wasm_bindgen(js_name = cookTorranceBRDF)]</span>
+<span class="tk-kw">pub fn</span> <span class="tk-fn">cook_torrance_brdf</span>(
+    n_dot_v: <span class="tk-ty">f64</span>, n_dot_l: <span class="tk-ty">f64</span>,
+    n_dot_h: <span class="tk-ty">f64</span>, h_dot_v: <span class="tk-ty">f64</span>,
+    roughness: <span class="tk-ty">f64</span>, f0: <span class="tk-ty">f64</span>,
+) -&gt; <span class="tk-ty">f64</span> {
+    <span class="tk-cm">// GGX Normal Distribution Function</span>
+    <span class="tk-kw">let</span> d = <span class="tk-fn">ggx_ndf</span>(n_dot_h, roughness);
+    <span class="tk-cm">// Smith G2 masking-shadowing</span>
+    <span class="tk-kw">let</span> g = <span class="tk-fn">smith_g2</span>(n_dot_v, n_dot_l, roughness);
+    <span class="tk-cm">// Schlick Fresnel approximation</span>
+    <span class="tk-kw">let</span> f = f0 + (<span class="tk-nm">1.0</span> - f0)
+              * (<span class="tk-nm">1.0</span> - h_dot_v).powi(<span class="tk-nm">5</span>);
+    <span class="tk-cm">// Cook-Torrance denominator: 4·NdotV·NdotL</span>
+    (d * g * f) /
+    (<span class="tk-nm">4.0</span> * n_dot_v * n_dot_l + <span class="tk-nm">1e-7</span>)
+}
+
+<span class="tk-at">#[wasm_bindgen(js_name = orenNayarBRDF)]</span>
+<span class="tk-kw">pub fn</span> <span class="tk-fn">oren_nayar_brdf</span>(
+    n_dot_l: <span class="tk-ty">f64</span>, n_dot_v: <span class="tk-ty">f64</span>,
+    l_dot_v: <span class="tk-ty">f64</span>, roughness: <span class="tk-ty">f64</span>,
+) -&gt; <span class="tk-ty">f64</span> { <span class="tk-cm">/* Oren-Nayar 1994 */</span> }</pre>
+        </div>
+        <div class="code-col">
+          <div class="code-col-header"><span class="code-lang-badge lang-wasm">WASM</span>PBR API — DielectricBSDF</div>
+          <pre><span class="tk-cm">// High-level BSDF classes</span>
+<span class="tk-kw">export class</span> <span class="tk-ty">DielectricBSDF</span> {
+    <span class="tk-kw">static</span> <span class="tk-fn">glass</span>()       { <span class="tk-cm">/* ior=1.52 */</span> }
+    <span class="tk-kw">static</span> <span class="tk-fn">water</span>()       { <span class="tk-cm">/* ior=1.33 */</span> }
+    <span class="tk-kw">static</span> <span class="tk-fn">diamond</span>()     { <span class="tk-cm">/* ior=2.42 */</span> }
+    <span class="tk-kw">static</span> <span class="tk-fn">frostedGlass</span>() { <span class="tk-cm">/* roughness=0.5 */</span> }
+
+    evaluate(wi_x, wi_y, wi_z, wo_x, wo_y, wo_z) {
+        <span class="tk-cm">// → { reflectance, transmittance,</span>
+        <span class="tk-cm">//     absorption, fresnel }</span>
+    }
+    validateEnergy() {
+        <span class="tk-cm">// R+T+A must equal 1.0</span>
+    }
+}
+
+<span class="tk-kw">export class</span> <span class="tk-ty">ConductorBSDF</span> {
+    <span class="tk-kw">static</span> <span class="tk-fn">gold</span>()   { <span class="tk-cm">/* n=0.17 k=3.5  */</span> }
+    <span class="tk-kw">static</span> <span class="tk-fn">silver</span>() { <span class="tk-cm">/* n=0.05 k=4.2  */</span> }
+    <span class="tk-kw">static</span> <span class="tk-fn">copper</span>() { <span class="tk-cm">/* n=0.25 k=2.8  */</span> }
+}</pre>
+        </div>
+        <div class="code-col">
+          <div class="code-col-header"><span class="code-lang-badge lang-ts">TypeScript</span>Consumer</div>
+          <pre><span class="tk-kw">import</span> init, {
+    cookTorranceBRDF, orenNayarBRDF,
+    DielectricBSDF, ConductorBSDF,
+    evaluateDielectricBatch,
+} <span class="tk-kw">from</span> <span class="tk-st">'momoto-wasm'</span>;
+
+<span class="tk-kw">await</span> init();
+
+<span class="tk-cm">// Low-level: direct BRDF evaluation</span>
+<span class="tk-kw">const</span> spec = cookTorranceBRDF(
+    <span class="tk-nm">0.9</span>,  <span class="tk-cm">// NdotV</span>
+    <span class="tk-nm">0.85</span>, <span class="tk-cm">// NdotL</span>
+    <span class="tk-nm">0.9</span>,  <span class="tk-cm">// NdotH</span>
+    <span class="tk-nm">0.88</span>, <span class="tk-cm">// HdotV</span>
+    <span class="tk-nm">0.2</span>,  <span class="tk-cm">// roughness (0=mirror, 1=rough)</span>
+    <span class="tk-nm">0.04</span>  <span class="tk-cm">// F0 (glass = 0.04)</span>
+);
+
+<span class="tk-cm">// High-level: PBR preset</span>
+<span class="tk-kw">const</span> glass = DielectricBSDF.glass();
+<span class="tk-kw">const</span> result = glass.evaluate(
+    <span class="tk-nm">0,0,1</span>,  <span class="tk-cm">// incident direction wi</span>
+    <span class="tk-nm">0,0,1</span>   <span class="tk-cm">// outgoing direction wo</span>
+);
+<span class="tk-cm">// { reflectance:0.04, transmittance:0.96,</span>
+<span class="tk-cm">//   absorption:0.0 }</span>
+
+<span class="tk-cm">// Batch: evaluate 1000 materials at once</span>
+<span class="tk-kw">const</span> iors = <span class="tk-kw">new</span> Float64Array([<span class="tk-nm">1.33,1.5,2.42</span>]);
+<span class="tk-kw">const</span> roughs = <span class="tk-kw">new</span> Float64Array([<span class="tk-nm">0.1,0.2,0.05</span>]);
+<span class="tk-kw">const</span> thetas = <span class="tk-kw">new</span> Float64Array([<span class="tk-nm">0.9,0.8,0.95</span>]);
+<span class="tk-kw">const</span> batch = evaluateDielectricBatch(iors,roughs,thetas);
+<span class="tk-cm">// Float64Array [R,T,A, R,T,A, R,T,A]</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- CVD PANEL -->
+    <div class="code-panel" id="cvd-panel">
+      <div class="code-panel-inner">
+        <div class="code-col">
+          <div class="code-col-header"><span class="code-lang-badge lang-rust">Rust</span>momoto-wasm/src/intelligence.rs</div>
+          <pre><span class="tk-cm">// Viénot 1999 — row-stochastic matrices</span>
+<span class="tk-cm">// in linear sRGB. D65 white preserved.</span>
+
+<span class="tk-at">#[wasm_bindgen(js_name = simulateCVD)]</span>
+<span class="tk-kw">pub fn</span> <span class="tk-fn">simulate_cvd</span>(
+    hex: &amp;<span class="tk-ty">str</span>,
+    cvd_type: &amp;<span class="tk-ty">str</span>,
+) -&gt; <span class="tk-ty">String</span> {
+    <span class="tk-kw">let</span> rgb = <span class="tk-ty">LinearRgb</span>::from_hex(hex);
+    <span class="tk-kw">let</span> mat = <span class="tk-kw">match</span> cvd_type {
+        <span class="tk-st">"protanopia"</span>   =&gt; VIENOT_PROT,
+        <span class="tk-st">"deuteranopia"</span> =&gt; VIENOT_DEUT,
+        <span class="tk-st">"tritanopia"</span>   =&gt; VIENOT_TRIT,
+        _ =&gt; <span class="tk-kw">return</span> hex.to_owned(),
+    };
+    <span class="tk-kw">let</span> sim = mat_mul_3x3(mat, rgb);
+    <span class="tk-ty">LinearRgb</span>::from(sim).to_hex()
+}
+
+<span class="tk-cm">// cvdDeltaE: OKLab distance original↔simulated</span>
+<span class="tk-at">#[wasm_bindgen(js_name = cvdDeltaE)]</span>
+<span class="tk-kw">pub fn</span> <span class="tk-fn">cvd_delta_e</span>(
+    hex: &amp;<span class="tk-ty">str</span>, cvd_type: &amp;<span class="tk-ty">str</span>
+) -&gt; <span class="tk-ty">f64</span> { <span class="tk-cm">/* &lt;20 mild · 20-60 mod · &gt;60 severe */</span> }</pre>
+        </div>
+        <div class="code-col">
+          <div class="code-col-header"><span class="code-lang-badge lang-wasm">WASM</span>Viénot matrices</div>
+          <pre><span class="tk-cm">// D65-normalized matrices (Viénot 1999)</span>
+<span class="tk-cm">// Row-stochastic: each row sums to 1.0</span>
+<span class="tk-cm">// → D65 white [1,1,1] is preserved exactly</span>
+
+<span class="tk-cm">// Protanopia (L-cone absent):</span>
+<span class="tk-cm">// [[0.567, 0.433, 0.000],</span>
+<span class="tk-cm">//  [0.558, 0.442, 0.000],</span>
+<span class="tk-cm">//  [0.000, 0.242, 0.758]]</span>
+
+<span class="tk-cm">// Deuteranopia (M-cone absent):</span>
+<span class="tk-cm">// [[0.625, 0.375, 0.000],</span>
+<span class="tk-cm">//  [0.700, 0.300, 0.000],</span>
+<span class="tk-cm">//  [0.000, 0.300, 0.700]]</span>
+
+<span class="tk-cm">// Note: NOT Brettel 1997 LMS matrices</span>
+<span class="tk-cm">// (Brettel uses equal-energy white E,</span>
+<span class="tk-cm">//  causing white-shift with D65 inputs)</span>
+
+<span class="tk-kw">export function</span> <span class="tk-fn">simulateCVD</span>(hex, cvdType) { }
+<span class="tk-kw">export function</span> <span class="tk-fn">cvdDeltaE</span>(hex, cvdType) { }
+<span class="tk-kw">export function</span> <span class="tk-fn">simulateCVDOklch</span>(l,c,h,type) { }</pre>
+        </div>
+        <div class="code-col">
+          <div class="code-col-header"><span class="code-lang-badge lang-ts">TypeScript</span>Consumer</div>
+          <pre><span class="tk-kw">import</span> init, {
+    simulateCVD, cvdDeltaE,
+    simulateCVDOklch,
+} <span class="tk-kw">from</span> <span class="tk-st">'momoto-wasm'</span>;
+
+<span class="tk-kw">await</span> init();
+
+<span class="tk-kw">const</span> original = <span class="tk-st">'#3a7bd5'</span>;
+
+<span class="tk-cm">// Simulate all 3 CVD types</span>
+<span class="tk-kw">const</span> cvdTypes = [
+    <span class="tk-st">'protanopia'</span>,
+    <span class="tk-st">'deuteranopia'</span>,
+    <span class="tk-st">'tritanopia'</span>,
+];
+cvdTypes.forEach(type =&gt; {
+    <span class="tk-kw">const</span> sim = simulateCVD(original, type);
+    <span class="tk-kw">const</span> dE  = cvdDeltaE(original, type);
+    <span class="tk-cm">// dE &lt; 20  → mild impact</span>
+    <span class="tk-cm">// dE 20-60 → moderate</span>
+    <span class="tk-cm">// dE &gt; 60  → severe — redesign needed</span>
+    console.log(type, sim, `ΔE=${dE.toFixed(1)}`);
+});
+
+<span class="tk-cm">// In OKLCH space (no conversion overhead)</span>
+<span class="tk-kw">const</span> [L2,C2,H2] = simulateCVDOklch(
+    <span class="tk-nm">0.56</span>, <span class="tk-nm">0.15</span>, <span class="tk-nm">258</span>, <span class="tk-st">'deuteranopia'</span>
+);</pre>
+        </div>
+      </div>
+    </div>
+  </div><!-- /code-viewer -->
+
+  <div style="margin-top:2rem">
+    <div class="arch-box" id="arch-diagram"></div>
+  </div>
 </section>
 
 <div class="divider"></div>
@@ -709,25 +1422,38 @@
 // ── DATA ──────────────────────────────────────────────────────────────────
 
 const MODULES = [
-  { key:'hct',          icon:'⬡', name:'HCT Color Space',       desc:'Google Material Design 3 perceptual model. CAM16 hue + CIELAB tone. Guaranteed gamut-safe tonal palettes.', fns:8 },
-  { key:'core',         icon:'◈', name:'Core & Luminance',       desc:'OKLCH, OKLab, LinearRGBA. WCAG + APCA metrics, gamma conversion, batch luminance, math utilities.', fns:18 },
-  { key:'intelligence', icon:'◉', name:'Intelligence',           desc:'AI color recommendations, perceptual scoring, 7 harmony types, CVD simulation (Viénot 1999), constraint solving.', fns:12 },
-  { key:'materials',    icon:'◬', name:'Materials & Physics',    desc:'Cook-Torrance BRDF, Oren-Nayar diffuse, thin-film interference, refraction, lighting, PBR glass.', fns:10 },
-  { key:'temporal',     icon:'◷', name:'Temporal Materials',     desc:'Time-evolving physics: drying paint, soap bubbles, heated metals. Energy-conserving (R+T+A=1).', fns:7 },
-  { key:'procedural',   icon:'⬦', name:'Procedural Noise',       desc:'Perlin fBm for material micro-textures. Same seed → same field every frame (animation-safe).', fns:5 },
-  { key:'siren',        icon:'◎', name:'SIREN Neural Network',   desc:'9→16→16→3 network (483 params, ω₀=30) for perceptual color correction. Deterministic.', fns:6 },
-  { key:'events',       icon:'◌', name:'Events & Streaming',     desc:'Pub/sub event bus + SSE-compatible stream. Progress, metrics, validation, custom events.', fns:15 },
-  { key:'agent',        icon:'◩', name:'Agent API',              desc:'High-level JSON query/response interface. Validation, recommendations, batch operations.', fns:10 },
+  { key:'hct',          icon:'⬡', name:'HCT Color Space',       desc:'Google Material Design 3 perceptual model. CAM16 hue + CIELAB tone. Guaranteed gamut-safe tonal palettes via binary search.', fns:11 },
+  { key:'core',         icon:'◈', name:'Core & Luminance',       desc:'Color, OKLCH, OKLab, LinearRgba. WCAG 2.1 + APCA-W3 v0.1.9 metrics, gamma, batch luminance, math utilities.', fns:24 },
+  { key:'intelligence', icon:'◉', name:'Intelligence',           desc:'AI recommendations, 7 harmony types, CVD simulation (Viénot 1999), constraint solver, quality scoring.', fns:22 },
+  { key:'materials',    icon:'◬', name:'Materials & Physics',    desc:'Cook-Torrance GGX, Oren-Nayar, thin-film transfer matrix, DielectricBSDF, ConductorBSDF, LayeredBSDF, PBR presets, CSS rendering.', fns:35 },
+  { key:'temporal',     icon:'◷', name:'Temporal Materials',     desc:'Time-evolving physics: drying paint, soap bubbles, heated metals. TemporalMaterial, TemporalThinFilm, TemporalConductor. Energy-conserving.', fns:14 },
+  { key:'procedural',   icon:'⬦', name:'Procedural Noise',       desc:'Perlin fBm (ProceduralNoise). Same seed → same field every frame. IOR variation and roughness fields for material micro-textures.', fns:8 },
+  { key:'siren',        icon:'◎', name:'SIREN Neural Network',   desc:'9→16→16→3 network (483 params, ω₀=30, seed=421337). Deterministic perceptual correction. Forward pass + batch inference + weight export.', fns:9 },
+  { key:'events',       icon:'◌', name:'Events & Streaming',     desc:'MomotoEventBus pub/sub + MomotoEventStream SSE-compatible consumer. 8 built-in categories, buffer, filtered subscriptions.', fns:22 },
+  { key:'agent',        icon:'◩', name:'Agent API',              desc:'High-level JSON interface: validate, recommend, improve, score, batch ops. ContractBuilder, color transitions, self-certification.', fns:16 },
 ];
 
 const API_ITEMS = [
-  // HCT
-  { mod:'hct', type:'fn', name:'hexToHct', sig:'hexToHct(hex)', desc:'Convert hex to flat [hue, chroma, tone].', returns:'Float64Array [H,C,T]', example:'const [h,c,t] = hexToHct("#3a7bd5"); // h≈250, c≈38, t≈47' },
+  // ── HCT ──
+  { mod:'hct', type:'fn', name:'hexToHct', sig:'hexToHct(hex)', desc:'Convert hex string to HCT [hue, chroma, tone]. CAM16 hue + CIELAB tone. Returns flat Float64Array.', returns:'Float64Array [H,C,T]', example:'const [h,c,t] = hexToHct("#3a7bd5");\n// h≈263.8  c≈37.4  t≈44.1' },
   { mod:'hct', type:'fn', name:'hctToHex', sig:'hctToHex(hue,chroma,tone)', desc:'HCT components to hex string. Auto gamut-clamps.', returns:'string "#rrggbb"', example:'hctToHex(250, 40, 60) // "#3370cc"' },
   { mod:'hct', type:'fn', name:'hctTonalPalette', sig:'hctTonalPalette(hue,chroma)', desc:'Generate 13-tone MD3 palette at tones [0,10,20,30,40,50,60,70,80,90,95,99,100]. Returns 39 floats.', returns:'Float64Array (39 values: 13×[H,C,T])', example:'const pal = hctTonalPalette(250, 40);\nfor(let i=0;i<13;i++) console.log(hctToHex(pal[i*3],pal[i*3+1],pal[i*3+2]));' },
   { mod:'hct', type:'fn', name:'hctMaxChroma', sig:'hctMaxChroma(hue,tone)', desc:'Maximum sRGB-gamut chroma for given hue+tone via binary search (50 iterations).', returns:'number', example:'const maxC = hctMaxChroma(250, 60); // ~48' },
-  { mod:'hct', type:'class', name:'HCT', sig:'new HCT(hue,chroma,tone)', desc:'HCT color object. Methods: fromHex, fromArgb, toHex, toArgb, toOklch, withTone, withChroma, withHue, clampToGamut.', example:'const c = HCT.fromHex("#3a7bd5");\nconsole.log(c.hue, c.chroma, c.tone);\nconst darker = c.withTone(30).toHex();' },
-  // CORE
+  { mod:'hct', type:'fn', name:'hctToHex', sig:'hctToHex(hue,chroma,tone)', desc:'HCT triple to hex string. Auto gamut-clamps to sRGB via binary search.', returns:'string "#rrggbb"', example:'hctToHex(250, 40, 60) // "#3a75cc"' },
+  { mod:'hct', type:'fn', name:'hctTonalPalette', sig:'hctTonalPalette(hue,chroma)', desc:'Generate MD3 13-tone palette at tones [0,10,20,30,40,50,60,70,80,90,95,99,100]. Returns 39 floats [H,C,T × 13].', returns:'Float64Array(39)', example:'const pal = hctTonalPalette(264, 38);\nfor(let i=0;i<13;i++) console.log(hctToHex(pal[i*3],pal[i*3+1],pal[i*3+2]));' },
+  { mod:'hct', type:'fn', name:'hctMaxChroma', sig:'hctMaxChroma(hue,tone)', desc:'Maximum sRGB-gamut-safe chroma for given hue+tone. Uses binary search (50 iterations). Essential before calling hctTonalPalette with custom chroma.', returns:'number', example:'const maxC = hctMaxChroma(264, 60); // ~48' },
+  { mod:'hct', type:'fn', name:'hctToOklch', sig:'hctToOklch(hue,chroma,tone)', desc:'Convert HCT → OKLCH perceptual polar. Useful for crossing between MD3 and OKLCH pipelines.', returns:'Float64Array [L,C,H]' },
+  { mod:'hct', type:'fn', name:'oklchToHct', sig:'oklchToHct(l,c,h)', desc:'Convert OKLCH → HCT. Useful when you need MD3 tone from OKLCH input.', returns:'Float64Array [H,C,T]' },
+  { mod:'hct', type:'class', name:'HCT', sig:'new HCT(hue,chroma,tone)', desc:'HCT color object. Methods: fromHex(hex), fromArgb(u32), toHex(), toArgb(), toOklch(), withTone(f64), withChroma(f64), withHue(f64), clampToGamut().', example:'const c = HCT.fromHex("#5577cc");\nconst darker = c.withTone(30).toHex();\nconst clamped = c.withChroma(200).clampToGamut();' },
+  // ── CORE ──
+  { mod:'core', type:'class', name:'Color', sig:'new Color(r,g,b)', desc:'sRGB color [0–255]. Constructors: Color.fromHex(hex). Methods: toHex(), r(), g(), b(), alpha(), withAlpha(f64), lighten(amt), darken(amt), saturate(amt), desaturate(amt).', example:'const c = Color.fromHex("#5577cc");\nconsole.log(c.r(), c.g(), c.b()); // 85 119 204\nconst lighter = c.lighten(0.1).toHex();' },
+  { mod:'core', type:'class', name:'OKLCH', sig:'new OKLCH(l,c,h)', desc:'Perceptual polar color. Methods: fromColor(Color), toColor(), l(), c(), h(), lighten(δ), darken(δ), saturate(f), desaturate(f), rotateHue(°), mapToGamut(), deltaE(other). Static: interpolate(a,b,t,huePath).', example:'const ok = new OKLCH(0.6, 0.18, 265);\nconst lighter = ok.lighten(0.1);\nconst mid = OKLCH.interpolate(ok, other, 0.5, "shorter");' },
+  { mod:'core', type:'class', name:'OKLab', sig:'new OKLab(l,a,b)', desc:'Perceptual Cartesian space. Methods: fromColor(Color), toColor(), toOklch(), l(), a(), b(), deltaE(other). Static: interpolate(from,to,t).', example:'const lab = OKLab.fromColor(Color.fromHex("#5577cc"));\nconst diff = lab.deltaE(other); // ~0.1 = barely noticeable' },
+  { mod:'core', type:'class', name:'LinearRgba', sig:'new LinearRgba(r,g,b,a)', desc:'Linear-light RGBA [0,1]. Methods: fromOklch(oklch, alpha), rgb(r,g,b) (static), r(), g(), b(), alpha(). Used for precise physics calculations.', example:'const lin = LinearRgba.fromOklch(new OKLCH(0.6,0.18,265), 1.0);' },
+  { mod:'core', type:'class', name:'WCAGMetric', sig:'new WCAGMetric()', desc:'WCAG 2.1 contrast evaluator. Methods: evaluate(fg,bg)→ContrastResult, evaluateBatch(fgs,bgs). Static: passes(ratio,level,isLarge).', example:'const wm = new WCAGMetric();\nconst r = wm.evaluate(Color.fromHex("#000"), Color.fromHex("#fff"));\nconsole.log(r.value); // 21.0' },
+  { mod:'core', type:'class', name:'APCAMetric', sig:'new APCAMetric()', desc:'APCA-W3 v0.1.9 contrast evaluator. Lc range: approximately −108 to +106. Methods: evaluate(fg,bg)→ContrastResult, evaluateBatch(fgs,bgs).', standard:'APCA-W3 v0.1.9', example:'const am = new APCAMetric();\nconst lc = am.evaluate(fg, bg).value; // e.g. 75.3' },
+  { mod:'core', type:'class', name:'QualityScorer', sig:'new QualityScorer()', desc:'Multi-dimensional color pair quality score. Methods: score(fg,bg,context)→QualityScore. Score has: overall, compliance, perceptual, appropriateness, passes(), assessment(), confidence(), explanation().', example:'const ctx = RecommendationContext.bodyText();\nconst s = new QualityScorer().score(fg,bg,ctx);\nconsole.log(s.assessment()); // "Good"' },
+  { mod:'core', type:'class', name:'CssRenderConfig', sig:'new CssRenderConfig()', desc:'Configuration for CSS glass rendering. Presets: minimal(), premium(), modal(), subtle(), darkMode(). Chainable: withSpecularIntensity(f), withFresnelIntensity(f), withElevation(u8), withBorderRadius(f), withLightMode(bool), withEffectsEnabled(bool).', example:'const cfg = CssRenderConfig.premium().withElevation(3);\nconst css = renderEnhancedCss(material, cfg);' },
   { mod:'core', type:'fn', name:'wcagContrastRatio', sig:'wcagContrastRatio(fg,bg)', desc:'WCAG contrast ratio = (L_lighter+0.05)/(L_darker+0.05). Range [1, 21].', returns:'number [1,21]', standard:'WCAG 2.1 §1.4.3', example:'const ratio = wcagContrastRatio(Color.fromHex("#000"), Color.fromHex("#fff"));\n// 21.0' },
   { mod:'core', type:'fn', name:'wcagPasses', sig:'wcagPasses(ratio,level,isLarge)', desc:'Check WCAG compliance. level: 0=AA (4.5:1 / 3:1 large), 1=AAA (7:1 / 4.5:1 large).', returns:'boolean', example:'wcagPasses(4.5, 0, false) // true — AA normal text\nwcagPasses(4.5, 1, false) // false — AAA needs 7:1' },
   { mod:'core', type:'fn', name:'relativeLuminanceSrgb', sig:'relativeLuminanceSrgb(color)', desc:'WCAG 2.1 relative luminance Y∈[0,1] per IEC 61966-2-1.', standard:'WCAG 2.1 / IEC 61966-2-1', example:'relativeLuminanceSrgb(Color.fromHex("#3a7bd5")) // 0.149' },
@@ -736,21 +1462,60 @@ const API_ITEMS = [
   { mod:'core', type:'fn', name:'isLargeText', sig:'isLargeText(fontSizePx,fontWeight)', desc:'Check WCAG large-text: 18pt+ regular or 14pt+ bold (700+).', example:'isLargeText(24, 400) // true\nisLargeText(14, 700) // true (bold)' },
   { mod:'core', type:'fn', name:'apcaConstants', sig:'apcaConstants()', desc:'Get APCA-W3 v0.1.9 algorithm constants as JSON: mainTrc, sRco, sGco, sBco, blkThrs, blkClmp, normBg, normTxt, etc.', returns:'object', standard:'APCA-W3 v0.1.9' },
   { mod:'core', type:'fn', name:'srgbToLinear', sig:'srgbToLinear(value)', desc:'sRGB gamma decoding IEC 61966-2-1. Encoded [0,1] → linear [0,1].', example:'srgbToLinear(0.5) // 0.2140' },
-  { mod:'core', type:'class', name:'OKLab.interpolate', sig:'OKLab.interpolate(from,to,t)', desc:'Perceptually uniform linear interpolation in OKLab space.', example:'const mid = OKLab.interpolate(a.toOklab(), b.toOklab(), 0.5).toColor();' },
-  { mod:'core', type:'class', name:'OKLab.deltaE', sig:'lab.deltaE(other)', desc:'Euclidean distance in OKLab — perceptual color difference.', returns:'number', example:'const diff = a.toOklab().deltaE(b.toOklab()); // ~0.1 = barely noticeable' },
-  // INTELLIGENCE
+  { mod:'core', type:'fn', name:'wcagLevel', sig:'wcagLevel(ratio,isLarge)', desc:'Return WCAG compliance level: 0=none, 1=AA, 2=AAA. Considers large-text threshold.', returns:'number 0|1|2', example:'wcagLevel(5.2, false) // 1 (AA)\nwcagLevel(7.5, false) // 2 (AAA)' },
+  { mod:'core', type:'fn', name:'wcagRequirement', sig:'wcagRequirement(level,isLarge)', desc:'Minimum contrast ratio for level (0=AA, 1=AAA) and text size.', returns:'number', example:'wcagRequirement(0, false) // 4.5\nwcagRequirement(0, true)  // 3.0' },
+  { mod:'core', type:'fn', name:'wcagRequirementsMatrix', sig:'wcagRequirementsMatrix()', desc:'Returns flat array [AA-normal, AA-large, AAA-normal, AAA-large] = [4.5, 3.0, 7.0, 4.5].', returns:'Float64Array(4)' },
+  { mod:'core', type:'fn', name:'softClamp', sig:'softClamp(y,threshold,exponent)', desc:'Soft luminance clamping used in APCA calculations. Smooths near-black region.', returns:'number' },
+  { mod:'core', type:'fn', name:'mathLerp', sig:'mathLerp(a,b,t)', desc:'Linear interpolation a + t*(b-a). Used internally in temporal and gradient systems.', returns:'number' },
+  { mod:'core', type:'fn', name:'mathInverseLerp', sig:'mathInverseLerp(a,b,value)', desc:'Inverse lerp: returns t such that lerp(a,b,t)=value. Clamped to [0,1].', returns:'number' },
+  { mod:'core', type:'fn', name:'apcaConstants', sig:'apcaConstants()', desc:'APCA-W3 v0.1.9 algorithm constants: mainTrc, sRco, sGco, sBco, blkThrs, blkClmp, normBg, normTxt, revBg, revTxt, revScale.', returns:'object', standard:'APCA-W3 v0.1.9' },
+  { mod:'core', type:'fn', name:'relativeLuminanceBatch', sig:'relativeLuminanceBatch(rgbData)', desc:'Batch WCAG luminance. Uint8Array [r,g,b,...]. Length must be multiple of 3.', returns:'Float64Array', example:'const lums = relativeLuminanceBatch(new Uint8Array([255,0,0, 0,255,0]));\n// [0.2126, 0.7152]' },
+  { mod:'core', type:'fn', name:'wcagContrastRatioBatch', sig:'wcagContrastRatioBatch(pairs)', desc:'Batch WCAG ratios. Uint8Array [fg_r,fg_g,fg_b,bg_r,bg_g,bg_b,...]. Length must be multiple of 6.', returns:'Float64Array' },
+  // ── INTELLIGENCE ──
   { mod:'intelligence', type:'class', name:'RecommendationEngine', sig:'new RecommendationEngine()', desc:'Color recommendation engine. Optimizes foreground for accessibility + perceptual quality.', example:'const engine = new RecommendationEngine();\nconst rec = engine.recommendForeground("#1a1a2e", "body_text", "wcag_aa");\nconsole.log(rec.hex, rec.score, rec.passes);' },
   { mod:'intelligence', type:'fn', name:'generatePalette', sig:'generatePalette(baseColor,harmonyType,count)', desc:'Generate harmonious palette. harmonyType: "complementary" | "triadic" | "analogous" | "split_complementary" | "tetradic" | "square" | "monochromatic".', returns:'string[]', example:'const triad = generatePalette("#3a7bd5", "triadic", 3);' },
   { mod:'intelligence', type:'fn', name:'generateShades', sig:'generateShades(color,count)', desc:'Generate perceptual shades (light→dark) in OKLCH. Typical count: 5–11.', example:'const shades = generateShades("#3a7bd5", 9);' },
   { mod:'intelligence', type:'fn', name:'simulateCVD', sig:'simulateCVD(hex,cvdType,severity)', desc:'Simulate color vision deficiency. Viénot 1999 row-stochastic matrices in linear sRGB. D65 white preserved exactly.', params:{hex:'string',cvdType:'"protanopia"|"deuteranopia"|"tritanopia"',severity:'number [0,1]'}, note:'Uses Viénot 1999, NOT Brettel 1997 (Brettel uses equal-energy white E — causes white-shift with D65).', returns:'string hex', example:'const sim = simulateCVD("#3a7bd5", "protanopia", 1.0);' },
-  { mod:'intelligence', type:'fn', name:'solveColorConstraints', sig:'solveColorConstraints(constraints,initialColor)', desc:'Penalty-method optimization to find a color satisfying multiple constraints simultaneously.', returns:'{ hex, score, iterations, converged }', example:'const r = solveColorConstraints([\n  { type: "wcag_aa", against: "#fff" },\n  { type: "lightness_range", min: 0.3, max: 0.7 }\n], "#888");' },
-  // MATERIALS
+  { mod:'intelligence', type:'fn', name:'harmonyScore', sig:'harmonyScore(lchFlat)', desc:'Score how harmonious a palette is [0,1]. Input: flat Float64Array [L,C,H,...] for 2+ colors.', returns:'number [0,1]', example:'const score = harmonyScore(generatePalette(0.6, 0.18, 265, 2, 3));\n// e.g. 0.82 = good harmony' },
+  { mod:'intelligence', type:'fn', name:'temperaturePalette', sig:'temperaturePalette(warm)', desc:'Generate 5-color warm or cool temperature palette. warm=true → ambers/reds. warm=false → blues/cyans.', returns:'Float64Array [L,C,H × 5]', example:'const warm = temperaturePalette(true);  // warm palette\nconst cool = temperaturePalette(false); // cool palette' },
+  { mod:'intelligence', type:'fn', name:'generatePaletteFromHex', sig:'generatePaletteFromHex(hex,harmonyType)', desc:'Generate harmony palette from hex string. harmonyType: 0=Complementary, 1=SplitComplementary, 2=Triadic, 3=Tetradic, 4=Analogous, 5=Monochromatic.', returns:'Float64Array [L,C,H × N]' },
+  { mod:'intelligence', type:'fn', name:'cvdDeltaE', sig:'cvdDeltaE(hex,cvdType)', desc:'OKLab ΔE between original and CVD-simulated color. Severity: <20 mild, 20–60 moderate, >60 severe (redesign needed).', returns:'number', note:'Uses Viénot 1999 (NOT Brettel 1997) — D65 white preserved exactly.', example:'const dE = cvdDeltaE("#3a7bd5", "protanopia");\n// dE > 60 → severe impact for protanopes' },
+  { mod:'intelligence', type:'fn', name:'simulateCVDOklch', sig:'simulateCVDOklch(l,c,h,cvdType)', desc:'CVD simulation directly in OKLCH space. Avoids hex conversion overhead for real-time use.', returns:'Float64Array [L,C,H]' },
+  { mod:'intelligence', type:'fn', name:'oklchToHex', sig:'oklchToHex(l,c,h)', desc:'Convert OKLCH triple directly to hex string. Maps to sRGB with gamut clamping.', returns:'string "#rrggbb"' },
+  { mod:'intelligence', type:'fn', name:'hexToOklch', sig:'hexToOklch(hex)', desc:'Convert hex string to OKLCH. Returns empty array on invalid input.', returns:'Float64Array [L,C,H] or []' },
+  { mod:'intelligence', type:'fn', name:'scorePairsBatch', sig:'scorePairsBatch(pairs)', desc:'Batch quality scoring. Input: Float64Array multiples of 8 [fg_r,fg_g,fg_b, bg_r,bg_g,bg_b, usage, target, ...].', returns:'Float64Array | Error' },
+  { mod:'intelligence', type:'fn', name:'recommendForegroundBatch', sig:'recommendForegroundBatch(backgrounds)', desc:'Batch foreground recommendations. Input: Uint8Array multiples of 5 [bg_r,bg_g,bg_b, usage, target, ...].', returns:'Array<Recommendation> | Error' },
+  { mod:'intelligence', type:'class', name:'RecommendationEngine', sig:'new RecommendationEngine()', desc:'Color recommendation engine. Methods: recommendForeground(bg,usage,target)→Recommendation, improveForeground(fg,bg,usage,target)→Recommendation. Optimizes for contrast + perceptual quality simultaneously.', example:'const engine = new RecommendationEngine();\nconst rec = engine.recommendForeground(\n  Color.fromHex("#07070e"), 0, 0  // bg, BodyText, WCAG_AA\n);\nconsole.log(rec.hex(), rec.passes()); // "#c8d4ff" true' },
+  { mod:'intelligence', type:'class', name:'ExplanationGenerator', sig:'new ExplanationGenerator()', desc:'Generate human-readable explanations for color recommendations. Methods: explainContrastImprovement(...), explainQualityImprovement(...). Returns RecommendationExplanation with toMarkdown(), summary(), benefits(), tradeOffs().', example:'const gen = new ExplanationGenerator();\nconst expl = gen.explainContrastImprovement(\n  "#5577cc","#6188d8","#07070e", 4.21, 5.1, 4.5,\n  0.042, 0.008, -1.2\n);\nconsole.log(expl.toMarkdown());' },
+  { mod:'intelligence', type:'class', name:'AdvancedScorer', sig:'new AdvancedScorer()', desc:'Advanced scoring with impact/effort/priority analysis. scoreRecommendation(category, before*, after*, deltas) → AdvancedScore with qualityOverall, impact, effort, confidence, priority, priorityAssessment(), isStrongRecommendation().', example:'const scorer = new AdvancedScorer();\nconst s = scorer.scoreRecommendation(\n  "contrast", 62, 0.7, 0.8, 0.6,\n  78, 0.85, 0.9, 0.7,\n  0.042, 0.008, -1.2\n);\nconsole.log(s.priorityAssessment()); // "High"' },
+  { mod:'intelligence', type:'class', name:'ConvergenceDetector', sig:'new ConvergenceDetector()', desc:'Track optimization convergence over iterations. Presets: fast(), highQuality(), neural(). Methods: update(quality)→status, reset(), bestQuality(), iterationCount(), isProgressing(), stats().', example:'const det = ConvergenceDetector.highQuality();\nfor(let i=0; i<100; i++) {\n  const status = det.update(optimizeStep());\n  if(status.converged) break;\n}' },
+  { mod:'intelligence', type:'fn', name:'solveColorConstraints', sig:'solveColorConstraints(lchFlat,constraintsJson,maxIterations)', desc:'Penalty-method constraint solver. Finds colors satisfying multiple simultaneous constraints. Constraints: MinContrast, MinAPCA, HarmonyAngle, InGamut, LightnessRange, ChromaRange.', returns:'{ colors:[L,C,H,...], converged, iterations, finalPenalty, violations }', note:'Pass initial colors as flat [L,C,H,...] and constraint JSON. See docs for schema.', example:'const r = solveColorConstraints(\n  new Float64Array([0.6, 0.18, 265,  0.1, 0.01, 270]),\n  JSON.stringify([\n    {"colorIdx":0,"kind":"MinContrast","otherIdx":1,"target":4.5},\n    {"colorIdx":0,"kind":"InGamut"}\n  ]), 200\n);\nconsole.log(r.converged, r.iterations);' },
+  // ── MATERIALS ──
   { mod:'materials', type:'fn', name:'cookTorranceBRDF', sig:'cookTorranceBRDF(normal,view,light,roughness,ior,cosTheta)', desc:'Cook-Torrance microfacet BRDF: GGX NDF + Smith G2 + Schlick Fresnel. Energy conserving.', standard:'Cook & Torrance 1982; GGX: Walter 2007; Smith G2: Heitz 2014', example:'const s = cookTorranceBRDF([0,1,0],[0,1,0],[0.7,0.7,0], 0.2, 1.5, 0.8);' },
   { mod:'materials', type:'fn', name:'orenNayarBRDF', sig:'orenNayarBRDF(roughness,normal,view,light)', desc:'Oren-Nayar diffuse BRDF. Generalizes Lambertian with inter-facet masking for rough surfaces.', standard:'Oren & Nayar 1994' },
   { mod:'materials', type:'fn', name:'thinFilmToRgb', sig:'thinFilmToRgb(thickness,ior,incidentAngle,illuminantType)', desc:'Thin-film interference color. Transfer-matrix method, 380–700nm spectrum, CIE 1931 CMFs.', params:{thickness:'nm (200–800 for visible)',ior:'film IOR',incidentAngle:'radians',illuminantType:'0=D65, 1=A, 2=F2'}, returns:'Float64Array [r,g,b]', example:'const [r,g,b] = thinFilmToRgb(350, 1.33, 0.0, 0); // soap bubble' },
   { mod:'materials', type:'fn', name:'gradientToCss', sig:'gradientToCss(env,curvature,shininess,samples,baseL,baseC,baseH)', desc:'Generate CSS linear-gradient string for glass surface rendering.', returns:'string CSS gradient' },
-  { mod:'materials', type:'fn', name:'materialToDominantColor', sig:'materialToDominantColor(material,context)', desc:'Extract dominant perceptual color from material definition given lighting context.', returns:'string hex' },
-  // TEMPORAL
+  { mod:'materials', type:'fn', name:'evaluateDielectricBatch', sig:'evaluateDielectricBatch(iors,roughnesses,cosThetas)', desc:'Batch dielectric BSDF. All arrays same length N. Returns flat [R,T,A × N]. Energy conserving: R+T+A=1.', returns:'Float64Array [R,T,A × N]', example:'const iors = new Float64Array([1.33, 1.52, 2.42]);\nconst roughnesses = new Float64Array([0.1, 0.2, 0.05]);\nconst thetas = new Float64Array([0.9, 0.8, 0.95]);\nconst r = evaluateDielectricBatch(iors, roughnesses, thetas);\n// [R0,T0,A0, R1,T1,A1, R2,T2,A2]' },
+  { mod:'materials', type:'fn', name:'evaluateDielectricBSDF', sig:'evaluateDielectricBSDF(ior,roughness,cosTheta)', desc:'Single dielectric BSDF evaluation. Returns [reflectance, transmittance, absorption]. R+T+A=1 guaranteed.', returns:'Float64Array [R,T,A]' },
+  { mod:'materials', type:'fn', name:'evaluateMicrofacetBSDF', sig:'evaluateMicrofacetBSDF(roughness,metallic,f0,cosTheta)', desc:'Unified microfacet model combining specular (Cook-Torrance) and diffuse (Oren-Nayar). metallic [0,1] interpolates between conductor and dielectric response.', returns:'Float64Array [R,T,A]' },
+  { mod:'materials', type:'fn', name:'ggxNDF', sig:'ggxNDF(nDotH,roughness)', desc:'GGX Normal Distribution Function (Walter 2007). Returns probability density for microfacet orientation.', returns:'number', standard:'Walter et al. 2007' },
+  { mod:'materials', type:'fn', name:'deltaE76', sig:'deltaE76(l1,a1,b1,l2,a2,b2)', desc:'CIE ΔE*76 color difference in CIELAB space. Simple Euclidean distance. Use deltaE2000 for perceptual accuracy.', returns:'number' },
+  { mod:'materials', type:'fn', name:'deltaE2000', sig:'deltaE2000(l1,a1,b1,l2,a2,b2)', desc:'CIE ΔE 2000 — most perceptually accurate color difference metric. Accounts for lightness/chroma/hue weighting.', returns:'number', standard:'CIE 142:2001' },
+  { mod:'materials', type:'fn', name:'deltaE2000Batch', sig:'deltaE2000Batch(labPairs)', desc:'Batch CIE ΔE 2000. Input: Float64Array multiples of 6 [L1,a1,b1,L2,a2,b2,...].', returns:'Float64Array | Error' },
+  { mod:'materials', type:'fn', name:'rgbToLab', sig:'rgbToLab(r,g,b)', desc:'Convert sRGB [0,1] to CIELAB (D65 illuminant). L∈[0,100], a∈[−128,127], b∈[−128,127].', returns:'Float64Array [L,a,b]' },
+  { mod:'materials', type:'class', name:'DielectricBSDF', sig:'new DielectricBSDF(ior,roughness)', desc:'Physically-based dielectric material (glass, water, plastic). Presets: glass() ior=1.52, water() ior=1.33, diamond() ior=2.42, frostedGlass() roughness=0.5. Methods: evaluate(wi, wo)→{reflectance,transmittance,absorption,fresnel}, validateEnergy().', example:'const glass = DielectricBSDF.glass();\nconst r = glass.evaluate(0,0,1, 0,0,1);\n// { reflectance:0.04, transmittance:0.96, absorption:0 }' },
+  { mod:'materials', type:'class', name:'ConductorBSDF', sig:'new ConductorBSDF(n,k,roughness)', desc:'Physically-based conductor (metals). Presets with real IOR: gold() n=0.17 k=3.5, silver() n=0.05 k=4.2, copper() n=0.25 k=2.8, aluminum(), chrome(). Methods: evaluate(wi,wo), validateEnergy().', example:'const gold = ConductorBSDF.gold();\nconst r = gold.evaluate(0,0,1, 0,0,1);\n// { reflectance:~0.98, transmittance:0, absorption:~0.02 }' },
+  { mod:'materials', type:'class', name:'ThinFilmBSDF', sig:'new ThinFilmBSDF(substrateIor,filmIor,filmThickness)', desc:'Thin-film interference BSDF. Transfer matrix method over 380–700nm. Presets: soapBubble(thickness), oilOnWater(thickness), arCoating(). Methods: evaluate(wi,wo).', example:'const soap = ThinFilmBSDF.soapBubble(350);\n// iridescent at 350nm thickness' },
+  { mod:'materials', type:'class', name:'LayeredBSDF', sig:'new LayeredBSDF()', desc:'Composable layered material. Chainable: pushDielectric(ior,roughness), pushConductor(n,k,roughness), pushThinFilm(subIor,filmIor,thickness), pushLambertian(albedo). Methods: layerCount(), evaluate(wi,wo), validateEnergy().', example:'const mat = new LayeredBSDF()\n  .pushThinFilm(1.0, 1.33, 400)\n  .pushDielectric(1.5, 0.1);\nconsole.log(mat.layerCount()); // 2' },
+  { mod:'materials', type:'class', name:'PBRMaterial', sig:'PBRMaterial.fromPreset(preset)', desc:'High-level PBR material API. Presets: "glass","frostedGlass","water","diamond","gold","silver","copper","soapBubble","oilSlick". Methods: evaluate(), evaluateAtAngle(cosTheta). Static: builder()→PBRMaterialBuilder.', example:'const mat = PBRMaterial.fromPreset("gold");\nconst r = mat.evaluateAtAngle(0.8);\n// { reflectance, transmittance, absorption, roughness }' },
+  { mod:'materials', type:'class', name:'LiquidGlass', sig:'new LiquidGlass(variant)', desc:'High-level glass surface. Variants: Regular, Clear. Methods: effectiveColor(bg)→Color, recommendTextColor(bg,preferWhite)→Color, getLayers(bg)→{highlight,base,shadow}, adaptForDarkMode(), adaptForLightMode().', example:'const glass = new LiquidGlass(GlassVariant.Regular);\nconst textColor = glass.recommendTextColor(bg, false);\nconst css = renderEnhancedCss(glass.evaluate(), CssRenderConfig.premium());' },
+  { mod:'materials', type:'fn', name:'calculateAmbientShadow', sig:'calculateAmbientShadow(params,bgL,bgC,bgH,elevation)', desc:'Generate CSS box-shadow string for ambient shadow at elevation. Shadow adapts to background OKLCH color.', returns:'string CSS box-shadow', example:'const shadow = calculateAmbientShadow(\n  AmbientShadowParams.standard(), 0.1, 0.02, 270, 2.0\n);\n// "0 4px 12px rgba(...)"' },
+  { mod:'materials', type:'fn', name:'calculateMultiScaleAmbient', sig:'calculateMultiScaleAmbient(params,bgL,bgC,bgH,elevation)', desc:'Multi-scale ambient shadow: combines close, mid, and far shadow layers. Returns comma-separated CSS box-shadow for more natural depth.', returns:'string CSS multi-shadow' },
+  { mod:'materials', type:'fn', name:'renderEnhancedCss', sig:'renderEnhancedCss(material,context)', desc:'Generate complete CSS glass effect: background, backdrop-filter, border, box-shadow. Context: CssRenderConfig.', returns:'string CSS' },
+  { mod:'materials', type:'fn', name:'getEnhancedGlassPresets', sig:'getEnhancedGlassPresets()', desc:'Get all built-in glass preset configurations as JSON array. Each preset includes name, ior, roughness, properties, CSS snippet.', returns:'object[]' },
+  { mod:'materials', type:'fn', name:'getPresetsByQuality', sig:'getPresetsByQuality(tier)', desc:'Get presets filtered by quality tier: "fast" | "standard" | "high" | "ultraHigh" | "experimental" | "reference".', returns:'object[]' },
+  { mod:'materials', type:'fn', name:'materialToDominantColor', sig:'materialToDominantColor(ior,roughness,cosTheta)', desc:'Extract dominant perceptual color from material physics. Returns [L,C,H, reflectance, colorTemp].', returns:'Float64Array [L,C,H,R,CCT]' },
+  // ── TEMPORAL ──
   { mod:'temporal', type:'class', name:'TemporalMaterial', sig:'new TemporalMaterial(roughnessBase,roughnessTarget,roughnessTau,iorBase)', desc:'Time-evolving dielectric. Roughness evolves exponentially. Presets: .dryingPaint(), .weatheringGlass(). All BSDF evaluations guarantee R+T+A=1.0.', example:'const paint = TemporalMaterial.dryingPaint();\nconst [r,t,a] = paint.evalAtTime(30, 0.8); // halfway through drying' },
   { mod:'temporal', type:'class', name:'TemporalThinFilmMaterial', sig:'new TemporalThinFilmMaterial(thicknessBase,amplitude,frequencyHz,filmIor,substrateIor)', desc:'Oscillating thin-film — iridescent color shifts over time. Presets: .soapBubble(), .oilSlick().', example:'const bubble = TemporalThinFilmMaterial.soapBubble();\nconst tl = bubble.sampleTimeline(3.0, 180, 0.8); // 3s @ 60fps' },
   { mod:'temporal', type:'class', name:'TemporalConductorMaterial', sig:'new TemporalConductorMaterial(nBase,kBase,roughness,nTempCoeff,kTempCoeff)', desc:'Temperature-dependent conductor. Presets: .heatedGold(), .heatedCopper().', example:'const gold = TemporalConductorMaterial.heatedGold();\nconst [r,t,a] = gold.evalAtTemperature(800, 0.8); // glowing' },
@@ -759,15 +1524,28 @@ const API_ITEMS = [
   { mod:'procedural', type:'fn', name:'variationField', sig:'variationField(baseIor,variation,cols,rows,seed)', desc:'2D IOR variation field for frosted-glass distortion maps.', returns:'Float64Array [baseIor±variation]', example:'const iorMap = variationField(1.5, 0.05, 256, 256, 42);' },
   // SIREN
   { mod:'siren', type:'fn', name:'computeSirenCorrection', sig:'computeSirenCorrection(bgL,bgC,bgH,fgL,fgC,fgH,apcaLc,wcagRatio,quality)', desc:'SIREN forward pass: compute perceptual correction deltas for OKLCH pair. Inputs normalized internally.', returns:'SirenCorrection { deltaL∈[−0.15,0.15], deltaC∈[−0.05,0.05], deltaH∈[−10°,10°] }', example:'const corr = computeSirenCorrection(0.15,0.1,250, 0.9,0.02,250, 75,8.5,70);\nconst [L,C,H] = applySirenCorrection(0.9,0.02,250, corr.deltaL,corr.deltaC,corr.deltaH);' },
-  { mod:'siren', type:'fn', name:'computeSirenCorrectionBatch', sig:'computeSirenCorrectionBatch(inputs)', desc:'Batch SIREN inference. Input flat Float64Array (multiples of 9). Returns flat [dL,dC,dH,...].', example:'const batch = computeSirenCorrectionBatch(new Float64Array([...inputs]));' },
-  { mod:'siren', type:'fn', name:'sirenMetadata', sig:'sirenMetadata()', desc:'Get network metadata: architecture, totalParams, omega0, seed, activations, clampRanges.', returns:'object' },
-  // EVENTS
+  { mod:'siren', type:'fn', name:'applySirenCorrection', sig:'applySirenCorrection(l,c,h,deltaL,deltaC,deltaH)', desc:'Apply SIREN correction deltas to OKLCH triple. Clamps result to valid ranges.', returns:'Float64Array [L,C,H]', example:'const [L,C,H] = applySirenCorrection(\n  0.537, 0.165, 265,\n  corr.deltaL, corr.deltaC, corr.deltaH\n);\n// L=0.579  C=0.173  H=263.8' },
+  { mod:'siren', type:'fn', name:'computeSirenCorrectionBatch', sig:'computeSirenCorrectionBatch(inputs)', desc:'Batch SIREN inference. Input Float64Array multiples of 9 [bgL,bgC,bgH, fgL,fgC,fgH, apcaLc,wcagRatio,quality,...]. Returns flat [dL,dC,dH,...].', returns:'Float64Array', example:'const batch = computeSirenCorrectionBatch(new Float64Array([\n  0.04,0.02,270, 0.537,0.165,265, 58.3,4.21,62.0,\n  ...more\n]));' },
+  { mod:'siren', type:'fn', name:'sirenMetadata', sig:'sirenMetadata()', desc:'Network metadata: architecture [9,16,16,3], totalParams=483, omega0=30, seed=421337, activations, inputNormalization, clampRanges.', returns:'object' },
+  { mod:'siren', type:'fn', name:'sirenWeights', sig:'sirenWeights()', desc:'Export all network weights as JSON: W1(9×16), B1(16), W2(16×16), B2(16), W3(16×3), B3(3). Useful for debugging or custom inference.', returns:'object { W1, B1, W2, B2, W3, B3 }' },
+  // ── EVENTS ──
   { mod:'events', type:'class', name:'MomotoEventBus', sig:'new MomotoEventBus()', desc:'Pub/sub event bus. Supports filtered subscriptions, buffer, max-age. Categories: progress, metrics, recommendation, validation, error, system, chart, heartbeat, custom.', example:'const bus = new MomotoEventBus();\nbus.subscribe(e => updateUI(e.category, e.payload));\nbus.emitProgress("engine", 50, "Analyzing…");' },
-  { mod:'events', type:'class', name:'MomotoEventStream', sig:'MomotoEventStream.fromBus(bus)', desc:'SSE-compatible streaming consumer. Poll-based: call poll() each frame. Supports pause/resume/close.', example:'const stream = MomotoEventStream.fromBus(bus);\n// In render loop:\nstream.poll().forEach(e => handleEvent(e));' },
-  // AGENT
+  { mod:'events', type:'class', name:'MomotoEventBus', sig:'new MomotoEventBus()', desc:'Pub/sub event bus. Methods: subscribe(cb)→id, subscribeFiltered(categories,cb)→id, emitProgress(src,pct,msg), emitMetric(src,name,val), emitError(src,desc), emitCustom(src,json), emitJson(json). Buffer: bufferedEvents(), clearBuffer(). Static: withConfig(bufferSize, maxAgeMs).', example:'const bus = new MomotoEventBus();\nbus.subscribe(e => console.log(e.category, e.payload));\nbus.emitProgress("engine", 50, "Computing…");\n// categories: 0=Progress,1=Metrics,2=Recommendation,3=Validation,4=Error,5=System' },
+  { mod:'events', type:'class', name:'MomotoEventStream', sig:'MomotoEventStream.fromBus(bus)', desc:'SSE-compatible streaming consumer. Statics: fromBus(bus), fromBusBatched(bus,batchSize,timeoutMs), standalone(). Methods: poll()→{events,sequence,count}|null, flush(), pause(), resume(), close(), stats(). State getter: "Active"|"Paused"|"Closed".', example:'const stream = MomotoEventStream.fromBus(bus);\n// In animation loop:\nrequestAnimationFrame(function tick() {\n  const batch = stream.poll();\n  if(batch) batch.events.forEach(handleEvent);\n  requestAnimationFrame(tick);\n});' },
+  // ── AGENT ──
   { mod:'agent', type:'fn', name:'agentValidatePair', sig:'agentValidatePair(fg,bg,standard,level)', desc:'Validate fg/bg contrast. standard: "wcag"|"apca", level: "aa"|"aaa".', returns:'JSON: { passes, ratio, level }', example:'const r = JSON.parse(agentValidatePair("#000","#fff","wcag","aa"));\n// { passes: true, ratio: 21.0, level: "aaa" }' },
   { mod:'agent', type:'fn', name:'agentGetMetrics', sig:'agentGetMetrics(color)', desc:'Comprehensive metrics: hex, oklch, hct, luminance.', returns:'JSON string', example:'const m = JSON.parse(agentGetMetrics("#3a7bd5"));\n// { hex, oklch, hct, luminance: 0.149 }' },
-  { mod:'agent', type:'class', name:'ContractBuilder', sig:'new ContractBuilder()', desc:'Fluent constraint builder. Methods: .minContrastWcagAa(against), .minContrastWcagAaa, .inSrgb, .inP3, .lightnessRange(min,max), .chromaRange(min,max).', example:'const c = new ContractBuilder().minContrastWcagAa("#fff").lightnessRange(0.2,0.7);\nagentValidate("#3a7bd5", JSON.stringify(c));' },
+  { mod:'agent', type:'fn', name:'agentValidate', sig:'agentValidate(colorHex,contractJson)', desc:'Validate a color against a JSON contract (ContractBuilder output). Returns JSON: {passes, violations[], metrics}.', returns:'JSON string', example:'const contract = new ContractBuilder().minContrastWcagAa("#07070e").inSrgb().build();\nconst r = JSON.parse(agentValidate("#5577cc", contract));\nconsole.log(r.passes, r.violations);' },
+  { mod:'agent', type:'fn', name:'agentValidatePairsBatch', sig:'agentValidatePairsBatch(pairsJson)', desc:'Batch validate multiple fg/bg pairs. Input: JSON array [{fg,bg,standard,level},...].', returns:'JSON string', example:'const pairs = [{fg:"#000",bg:"#fff",standard:0,level:0}, ...];\nconst results = JSON.parse(agentValidatePairsBatch(JSON.stringify(pairs)));' },
+  { mod:'agent', type:'fn', name:'agentGetMetrics', sig:'agentGetMetrics(colorHex)', desc:'Complete color metrics: hex, oklch, hct, luminance (WCAG + APCA), gamut, temperature.', returns:'JSON string', example:'const m = JSON.parse(agentGetMetrics("#5577cc"));\n// { hex, oklch:{l,c,h}, hct:{hue,chroma,tone}, luminance:{wcag,apca} }' },
+  { mod:'agent', type:'fn', name:'agentRecommendForeground', sig:'agentRecommendForeground(bgHex,context,target)', desc:'Recommend best foreground for a background. context: 0=BodyText…5=Disabled, target: 0=WCAG_AA…3=Hybrid.', returns:'JSON string', example:'const r = JSON.parse(agentRecommendForeground("#07070e", 0, 0));\nconsole.log(r.hex, r.wcagRatio, r.passes);' },
+  { mod:'agent', type:'fn', name:'agentImproveForeground', sig:'agentImproveForeground(fgHex,bgHex,context,target)', desc:'Improve an existing foreground to meet accessibility targets. Returns adjusted color with explanation.', returns:'JSON string', example:'const r = JSON.parse(agentImproveForeground("#5577cc","#07070e",0,0));\nconsole.log(r.original, r.improved, r.ratioImprovement);' },
+  { mod:'agent', type:'fn', name:'agentScorePair', sig:'agentScorePair(fgHex,bgHex,context,target)', desc:'Score a color pair on overall quality, compliance, perceptual quality, and appropriateness.', returns:'JSON string', example:'const s = JSON.parse(agentScorePair("#6188d8","#07070e",0,0));\nconsole.log(s.overall, s.assessment); // 0.82 "Good"' },
+  { mod:'agent', type:'fn', name:'createColorTransition', sig:'createColorTransition(fromHex,toHex,durationMs,easing,frameCount)', desc:'Generate color animation keyframes. Easing: "easeIn"|"easeOut"|"easeInOut"|"linear"|"step". Returns array of {t, hex, oklch}.', returns:'JSON string', example:'const frames = JSON.parse(createColorTransition(\n  "#5577cc","#ff6b6b", 500, "easeInOut", 60\n));\n// 60 keyframes for a smooth 500ms transition' },
+  { mod:'agent', type:'fn', name:'generateExperience', sig:'generateExperience(preset,primaryHex,backgroundHex)', desc:'Generate complete visual experience config. Presets: "dashboard"|"landing"|"app". Returns CSS tokens, material params, color roles.', returns:'JSON string' },
+  { mod:'agent', type:'fn', name:'getMomotoIdentity', sig:'getMomotoIdentity()', desc:'Engine identity: version 7.0.0, buildId, specVersion, phaseCoverage, major/minor/patch.', returns:'JSON string' },
+  { mod:'agent', type:'fn', name:'selfCertify', sig:'selfCertify()', desc:'Run engine self-certification: validates WCAG golden vectors, APCA constants, SIREN weights checksum, HCT roundtrip accuracy.', returns:'JSON string { passed, tests[], timestamp }' },
+  { mod:'agent', type:'class', name:'ContractBuilder', sig:'new ContractBuilder()', desc:'Fluent color contract builder. Chainable: minContrastWcagAA(against), minContrastWcagAAA(against), inSrgb(), inP3(), lightnessRange(min,max), chromaRange(min,max), hueRange(min,max). Methods: build()→JSON, buildAndValidate(colorHex).', example:'const contract = new ContractBuilder()\n  .minContrastWcagAA("#07070e")\n  .lightnessRange(0.4, 0.9)\n  .inSrgb()\n  .build(); // JSON string\nagentValidate("#6188d8", contract);' },
 ];
 
 const QS_EXAMPLES = [
@@ -952,6 +1730,24 @@ function renderAPI() {
         </div>
       </div>`;
   }).join('');
+}
+
+// ── PIPELINE ───────────────────────────────────────────────────────────────
+
+function toggleStep(id) {
+  const el = document.getElementById(id);
+  const wasActive = el.classList.contains('active');
+  document.querySelectorAll('.pipeline-step').forEach(s => s.classList.remove('active'));
+  if (!wasActive) el.classList.add('active');
+}
+
+// ── CODE VIEWER ────────────────────────────────────────────────────────────
+
+function showCodePanel(panelId, btn) {
+  document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(panelId).classList.add('active');
+  btn.classList.add('active');
 }
 
 // ── INTERACTIONS ───────────────────────────────────────────────────────────
