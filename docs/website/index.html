@@ -668,12 +668,12 @@
     <a href="https://github.com/zuclubit/momoto-ui" class="btn btn-ghost" target="_blank">★ GitHub</a>
   </div>
   <div class="hero-stats">
-    <div class="stat"><div class="stat-n">10</div><div class="stat-l">WASM Modules</div></div>
-    <div class="stat"><div class="stat-n">400+</div><div class="stat-l">Public Methods</div></div>
-    <div class="stat"><div class="stat-n">80+</div><div class="stat-l">WASM Classes</div></div>
+    <div class="stat"><div class="stat-n">9</div><div class="stat-l">WASM Modules</div></div>
+    <div class="stat"><div class="stat-n">230+</div><div class="stat-l">API Items</div></div>
+    <div class="stat"><div class="stat-n">100+</div><div class="stat-l">WASM Classes</div></div>
     <div class="stat"><div class="stat-n">483</div><div class="stat-l">SIREN Params</div></div>
-    <div class="stat"><div class="stat-n">7</div><div class="stat-l">Harmony Types</div></div>
-    <div class="stat"><div class="stat-n">3</div><div class="stat-l">CVD Types</div></div>
+    <div class="stat"><div class="stat-n">12</div><div class="stat-l">Metal Presets</div></div>
+    <div class="stat"><div class="stat-n">4</div><div class="stat-l">Sprints Complete</div></div>
   </div>
 </div>
 
@@ -1425,8 +1425,8 @@ const MODULES = [
   { key:'hct',          icon:'⬡', name:'HCT Color Space',       desc:'Google Material Design 3 perceptual model. CAM16 hue + CIELAB tone. Guaranteed gamut-safe tonal palettes via binary search.', fns:11 },
   { key:'core',         icon:'◈', name:'Core & Luminance',       desc:'Color, OKLCH, OKLab, LinearRgba. WCAG 2.1 + APCA-W3 v0.1.9 metrics, gamma, batch luminance, math utilities.', fns:24 },
   { key:'intelligence', icon:'◉', name:'Intelligence',           desc:'AI recommendations, 7 harmony types, CVD simulation (Viénot 1999), constraint solver, quality scoring.', fns:22 },
-  { key:'materials',    icon:'◬', name:'Materials & Physics',    desc:'Cook-Torrance GGX, Oren-Nayar, thin-film transfer matrix, DielectricBSDF, ConductorBSDF, LayeredBSDF, PBR presets, CSS rendering.', fns:35 },
-  { key:'temporal',     icon:'◷', name:'Temporal Materials',     desc:'Time-evolving physics: drying paint, soap bubbles, heated metals. TemporalMaterial, TemporalThinFilm, TemporalConductor. Energy-conserving.', fns:14 },
+  { key:'materials',    icon:'◬', name:'Materials & Physics',    desc:'Cook-Torrance GGX, Oren-Nayar, Airy/transfer-matrix thin film, Cauchy/Sellmeier dispersion, complex IOR (12 metal presets), Mie scattering (9 particle presets), multilayer TMM, refraction, shadows, interpolation. Sprints 1–4 complete.', fns:120 },
+  { key:'temporal',     icon:'◷', name:'Temporal Materials',     desc:'Time-evolving physics: drying paint, soap bubbles, heated metals. TemporalMaterial, TemporalThinFilmMaterial, TemporalConductorMaterial + lower-level TemporalDielectric, TemporalThinFilm, TemporalConductor. All R+T+A=1.', fns:18 },
   { key:'procedural',   icon:'⬦', name:'Procedural Noise',       desc:'Perlin fBm (ProceduralNoise). Same seed → same field every frame. IOR variation and roughness fields for material micro-textures.', fns:8 },
   { key:'siren',        icon:'◎', name:'SIREN Neural Network',   desc:'9→16→16→3 network (483 params, ω₀=30, seed=421337). Deterministic perceptual correction. Forward pass + batch inference + weight export.', fns:9 },
   { key:'events',       icon:'◌', name:'Events & Streaming',     desc:'MomotoEventBus pub/sub + MomotoEventStream SSE-compatible consumer. 8 built-in categories, buffer, filtered subscriptions.', fns:22 },
@@ -1515,10 +1515,73 @@ const API_ITEMS = [
   { mod:'materials', type:'fn', name:'getEnhancedGlassPresets', sig:'getEnhancedGlassPresets()', desc:'Get all built-in glass preset configurations as JSON array. Each preset includes name, ior, roughness, properties, CSS snippet.', returns:'object[]' },
   { mod:'materials', type:'fn', name:'getPresetsByQuality', sig:'getPresetsByQuality(tier)', desc:'Get presets filtered by quality tier: "fast" | "standard" | "high" | "ultraHigh" | "experimental" | "reference".', returns:'object[]' },
   { mod:'materials', type:'fn', name:'materialToDominantColor', sig:'materialToDominantColor(ior,roughness,cosTheta)', desc:'Extract dominant perceptual color from material physics. Returns [L,C,H, reflectance, colorTemp].', returns:'Float64Array [L,C,H,R,CCT]' },
+  // ── MATERIALS: Sprint 1 — Thin-Film Optics ──
+  { mod:'materials', type:'class', name:'ThinFilm', sig:'new ThinFilm(nFilm,thicknessNm)', desc:'Thin-film interference via Airy formula (380–700nm). 12 presets: soapBubbleThin() ~100nm, soapBubbleMedium() ~200nm, soapBubbleThick() ~400nm, oilThin() ~150nm, oilMedium() ~300nm, oilThick() ~500nm, arCoating() MgF₂ λ/4@550nm, oxideThin/Medium/Thick, beetleShell(), nacre(). Methods: reflectanceAt(λNm,angleDeg), reflectanceRgb(angleDeg), colorHex(angleDeg), iridescenceMap(steps).', example:'const soap = ThinFilm.soapBubbleMedium();\nconst hex = soap.colorHex(0);          // e.g. "#e0b0ff"\nconst rgb = soap.reflectanceRgb(30.0); // [r,g,b] at 30°' },
+
+  // ── MATERIALS: Sprint 2 — Chromatic Dispersion & Metal IOR ──
+  { mod:'materials', type:'class', name:'CauchyDispersion', sig:'new CauchyDispersion(a,b,c)', desc:'Cauchy chromatic dispersion n(λ)=A+B/λ²+C/λ⁴. 7 presets: crownGlass() BK7 Abbe≈64, flintGlass() SF11 Abbe≈25, fusedSilica() Abbe≈68, water() Abbe≈56, diamond() Abbe≈44, polycarbonate() Abbe≈30, pmma() Abbe≈57. Static factories: fromIor(ior), constant(ior). Methods: nAt(λNm), abbeNumber(), dispersionRange(startNm,endNm).', example:'const bk7 = CauchyDispersion.crownGlass();\nconsole.log(bk7.nAt(550));     // 1.5168\nconsole.log(bk7.abbeNumber()); // ~64' },
+  { mod:'materials', type:'class', name:'SellmeierDispersion', sig:'new SellmeierDispersion(coefficients)', desc:'Sellmeier dispersion n²(λ)−1=Σ Bᵢλ²/(λ²−Cᵢ). Higher accuracy than Cauchy for UV/IR. 5 presets: bk7(), fk51a(), fusedSilica(), calcite(), sapphire(). Methods: nAt(λNm), groupIndex(λNm), groupVelocityDispersion(λNm).', example:'const glass = SellmeierDispersion.bk7();\nconst n = glass.nAt(587.6); // 1.5168 (sodium D line)' },
+  { mod:'materials', type:'class', name:'ComplexIOR', sig:'new ComplexIOR(n,k)', desc:'Complex refractive index n̂=n+ik for metals. 12 presets with real-data IOR: gold() n=0.17 k=3.5, silver() n=0.05 k=4.2, copper() n=0.25 k=2.8, iron(), nickel(), platinum(), titanium(), chromium(), tungsten(), aluminum(), cobalt(), zinc(). Methods: reflectanceAt(cosTheta), absorptionAt(λNm), skinDepthNm().', example:'const gold = ComplexIOR.gold();\nconst R = gold.reflectanceAt(1.0); // ~0.98\nconst δ = gold.skinDepthNm(532);   // ~11nm' },
+  { mod:'materials', type:'class', name:'SpectralComplexIOR', sig:'new SpectralComplexIOR(wavelengths,ns,ks)', desc:'Wavelength-dependent complex IOR for spectral rendering. Presets: gold(), silver(), copper(). Methods: nAt(λNm), kAt(λNm), reflectanceRgb(cosTheta), colorHex(cosTheta).', example:'const gold = SpectralComplexIOR.gold();\nconst rgb = gold.reflectanceRgb(1.0); // characteristic golden hue\nconst hex = gold.colorHex(0.8);       // "#c8a050"' },
+  { mod:'materials', type:'class', name:'DrudeParams', sig:'new DrudeParams(plasmaFreq,dampingFreq)', desc:'Drude free-electron metal model for temperature-dependent IOR. 7 presets: gold(), silver(), copper(), aluminum(), tungsten(), nickel(), platinum(). Methods: iorAt(λNm)→{n,k}, temperatureDependentIor(λNm,tempK)→{n,k}.', example:'const al = DrudeParams.aluminum();\nconst {n,k} = al.iorAt(550);                  // n≈0.15, k≈3.5\nconst hotAl = al.temperatureDependentIor(550, 900); // high-T IOR' },
+
+  // ── MATERIALS: Sprint 3 — Mie Scattering ──
+  { mod:'materials', type:'class', name:'MieParams', sig:'new MieParams(radiusUm,nParticle,nMedium)', desc:'Mie scattering for spherical particles via size parameter x=2πr/λ. 9 presets: fineDust() Rayleigh x~0.3, coarseDust(), fogSmall() 2µm, fogLarge() 10µm, cloud() 8µm, mist() 3µm, smoke() 0.3µm soot, milkGlobule() 2.5µm, pollen() 25µm geometric. Getters: radiusUm, nParticle, nMedium. Regimes: Rayleigh x<0.3 (blue sky), Mie x~1–10 (white clouds), Geometric x>30 (pollen).', example:'const fog = MieParams.fogSmall();\nconst scat = fog.scatteringCross(550); // scattering cross-section\nconst g = fog.asymmetryFactor();       // Henyey-Greenstein g' },
+  { mod:'materials', type:'class', name:'DynamicMieParams', sig:'DynamicMieParams.evaporatingDroplet()', desc:'Time-varying Mie params for animated particle effects. 8 presets: evaporatingDroplet(), growingCrystal(), dissolvingSmoke(), coalescingFog(), swellingPollen(), shrinkingDust(), pulsatingBubble(), oscillatingAerosol(). Methods: paramsAtTime(t)→MieParams, scatteringColorAtTime(t,λNm)→[r,g,b].', example:'const droplet = DynamicMieParams.evaporatingDroplet();\nconst [r,g,b] = droplet.scatteringColorAtTime(1.5, 550);\n// Color shifts from Mie→Rayleigh as droplet shrinks' },
+
+  // ── MATERIALS: Sprint 4 — Multilayer Transfer Matrix ──
+  { mod:'materials', type:'class', name:'FilmLayer', sig:'FilmLayer.dielectric(n,thicknessNm)', desc:'Single layer for TransferMatrixFilm stack. Constructors: dielectric(n,thicknessNm) for lossless layers; absorbing(n,k,thicknessNm) for metallic layers. Getters: n (real IOR), k (extinction), thicknessNm.', example:'const mgf2 = FilmLayer.dielectric(1.38, 99.6);    // λ/4 MgF₂ at 550nm\nconst al   = FilmLayer.absorbing(0.15, 3.5, 50.0); // thin absorbing Al' },
+  { mod:'materials', type:'class', name:'TransferMatrixFilm', sig:'new TransferMatrixFilm(nIncident,nSubstrate)', desc:'Transfer-matrix method for multilayer stacks: M=D₀⁻¹·Π(Dᵢ·Pᵢ·Dᵢ⁻¹)·Dₛ. Methods: addLayer(n,thicknessNm), addAbsorbingLayer(n,k,thicknessNm), reflectance(λNm,angleDeg,pol)→[0,1], reflectanceRgb(angleDeg,pol)→[r,g,b], colorHex(angleDeg,pol), transmittanceSpectrum(pol). Static: braggMirror(nH,nL,λNm,pairs) — quarter-wave mirror.', note:'Color emerges from STRUCTURE, not pigments. Polarization: 0=S, 1=P, 2=Average.', example:'// 5-pair Bragg mirror — >99% reflectance at design wavelength\nconst mirror = TransferMatrixFilm.braggMirror(2.35, 1.46, 550.0, 5);\nconst R = mirror.reflectance(550.0, 0.0, 2); // pol=Average\nconsole.log(`R=${(R*100).toFixed(1)}%`); // 99.x%\nconst rgb = mirror.reflectanceRgb(0.0, 2);  // structural green' },
+
+  // ── MATERIALS: Glass Surface ──
+  { mod:'materials', type:'class', name:'GlassMaterial', sig:'new GlassMaterial(ior,roughness,tint,opacity)', desc:'Apple HIG-inspired glass surface. Presets: window() clear high-IOR, frosted() scattered, tinted(r,g,b,opacity). Methods: effectiveColor(bgL,bgC,bgH), luminanceCorrected(bgLum), withRoughness(r), withTint(r,g,b,a), withIor(ior), css(bgHex)→CSS string, cssDark(bgHex)→dark mode CSS.', example:'const win = GlassMaterial.window();\nconst css = win.css("#1a1a2e");\n// backdrop-filter: blur(20px); background: rgba(255,255,255,0.08); ...' },
+  { mod:'materials', type:'class', name:'GlassMaterialBuilder', sig:'new GlassMaterialBuilder()', desc:'Fluent builder for custom GlassMaterial. Chainable: ior(n), roughness(r), tintRgba(r,g,b,a), opacity(a), frosted(), window(), tinted(hex). Terminal: build()→GlassMaterial.', example:'const mat = new GlassMaterialBuilder()\n  .ior(1.45)\n  .roughness(0.3)\n  .tintRgba(1.0, 1.0, 1.0, 0.15)\n  .build();\nconsole.log(mat.css("#07070e"));' },
+
+  // ── MATERIALS: Refraction System ──
+  { mod:'materials', type:'class', name:'RefractionParams', sig:'new RefractionParams(index,distortionStrength,chromaticAberration,edgeLensing)', desc:'Refraction config for glass distortion effects. Presets: clear() minimal distortion, frosted() strong blur/distortion, thick() high index, subtle() light effect, highIndex() n>2.0. Property getters: index, distortionStrength, chromaticAberration, edgeLensing.', example:'const frosted = RefractionParams.frosted();\nconsole.log(frosted.distortionStrength); // 0.8\nconsole.log(frosted.chromaticAberration); // 0.12' },
+  { mod:'materials', type:'fn', name:'calculateRefraction', sig:'calculateRefraction(params,x,y,incidentAngle)', desc:'Compute refraction offset at point (x,y) with incident angle. Returns [offset_x, offset_y, hue_shift, brightness_factor]. Use for per-pixel distortion.', returns:'Float64Array [offsetX,offsetY,hueShift,brightnessFactor]', example:'const par = RefractionParams.frosted();\nconst [ox,oy,hs,bf] = calculateRefraction(par, 0.5, 0.3, 0.1);\n// ox,oy: texel offset; hs: chromatic shift; bf: brightness scale' },
+  { mod:'materials', type:'fn', name:'applyRefractionToColor', sig:'applyRefractionToColor(params,l,c,h,x,y,incidentAngle)', desc:'Apply refraction correction to OKLCH color at position (x,y). Returns shifted OKLCH triple.', returns:'Float64Array [L,C,H]', example:'const [L,C,H] = applyRefractionToColor(\n  RefractionParams.thick(), 0.5, 0.1, 260,\n  0.5, 0.3, 0.15 // x, y, incidentAngle\n);' },
+  { mod:'materials', type:'fn', name:'generateDistortionMap', sig:'generateDistortionMap(params,gridSize)', desc:'Generate gridSize×gridSize distortion grid for GPU texture upload. Returns flat [offset_x,offset_y,hue_shift,brightness × N²]. Pass to WebGL as RGBA texture.', returns:'Float64Array [4 × gridSize²]', example:'const map = generateDistortionMap(RefractionParams.frosted(), 64);\n// 64×64 × 4 = 16384 values → texImage2D(gl.FLOAT)' },
+
+  // ── MATERIALS: Lighting System ──
+  { mod:'materials', type:'class', name:'LightSource', sig:'new LightSource(x,y,z,l,c,h,intensity)', desc:'Directional light in OKLCH color space. Presets: defaultKeyLight() top-right 45° primary, defaultFillLight() softer left fill, dramaticTopLight() harsh overhead harsh. Used with LightingEnvironment and calculateLighting().', example:'const env = new LightingEnvironment();\nenv.addLight(LightSource.defaultKeyLight());\nenv.addLight(LightSource.defaultFillLight());\nconst lit = calculateLighting(env, 0.3, 0.1, 260);' },
+  { mod:'materials', type:'class', name:'LightingEnvironment', sig:'new LightingEnvironment()', desc:'Multi-light environment for glass material evaluation. Methods: addLight(src)→void. Pass to calculateLighting().', example:'const env = new LightingEnvironment();\nenv.addLight(LightSource.dramaticTopLight());\nconst result = calculateLighting(env, 0.4, 0.12, 265);' },
+  { mod:'materials', type:'fn', name:'calculateLighting', sig:'calculateLighting(env,l,c,h)', desc:'Evaluate multi-light environment on OKLCH surface color. Returns lighting result with specular, diffuse, ambient contributions.', returns:'object {specular,diffuse,ambient,resultL,resultC,resultH}', example:'const env = new LightingEnvironment();\nenv.addLight(LightSource.defaultKeyLight());\nconst lit = calculateLighting(env, 0.4, 0.12, 265);\n// { specular:0.32, diffuse:0.68, resultL:0.51, resultC:0.14, resultH:267 }' },
+  { mod:'materials', type:'fn', name:'deriveGradient', sig:'deriveGradient(l,c,h,lightX,lightY,curvature)', desc:'Derive surface gradient from OKLCH color and light direction for glass highlight rendering. Returns [gradX, gradY, normalZ] normalized vector.', returns:'Float64Array [gradX,gradY,normalZ]' },
+
+  // ── MATERIALS: Shadow System ──
+  { mod:'materials', type:'class', name:'AmbientShadowParams', sig:'new AmbientShadowParams(blurRadius,spread,opacity,color)', desc:'Elevation shadow config adapting to background color. 4 presets: standard() for cards, elevated() for modals/menus, subtle() for flat UI, dramatic() for popovers. Used with calculateAmbientShadow().', example:'const shadow = calculateAmbientShadow(\n  AmbientShadowParams.elevated(), 0.1, 0.02, 270, 3.0\n);\n// "0 8px 24px rgba(0,0,10, 0.45)"' },
+  { mod:'materials', type:'class', name:'ElevationTransition', sig:'new ElevationTransition(rest,hover,active,focus)', desc:'Interactive elevation levels for UI components (Material Design 0–8 scale). Presets: card() rest=0 hover=2 active=1 focus=3, fab() rest=6 hover=8 active=7 focus=6, flat() rest=0 hover=1 active=0 focus=0. Used with calculateInteractiveShadow().', example:'const trans = ElevationTransition.card();\nconst shadow = calculateInteractiveShadow(\n  trans, 0.07, 0.01, 270, "hover"\n);\n// "0 4px 16px rgba(0,0,10, 0.35)"' },
+  { mod:'materials', type:'fn', name:'calculateInteractiveShadow', sig:'calculateInteractiveShadow(transition,bgL,bgC,bgH,state)', desc:'Generate CSS box-shadow string based on interactive elevation state. state: "rest"|"hover"|"active"|"focus". Shadow color adapts to background OKLCH.', returns:'string CSS box-shadow', example:'const shadow = calculateInteractiveShadow(\n  ElevationTransition.fab(), 0.1, 0.02, 270, "hover"\n);\n// "0 8px 32px rgba(0,0,10, 0.55)"' },
+  { mod:'materials', type:'fn', name:'elevationDp', sig:'elevationDp(level)', desc:'Material Design 3 elevation in density-independent pixels. 0→0dp, 1→1dp, 2→3dp, 3→6dp, 4→8dp, 5→12dp, 6→16dp, 7→24dp, 8→32dp.', returns:'number (dp)', example:'elevationDp(3) // 6\nelevationDp(6) // 16\nelevationDp(8) // 32' },
+  { mod:'materials', type:'fn', name:'elevationTintOpacity', sig:'elevationTintOpacity(level)', desc:'Surface primary-color tint opacity at each elevation level per Material Design 3 spec.', returns:'number [0,1]', example:'elevationTintOpacity(3) // 0.08\nelevationTintOpacity(6) // 0.12\nelevationTintOpacity(8) // 0.15' },
+
+  // ── MATERIALS: Temporal Interpolation & Smoothing ──
+  { mod:'materials', type:'class', name:'FlickerValidator', sig:'new FlickerValidator()', desc:'Spectral coherence validator preventing epileptic-risk flicker (HARDING compliance). Presets: strict() Harding standard, relaxed() for normal animations. Factory: withThresholds(stable,minor,warning). Methods: validate(prevLum,newLum,deltaTime)→status.', example:'const v = FlickerValidator.strict();\n// Ensure safe transitions:\nconst ok = v.validate(prevLum, newLum, 1/60);' },
+  { mod:'materials', type:'class', name:'ConstraintValidator', sig:'new ConstraintValidator()', desc:'Physics constraint validator for BSDF energy conservation, reciprocity, and spectral monotonicity. Factory: withConfig(energyTolerance,reciprocityTolerance,maxSpectralGradient,hardClamp). Methods: validate(bsdf)→{valid,violations[],clampedValues}.', example:'const cv = ConstraintValidator.withConfig(0.001, 0.01, 0.3, true);\nconst result = cv.validate(myBsdf);' },
+  { mod:'materials', type:'class', name:'RateLimiter', sig:'new RateLimiter(initial,maxRate,smooth)', desc:'Rate-limited value for smooth IOR/roughness animations. Methods: setTarget(v), update(time)→currentValue, reset(v,time). Getters: current, target, atTarget.', example:'const ior = new RateLimiter(1.33, 0.5, true);\nior.setTarget(1.52);\n// In animation loop:\nconst v = ior.update(performance.now() / 1000);\n// Smooth exponential approach' },
+  { mod:'materials', type:'class', name:'ExponentialMovingAverage', sig:'new ExponentialMovingAverage(alpha)', desc:'EMA smoothing filter. alpha=1.0 = no smoothing; alpha=0.05 = heavy smoothing (τ≈20 samples). Methods: update(value)→smoothed, reset(). Getter: value.', example:'const ema = new ExponentialMovingAverage(0.15);\nrequestAnimationFrame(function tick() {\n  const v = ema.update(rawMeasurement);\n  requestAnimationFrame(tick);\n});' },
+  { mod:'materials', type:'fn', name:'applyInterpolation', sig:'applyInterpolation(mode,t)', desc:'Apply easing to t∈[0,1]. mode: 0=Linear, 1=Smoothstep (Hermite 3t²−2t³), 2=Smootherstep (Perlin 6t⁵−15t⁴+10t³), 3=EaseInOut, 4=Step.', returns:'number [0,1]', example:'applyInterpolation(1, 0.3)  // smoothstep  → 0.216\napplyInterpolation(2, 0.3)  // smootherstep → 0.163\napplyInterpolation(3, 0.25) // easeInOut   → 0.125' },
+  { mod:'materials', type:'fn', name:'interpolateValues', sig:'interpolateValues(mode,a,b,t)', desc:'Interpolate between a and b using easing mode. mode: 0=Linear, 1=Smoothstep, 2=Smootherstep, 3=EaseInOut, 4=Step.', returns:'number', example:'interpolateValues(1, 1.33, 1.52, 0.5) // ~1.425 (smoothstep)\ninterpolateValues(2, 380, 700, 0.5)   // ~540nm (smootherstep)' },
+  { mod:'materials', type:'fn', name:'smoothstep', sig:'smoothstep(t)', desc:'Hermite cubic: 3t²−2t³. C¹ continuous at 0 and 1. Standard for GPU shader transitions.', returns:'number [0,1]', example:'smoothstep(0.5)  // 0.5\nsmoothstep(0.25) // 0.15625\nsmoothstep(0.75) // 0.84375' },
+  { mod:'materials', type:'fn', name:'smootherstep', sig:'smootherstep(t)', desc:'Perlin smootherstep: 6t⁵−15t⁴+10t³. C² continuous — zero 1st and 2nd derivative at edges. Preferred for natural motion.', returns:'number [0,1]', example:'smootherstep(0.5)  // 0.5\nsmootherstep(0.25) // 0.103516\nsmootherstep(0.75) // 0.896484' },
+  { mod:'materials', type:'fn', name:'easeInOut', sig:'easeInOut(t)', desc:'Symmetric quadratic ease: t<0.5 uses 2t², t≥0.5 uses 1−(1−t)²×2. Classic UI animation curve.', returns:'number [0,1]', example:'easeInOut(0.25) // 0.125 (slow start)\neaseInOut(0.5)  // 0.5\neaseInOut(0.75) // 0.875 (slow end)' },
+  { mod:'materials', type:'fn', name:'remap', sig:'remap(value,inMin,inMax,outMin,outMax)', desc:'Remap value from [inMin,inMax] → [outMin,outMax]. Essential for physics→CSS unit conversion.', returns:'number', example:'remap(0.8, 0.0, 1.0, 0.0, 20.0)  // 16.0 (roughness→blur px)\nremap(450, 380, 700, 0, 255)      // 43.5 (wavelength→pixel)' },
+
+  // ── MATERIALS: Batch & Rendering ──
+  { mod:'materials', type:'class', name:'PBRMaterialBuilder', sig:'PBRMaterial.builder()', desc:'Fluent builder for PBRMaterial. Chainable: addDielectric(ior,roughness), addConductor(n,k,roughness), addThinFilm(filmIor,substrateIor,thicknessNm), color(r,g,b), opacity(a). Terminal: build()→PBRMaterial.', example:'const mat = PBRMaterial.builder()\n  .addDielectric(1.5, 0.05)\n  .addThinFilm(1.33, 1.0, 400)\n  .color(0.9, 0.9, 1.0)\n  .opacity(0.85)\n  .build();\nconst r = mat.evaluateAtAngle(0.8);' },
+  { mod:'materials', type:'fn', name:'evaluateMaterialBatch', sig:'evaluateMaterialBatch(materials)', desc:'Batch evaluate materials. Input: Float64Array multiples of 3 [ior,roughness,metallic,...]. Returns [R,T,A × N]. metallic=0 → dielectric, metallic=1 → conductor.', returns:'Float64Array [R,T,A × N]', example:'const mats = new Float64Array([\n  1.5,  0.1, 0.0,  // glass\n  0.17, 0.0, 1.0,  // gold (complex IOR as n)\n  1.33, 0.3, 0.0   // frosted water\n]);\nconst r = evaluateMaterialBatch(mats);' },
+  { mod:'materials', type:'fn', name:'deltaE94', sig:'deltaE94(l1,a1,b1,l2,a2,b2)', desc:'CIE ΔE 1994 color difference in CIELAB. Better than ΔE76 for industrial matching; use ΔE2000 for maximum perceptual accuracy.', returns:'number', standard:'CIE ΔE 1994' },
+  { mod:'materials', type:'fn', name:'labToRgb', sig:'labToRgb(l,a,b)', desc:'Convert CIELAB (D65 illuminant) to sRGB [0,1]. Inverse of rgbToLab(). Result clamps to sRGB gamut.', returns:'Float64Array [r,g,b]', example:'const [r,g,b] = labToRgb(53.39, 0.0, 0.0); // neutral gray\nconst [r2,g2,b2] = labToRgb(32.30, 79.19, -107.86); // blue' },
+  { mod:'materials', type:'fn', name:'renderPremiumCss', sig:'renderPremiumCss(material,context)', desc:'Generate premium-tier CSS glass: complete backdrop-filter, multi-layer gradient, dual-layer shadow, chromatic border glow. Superset of renderEnhancedCss.', returns:'string CSS', example:'const css = renderPremiumCss(\n  GlassMaterial.frosted(),\n  CssRenderConfig.premium().withElevation(4)\n);\n// backdrop-filter, gradient, border, multi-shadow' },
+
   // ── TEMPORAL ──
   { mod:'temporal', type:'class', name:'TemporalMaterial', sig:'new TemporalMaterial(roughnessBase,roughnessTarget,roughnessTau,iorBase)', desc:'Time-evolving dielectric. Roughness evolves exponentially. Presets: .dryingPaint(), .weatheringGlass(). All BSDF evaluations guarantee R+T+A=1.0.', example:'const paint = TemporalMaterial.dryingPaint();\nconst [r,t,a] = paint.evalAtTime(30, 0.8); // halfway through drying' },
   { mod:'temporal', type:'class', name:'TemporalThinFilmMaterial', sig:'new TemporalThinFilmMaterial(thicknessBase,amplitude,frequencyHz,filmIor,substrateIor)', desc:'Oscillating thin-film — iridescent color shifts over time. Presets: .soapBubble(), .oilSlick().', example:'const bubble = TemporalThinFilmMaterial.soapBubble();\nconst tl = bubble.sampleTimeline(3.0, 180, 0.8); // 3s @ 60fps' },
   { mod:'temporal', type:'class', name:'TemporalConductorMaterial', sig:'new TemporalConductorMaterial(nBase,kBase,roughness,nTempCoeff,kTempCoeff)', desc:'Temperature-dependent conductor. Presets: .heatedGold(), .heatedCopper().', example:'const gold = TemporalConductorMaterial.heatedGold();\nconst [r,t,a] = gold.evalAtTemperature(800, 0.8); // glowing' },
+  { mod:'temporal', type:'class', name:'TemporalDielectric', sig:'TemporalDielectric.dryingPaint()', desc:'Lightweight time-varying dielectric for physical aging. Presets: dryingPaint() roughness 0.8→0.05 τ=60s, weatheringGlass() IOR+roughness increase over hours. Lower-level than TemporalMaterial — no sampleTimeline(). Use with evaluateDielectricBatch().', example:'const paint = TemporalDielectric.dryingPaint();\n// Integrate with physics batch at time t=30s' },
+  { mod:'temporal', type:'class', name:'TemporalThinFilm', sig:'TemporalThinFilm.soapBubble()', desc:'Lightweight time-evolving thin-film for animated iridescence. Preset: soapBubble() — thickness oscillates producing color shifts. For full animation API with sampleTimeline(), use TemporalThinFilmMaterial.soapBubble().', example:'const film = TemporalThinFilm.soapBubble();\n// Film thickness evolves: use with ThinFilm.reflectanceRgb() per frame' },
+  { mod:'temporal', type:'class', name:'TemporalConductor', sig:'TemporalConductor.heatedGold()', desc:'Lightweight temperature-dependent conductor. Preset: heatedGold() — n,k shift with temperature. For evalAtTemperature() API, use TemporalConductorMaterial.heatedGold().', example:'const gold = TemporalConductor.heatedGold();\n// n,k coefficients shift as temperature rises' },
   // PROCEDURAL
   { mod:'procedural', type:'class', name:'ProceduralNoise', sig:'new ProceduralNoise(seed,octaves,persistence,lacunarity)', desc:'Improved Perlin fBm. Same seed → same field. Presets: .frosted() 6oct, .regular() 3oct, .clear() 1oct, .thick() 4oct.', example:'const noise = ProceduralNoise.frosted();\nconst v = noise.sample(1.5, 2.3); // [0,1]' },
   { mod:'procedural', type:'fn', name:'variationField', sig:'variationField(baseIor,variation,cols,rows,seed)', desc:'2D IOR variation field for frosted-glass distortion maps.', returns:'Float64Array [baseIor±variation]', example:'const iorMap = variationField(1.5, 0.05, 256, 256, 42);' },
@@ -1607,25 +1670,41 @@ const [L, C, H] = applySirenCorrection(
 
 const ARCH_TEXT = `┌─────────────── momoto-wasm ─── Public WASM API surface ──────────────────┐
 │                                                                            │
-│  hct.rs         ← HCT/CAM16 color space                                   │
-│  core_ext.rs    ← OKLCH, OKLab, luminance, WCAG, APCA helpers             │
-│  intelligence.rs← Recommendations, scoring, harmony, CVD, constraints     │
-│  materials_ext.rs← Cook-Torrance, Oren-Nayar, thin-film, refraction       │
-│  temporal.rs    ← Time-evolving dielectric, thin-film, conductor          │
-│  procedural.rs  ← Perlin fBm noise, IOR variation fields                  │
-│  siren.rs       ← Neural network [9→16→16→3], 483 params, ω₀=30          │
-│  events.rs      ← Pub/sub bus + SSE-compatible streaming                  │
-│  agent.rs       ← High-level JSON query/response API                      │
+│  lib.rs          ← Sprint 1–4 physics: ThinFilm (12 presets),             │
+│                    CauchyDispersion (7 presets), SellmeierDispersion,      │
+│                    ComplexIOR (12 metals), SpectralComplexIOR, DrudeParams,│
+│                    MieParams (9 presets), DynamicMieParams (8 presets),    │
+│                    FilmLayer, TransferMatrixFilm (braggMirror),            │
+│                    GlassMaterial, GlassMaterialBuilder, LiquidGlass        │
+│                    ContactShadow, henyeyGreenstein, rayleighPhase, f0FromIOR│
+│  hct.rs          ← HCT/CAM16 color space, tonal palettes                 │
+│  core_ext.rs     ← OKLCH, OKLab, luminance, WCAG 2.1, APCA-W3 v0.1.9   │
+│  intelligence.rs ← Recommendations, harmony (7 types), CVD (Viénot 1999),│
+│                    ConstraintSolver (penalty method, 6 constraint types)   │
+│  materials_ext.rs← Refraction, lighting, AmbientShadow, ElevationTransition│
+│                    RateLimiter, EMA, InterpolationMode, smoothstep/er,     │
+│                    DielectricBSDF, ConductorBSDF, ThinFilmBSDF, Layered,  │
+│                    PBRMaterial, FlickerValidator, ConstraintValidator       │
+│  temporal.rs     ← TemporalMaterial, TemporalThinFilmMaterial,            │
+│                    TemporalConductorMaterial + evalAtTime, sampleTimeline  │
+│  procedural.rs   ← ProceduralNoise Perlin fBm, IOR variation fields      │
+│  siren.rs        ← Neural [9→16→16→3], 483 params, ω₀=30, seed=421337   │
+│  events.rs       ← MomotoEventBus pub/sub + MomotoEventStream (SSE)      │
+│  agent.rs        ← JSON API: validate, recommend, improve, certify        │
 │                                                                            │
 ├─────────────── Rust Crates ──────────────────────────────────────────────┤
 │                                                                            │
-│  momoto-core        Color, OKLCH, OKLab, HCT, luminance, gamma           │
-│  momoto-metrics     WCAG 2.1 (AA/AAA), APCA-W3 v0.1.9                    │
-│  momoto-intelligence Recommendations, harmony, CVD, constraint solver     │
-│  momoto-materials   40+ physics files: BRDFs, thin-film, Perlin, SSS     │
-│  momoto-agent       Contracts, workflows, sessions, certification         │
-│  momoto-events      Pub/sub, EventBroadcaster, EventStream               │
-│  momoto-engine      (stub — future SIMD/WASM performance layer)          │
+│  momoto-core        Color, OKLCH, OKLab, HCT/CAM16, gamma                │
+│  momoto-metrics     WCAG 2.1 (AA=4.5:1/AAA=7:1), APCA-W3 v0.1.9        │
+│  momoto-intelligence Harmony, CVD Viénot 1999, constraint solver         │
+│  momoto-materials   40+ physics files — Sprints 1–4:                     │
+│    ├ Sprint 1: ThinFilm, Airy formula, 12 presets                        │
+│    ├ Sprint 2: CauchyDispersion, Sellmeier, ComplexIOR, 12 metal presets │
+│    ├ Sprint 3: MieParams, 9 presets, henyeyGreenstein, rayleighPhase     │
+│    └ Sprint 4: FilmLayer, TransferMatrixFilm, braggMirror                │
+│  momoto-agent       Contracts, workflows, self-certification              │
+│  momoto-events      EventBus (pub/sub), EventStream (SSE-compatible)     │
+│  momoto-engine      (stub — future SIMD/batch performance layer)         │
 │                                                                            │
 ├─────────────── TypeScript (src/) ────────────────────────────────────────┤
 │                                                                            │

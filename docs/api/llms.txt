@@ -1,32 +1,61 @@
 # Momoto Engine
 
-> Chromatic intelligence and material physics engine compiled to WebAssembly. Provides perceptual color science, WCAG/APCA accessibility metrics, glass physics (PBR BRDFs, thin-film interference), AI-powered color recommendations, and real-time event streaming.
+> Chromatic intelligence and material physics engine compiled to WebAssembly. Provides perceptual color science, WCAG/APCA accessibility metrics, glass physics (PBR BRDFs, thin-film interference, Mie scattering, chromatic dispersion, multilayer transfer matrix), AI-powered color recommendations, and real-time event streaming.
 
-Momoto is a Rust library (v7.0.0) compiled to WASM via wasm-bindgen. It implements the full photometric and perceptual pipeline: from gamma-correct sRGB ↔ OKLCH ↔ OKLab ↔ HCT color space conversions, through physically-based rendering (Cook-Torrance, Oren-Nayar, Mie scattering, thin-film transfer matrix), to WCAG 2.1 and APCA-W3 v0.1.9 contrast metrics, a SIREN neural network for perceptual correction, and a constraint solver for finding colors satisfying multiple simultaneous accessibility constraints.
+Momoto is a Rust library (v7.0.0) compiled to WASM via wasm-bindgen. It implements the full photometric and perceptual pipeline: from gamma-correct sRGB ↔ OKLCH ↔ OKLab ↔ HCT color space conversions, through physically-based rendering (Cook-Torrance, Oren-Nayar, Mie scattering, thin-film transfer matrix, Bragg mirrors, Cauchy/Sellmeier dispersion, complex IOR for 12 metals), to WCAG 2.1 and APCA-W3 v0.1.9 contrast metrics, a SIREN neural network for perceptual correction, and a constraint solver for finding colors satisfying multiple simultaneous accessibility constraints.
 
 ## Modules
 
-- [HCT Color Space](https://zuclubit.github.io/momoto-ui/#module-hct): Google Material Design 3 color space (CAM16 + CIELAB). Functions: hexToHct, hctToHex, hctTonalPalette, hctMaxChroma, HCT class.
+- [HCT Color Space](https://zuclubit.github.io/momoto-ui/#module-hct): Google Material Design 3 color space (CAM16 + CIELAB). Functions: hexToHct, hctToHex, hctTonalPalette, hctMaxChroma, hctToOklch, oklchToHct, HCT class.
 - [Core: Color & Luminance](https://zuclubit.github.io/momoto-ui/#module-core): OKLCH, OKLab, Color, LinearRgba. WCAG contrast, APCA luminance, gamma, math utilities. Batch operations.
-- [Intelligence: Recommendations](https://zuclubit.github.io/momoto-ui/#module-intelligence): RecommendationEngine, Recommendation, ExplanationGenerator. Color harmony (7 types), CVD simulation (Viénot 1999), constraint solving.
-- [Materials: Glass Physics](https://zuclubit.github.io/momoto-ui/#module-materials): Cook-Torrance BRDF, Oren-Nayar BRDF, thin-film interference, refraction, procedural noise, lighting.
-- [Temporal Materials](https://zuclubit.github.io/momoto-ui/#module-temporal): Time-evolving materials (TemporalMaterial, TemporalThinFilmMaterial, TemporalConductorMaterial). Drying paint, soap bubbles, heated metals.
-- [Procedural Noise](https://zuclubit.github.io/momoto-ui/#module-procedural): Perlin noise (ProceduralNoise), IOR variation fields, roughness maps. Deterministic/reproducible.
-- [SIREN Neural Network](https://zuclubit.github.io/momoto-ui/#module-siren): Perceptual color correction via SIREN (9→16→16→3, 483 params, ω₀=30). computeSirenCorrection, applySirenCorrection, batch inference.
-- [Events](https://zuclubit.github.io/momoto-ui/#module-events): Pub/sub event system (MomotoEventBus, MomotoEventStream). Progress, metrics, validation, streaming.
-- [Agent API](https://zuclubit.github.io/momoto-ui/#module-agent): High-level JSON query/response interface. agentValidate, agentValidatePair, agentRecommendForeground, ContractBuilder.
+- [Intelligence: Recommendations](https://zuclubit.github.io/momoto-ui/#module-intelligence): RecommendationEngine, ExplanationGenerator, AdvancedScorer, ConvergenceDetector. Color harmony (7 types), CVD simulation (Viénot 1999), constraint solving (penalty method, 6 constraint types).
+- [Materials: Glass Physics](https://zuclubit.github.io/momoto-ui/#module-materials): Full Sprint 1–4 physics implementation.
+  - Sprint 1 — Thin-Film Optics: ThinFilm class (12 presets: soapBubbleThin/Medium/Thick, oilThin/Medium/Thick, arCoating, oxideThin/Medium/Thick, beetleShell, nacre). Airy formula, 380–700nm.
+  - Sprint 2 — Chromatic Dispersion & Metals: CauchyDispersion (7 glass presets, Abbe numbers), SellmeierDispersion (5 presets), ComplexIOR (12 metal presets: gold n=0.17 k=3.5, silver n=0.05 k=4.2, copper n=0.25 k=2.8, iron, nickel, platinum, titanium, chromium, tungsten, aluminum, cobalt, zinc), SpectralComplexIOR, DrudeParams (7 presets), f0FromIor.
+  - Sprint 3 — Mie Scattering: MieParams (9 presets: fineDust Rayleigh x~0.3, coarseDust, fogSmall 2µm, fogLarge 10µm, cloud 8µm, mist 3µm, smoke 0.3µm soot, milkGlobule 2.5µm, pollen 25µm), DynamicMieParams (8 animated presets), henyeyGreenstein, doubleHenyeyGreenstein, rayleighPhase, rayleighEfficiency, rayleighIntensityRgb.
+  - Sprint 4 — Multilayer TMM: FilmLayer (dielectric/absorbing), TransferMatrixFilm (addLayer, addAbsorbingLayer, reflectance, reflectanceRgb, transmittanceSpectrum, braggMirror).
+  - BSDF Classes: DielectricBSDF (glass/water/diamond/frostedGlass presets), ConductorBSDF (gold/silver/copper/aluminum/chrome presets), ThinFilmBSDF (soapBubble/oilOnWater/arCoating), LambertianBSDF, LayeredBSDF, PBRMaterial, PBRMaterialBuilder.
+  - Glass Surface: GlassMaterial (window/frosted/tinted), GlassMaterialBuilder, LiquidGlass, CssRenderConfig, renderEnhancedCss, renderPremiumCss.
+  - Refraction: RefractionParams (clear/frosted/thick/subtle/highIndex), calculateRefraction, applyRefractionToColor, generateDistortionMap.
+  - Lighting: LightSource (defaultKeyLight/defaultFillLight/dramaticTopLight), LightingEnvironment, calculateLighting, deriveGradient, gradientToCss.
+  - Shadows: AmbientShadowParams (standard/elevated/subtle/dramatic), ElevationTransition (card/fab/flat), calculateAmbientShadow, calculateMultiScaleAmbient, calculateInteractiveShadow, elevationDp, elevationTintOpacity.
+  - Interpolation: InterpolationModeEnum (Linear/Smoothstep/Smootherstep/EaseInOut/Step), applyInterpolation, interpolateValues, smoothstep, smootherstep, easeInOut, remap.
+  - Utilities: FlickerValidator (strict/relaxed), ConstraintValidator, RateLimiter, ExponentialMovingAverage.
+  - Color difference: deltaE76, deltaE94, deltaE2000, deltaE2000Batch, rgbToLab, labToRgb.
+  - Batch: evaluateDielectricBatch, evaluateDielectricBSDF, evaluateMicrofacetBSDF, evaluateMaterialBatch, ggxNDF, cookTorranceBRDF, orenNayarBRDF, materialToDominantColor.
+- [Temporal Materials](https://zuclubit.github.io/momoto-ui/#module-temporal): High-level: TemporalMaterial (dryingPaint/weatheringGlass, evalAtTime, sampleTimeline), TemporalThinFilmMaterial (soapBubble/oilSlick), TemporalConductorMaterial (heatedGold/heatedCopper, evalAtTemperature). Lightweight: TemporalDielectric, TemporalThinFilm, TemporalConductor. All R+T+A=1.
+- [Procedural Noise](https://zuclubit.github.io/momoto-ui/#module-procedural): ProceduralNoise Perlin fBm (frosted 6oct/regular 3oct/clear 1oct/thick 4oct). Deterministic seed → same field. variationField() for IOR distortion maps.
+- [SIREN Neural Network](https://zuclubit.github.io/momoto-ui/#module-siren): Perceptual color correction via SIREN (9→16→16→3, 483 params, ω₀=30, Mulberry32 seed=421337). computeSirenCorrection, applySirenCorrection, computeSirenCorrectionBatch, sirenMetadata, sirenWeights.
+- [Events](https://zuclubit.github.io/momoto-ui/#module-events): MomotoEventBus pub/sub (subscribe, subscribeFiltered, emitProgress, emitMetric, emitRecommendation, emitValidation, emitError, emitCustom, emitJson, bufferedEvents, clearBuffer). MomotoEventStream SSE-compatible (fromBus, fromBusBatched, standalone, poll, flush, pause, resume, close, stats).
+- [Agent API](https://zuclubit.github.io/momoto-ui/#module-agent): High-level JSON interface. agentValidate, agentValidatePair, agentValidatePairsBatch, agentGetMetrics, agentRecommendForeground, agentImproveForeground, agentScorePair, createColorTransition, generateExperience, getMomotoIdentity, selfCertify. ContractBuilder (minContrastWcagAA, minContrastWcagAAA, inSrgb, inP3, lightnessRange, chromaRange, hueRange, build).
 - [Full API Reference (JSON)](https://zuclubit.github.io/momoto-ui/momoto.json): Machine-readable complete API spec.
 
 ## Key Facts
 
 - **Color spaces**: sRGB (gamma + linear), OKLCH, OKLab, HCT (CAM16+CIELAB), LinearRGBA
 - **Accessibility**: WCAG 2.1 (AA=4.5:1 / AAA=7:1 normal; AA=3:1 / AAA=4.5:1 large), APCA-W3 v0.1.9 (Lc body≥75, heading≥60)
-- **CVD**: Viénot 1999 protanopia/deuteranopia/tritanopia in linear sRGB. D65 white preserved exactly.
+- **CVD**: Viénot 1999 protanopia/deuteranopia/tritanopia in linear sRGB. D65 white preserved exactly (NOT Brettel 1997 which uses equal-energy white E).
 - **PBR**: Cook-Torrance BRDF (GGX NDF + Smith G2 + Schlick Fresnel), Oren-Nayar diffuse
-- **Thin film**: Transfer-matrix method 380–700nm, soap bubble / oil slick / AR coating
+- **Thin film**: Airy formula (ThinFilm, 12 presets) + transfer-matrix method 380–700nm (TransferMatrixFilm, braggMirror)
+- **Dispersion**: Cauchy n(λ)=A+B/λ²+C/λ⁴ (7 glass presets, Abbe numbers) + Sellmeier (5 presets)
+- **Complex IOR**: 12 metal presets (gold n=0.17 k=3.5, silver n=0.05 k=4.2, copper n=0.25 k=2.8, iron, nickel, platinum, titanium, chromium, tungsten, aluminum, cobalt, zinc)
+- **Drude model**: 7 metal presets, temperature-dependent IOR
+- **Mie scattering**: Henyey-Greenstein phase function, Rayleigh/Mie/geometric regimes (x<0.3 / x~1–10 / x>30)
 - **SIREN**: Architecture [9,16,16,3], 483 params, Mulberry32 PRNG seed=421337, deterministic
 - **Return types**: Most functions return `Float64Array` (flat packed arrays) or JSON strings
 - **Energy conservation**: All BSDF evaluations guarantee reflectance + transmittance + absorption = 1.0
+- **Shadow system**: AmbientShadowParams + ElevationTransition (Material Design 0–8 scale) adapting to OKLCH background
+- **Refraction**: RefractionParams + distortion maps for WebGL upload (grid_size² × 4 floats)
+- **CAM16 z formula**: z = 1.48 + 0.29 × √n (corrected from literature errors)
+
+## Physics Constants
+
+- **APCA**: MAIN_TRC=2.4, sRco=0.2126, sGco=0.7152, sBco=0.0722, BLK_THRS=0.022, BLK_CLMP=1.414, LO_CLIP=0.1, NORM_BG=0.56, NORM_TXT=0.57, REV_BG=0.65, REV_TXT=0.62, SCALE_NORM=1.14, SCALE_REV=1.14
+- **CVD Viénot 1999 Protanopia matrix** (linear sRGB): [0.567, 0.433, 0; 0.558, 0.442, 0; 0, 0.242, 0.758]
+- **CVD Viénot 1999 Deuteranopia matrix** (linear sRGB): [0.625, 0.375, 0; 0.700, 0.300, 0; 0, 0.300, 0.700]
+- **CVD Viénot 1999 Tritanopia matrix** (linear sRGB): [0.95, 0.05, 0; 0, 0.433, 0.567; 0, 0.475, 0.525]
+- **Constraint solver**: Penalty method, max_iterations=500, convergence_threshold=1e-4, finite-difference gradient
+- **Color harmony angles**: Complementary=180°, SplitComplementary=±150°/±210°, Triadic=120°, Tetradic=90°, Analogous=±30°
 
 ## Usage Pattern
 
@@ -48,6 +77,9 @@ Many functions return `Float64Array` with packed data:
 - BSDF: `[reflectance, transmittance, absorption]` — sums to 1.0
 - Tonal palette: 13 HCT triples → 39 values total
 - Timeline: `[t0, r0, t1, r1, ...]` — time,reflectance pairs
+- Distortion map: `[offsetX, offsetY, hueShift, brightness × N²]`
+- Refraction result: `[offset_x, offset_y, hue_shift, brightness_factor]`
+- Complex IOR batch: `[n0, k0, n1, k1, ...]`
 
 ## Installation
 
@@ -61,5 +93,5 @@ npm install momoto-wasm
 
 - Source: https://github.com/zuclubit/momoto-ui
 - Rust workspace: `/momoto/crates/`
-- WASM bindings: `/momoto/crates/momoto-wasm/src/`
+- WASM bindings: `/momoto/crates/momoto-wasm/src/` (lib.rs 7979 lines + 9 module files)
 - TypeScript UI: `/src/` (hexagonal architecture: domain/application/adapters/infrastructure)
