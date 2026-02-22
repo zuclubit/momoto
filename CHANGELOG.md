@@ -12,11 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed — Repository Architecture
 
 - **True monorepo**: Rust engine (`zuclubit/momoto`) merged into this repo via `git subtree add --squash`
-- **npm workspaces** configured: `packages/*` and `apps/*` automatically linked
+- **npm workspaces** configured: `packages/*` automatically linked
 - **`@momoto-ui/wasm@7.0.0`** replaces old `momoto-wasm` (v5.0.0) as the canonical workspace package
 - **`@momoto-ui/crystal`** dependency on `@momoto-ui/wasm` now resolves via npm workspace (no `file:` path)
-- **`@momoto/topocho-crm`** now a proper workspace app in `apps/`
 - **Root `.gitignore`**: ignores `momoto/target/`, `momoto/crates/*/pkg/` (build artifacts) instead of `momoto/` entirely
+- **Removed `@momoto/topocho-crm`** from the project (apps/topocho-crm eliminated)
 
 ### Added — Monorepo Scripts
 
@@ -26,9 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | `build:wasm:web` | `wasm-pack build` → web target (ES modules) |
 | `build:engine` | `cargo build --release` in `momoto/` |
 | `test:engine` | `cargo test` in `momoto/` |
-| `dev:crm` | Start `apps/topocho-crm` dev server |
 | `build:crystal` | Build `@momoto-ui/crystal` |
-| `build:all` | `build:wasm` + `build` + `build:crm` |
+| `build:all` | `build:wasm` + `build` + `build:crystal` |
 
 ### Engine — Documentation Updated (v7.0.0)
 

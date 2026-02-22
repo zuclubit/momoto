@@ -4,8 +4,7 @@
   "private": true,
   "description": "Momoto — Chromatic Intelligence Monorepo (UI + Rust Engine)",
   "workspaces": [
-    "packages/*",
-    "apps/*"
+    "packages/*"
   ],
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -101,10 +100,8 @@
     "build:wasm:web": "cd momoto/crates/momoto-wasm && wasm-pack build --target web --out-dir ../../../packages/momoto-ui-wasm",
     "build:engine": "cd momoto && cargo build --release",
     "test:engine": "cd momoto && cargo test",
-    "dev:crm": "npm run dev --workspace=apps/topocho-crm",
-    "build:crm": "npm run build --workspace=apps/topocho-crm",
     "build:crystal": "npm run build --workspace=packages/momoto-ui-crystal",
-    "build:all": "npm run build:wasm && npm run build && npm run build:crm"
+    "build:all": "npm run build:wasm && npm run build && npm run build:crystal"
   },
   "keywords": [
     "design-system",

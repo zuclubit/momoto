@@ -36,7 +36,6 @@ Momoto is a **Rust library (v7.0.0) compiled to WebAssembly** via wasm-bindgen. 
 |-------|---------|---------------|
 | **Momoto Engine (Rust/WASM)** | `@momoto-ui/wasm` | Color perception, contrast, physics, accessibility, AI |
 | **Crystal UI** | `@momoto-ui/crystal` | React components, design tokens, glass effects |
-| **Topocho CRM** | `@momoto/topocho-crm` | Reference CRM app built on Crystal + Engine |
 
 > If Momoto is the **decision engine**, **Momoto UI is the execution surface**.
 
@@ -45,7 +44,7 @@ Momoto is a **Rust library (v7.0.0) compiled to WebAssembly** via wasm-bindgen. 
 ## Monorepo Structure
 
 ```
-momoto-ui/                          ← Root (npm workspaces)
+momoto-ui/                          ← Root (npm workspaces: packages/*)
 ├── momoto/                         ← Rust engine (git subtree: zuclubit/momoto)
 │   ├── Cargo.toml                  ← Engine workspace (v7.0.0)
 │   └── crates/
@@ -55,16 +54,13 @@ momoto-ui/                          ← Root (npm workspaces)
 │       ├── momoto-materials/       ← PBR physics, thin film, Mie, TMM
 │       ├── momoto-agent/           ← JSON workflow engine
 │       ├── momoto-events/          ← Pub/sub + SSE streaming
-│       └── momoto-wasm/            ← WASM bindings (wasm-pack output)
+│       └── momoto-wasm/            ← WASM bindings (wasm-pack output → packages/momoto-ui-wasm)
 │
 ├── packages/                       ← npm workspace packages
-│   ├── momoto-ui-wasm/             ← @momoto-ui/wasm (built from momoto/crates/momoto-wasm)
-│   └── momoto-ui-crystal/          ← @momoto-ui/crystal (React components)
+│   ├── momoto-ui-wasm/             ← @momoto-ui/wasm v7.0.0 (built from momoto/crates/momoto-wasm)
+│   └── momoto-ui-crystal/          ← @momoto-ui/crystal (React components, glass effects, tokens)
 │
-├── apps/                           ← npm workspace apps
-│   └── topocho-crm/                ← @momoto/topocho-crm (reference CRM)
-│
-├── src/                            ← TypeScript design system (hexagonal arch)
+├── src/                            ← TypeScript design system (hexagonal architecture)
 │   ├── domain/                     ← Color entities, ports, value objects
 │   ├── application/                ← Use cases, recommendation pipeline
 │   ├── adapters/                   ← React, CSS, Tailwind adapters
@@ -82,7 +78,7 @@ momoto-ui/                          ← Root (npm workspaces)
 ├── examples/                       ← Standalone usage examples
 ├── scripts/                        ← Build and verification scripts
 ├── Cargo.toml                      ← UI Rust workspace root
-└── package.json                    ← Monorepo root (workspaces: packages/*, apps/*)
+└── package.json                    ← Monorepo root (workspaces: packages/*)
 ```
 
 ---
@@ -126,9 +122,8 @@ npm run build:wasm:web  # → web target (ES modules, no bundler)
 ### Build Everything
 
 ```bash
-npm run build:all    # build:wasm + TypeScript + Crystal + CRM
+npm run build:all    # build:wasm + TypeScript + Crystal
 npm run build        # TypeScript design system only (dist/)
-npm run build:crm    # topocho-crm app only
 npm run build:crystal # @momoto-ui/crystal only
 ```
 
@@ -140,11 +135,11 @@ npm run test:engine   # cargo test (all engine tests)
 cd momoto && cargo test crates/momoto-wasm  # specific crate
 ```
 
-### App Development
+### Design System Development
 
 ```bash
-npm run dev:crm      # Start topocho-crm dev server
 npm run dev          # TypeScript design system watch mode
+cd packages/momoto-ui-crystal && npm run storybook  # Crystal Storybook
 ```
 
 ---
@@ -372,7 +367,7 @@ function Dashboard() {
 │  └──────────────────────────────────────────────────────────────────┘   │
 │                         │ npm workspace                                    │
 │                         ▼                                                 │
-│  packages/momoto-ui-crystal/ · apps/topocho-crm/                         │
+│  packages/momoto-ui-crystal/ (@momoto-ui/crystal)                         │
 │  src/ (domain · application · adapters · infrastructure)                  │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
