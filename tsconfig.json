@@ -22,20 +22,11 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": [
-    "index.ts",
-    "domain/**/*.ts",
-    "application/**/*.ts",
-    "adapters/**/*.ts",
-    "adapters/**/*.tsx",
-    "infrastructure/**/*.ts",
-    "components/**/*.ts",
-    "components/**/*.tsx",
-    "validation/**/*.ts",
-    "ports/**/*.ts"
+    "src"
   ],
   "exclude": ["node_modules", "dist"]
 }

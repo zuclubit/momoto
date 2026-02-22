@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Momoto Engine — Chromatic Intelligence API</title>
+  <meta name="description" content="Momoto is a Rust/WASM chromatic intelligence engine: perceptual color science, WCAG/APCA accessibility, glass physics, AI color recommendations. Momoto decides. Momoto UI renders." />
+  <meta property="og:title" content="Momoto Engine — Chromatic Intelligence" />
+  <meta property="og:description" content="Rust/WASM engine for perceptual color science, accessibility metrics, glass physics, and AI color recommendations." />
+  <meta property="og:image" content="assets/momoto-ui-geno1.png" />
+  <meta property="og:url" content="https://zuclubit.github.io/momoto-ui/" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="canonical" href="https://zuclubit.github.io/momoto-ui/" />
+  <style>
+    /* ── DESIGN TOKENS ─────────────────────────────────────────────────── */
+    :root {
+      /* Brand */
+      --m-bg:          #07070e;
+      --m-bg-alt:      #0d0d18;
+      --m-surface:     #111122;
+      --m-surface-2:   #171730;
+      --m-border:      rgba(255,255,255,0.08);
+      --m-border-glow: rgba(108,99,255,0.35);
+
+      /* Accent gradient: indigo → violet → blue */
+      --m-grad: linear-gradient(135deg, oklch(0.62 0.22 265) 0%, oklch(0.58 0.28 300) 50%, oklch(0.64 0.2 245) 100%);
+      --m-grad-text: linear-gradient(135deg, #fff 0%, oklch(0.82 0.18 265) 50%, oklch(0.78 0.2 310) 100%);
+
+      --m-accent:  oklch(0.62 0.22 265);
+      --m-violet:  oklch(0.58 0.28 300);
+      --m-blue:    oklch(0.64 0.2 245);
+      --m-green:   oklch(0.73 0.17 155);
+      --m-amber:   oklch(0.80 0.16 80);
+      --m-red:     oklch(0.60 0.20 25);
+
+      --m-text:    #eeeef8;
+      --m-text-2:  #9898b8;
+      --m-text-3:  #555578;
+
+      --m-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', ui-monospace, monospace;
+      --m-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif;
+
+      --m-radius: 12px;
+      --m-radius-sm: 8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; color-scheme: dark; }
+    body {
+      font-family: var(--m-sans);
+      background: var(--m-bg);
+      color: var(--m-text);
+      line-height: 1.65;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE TEXTURE OVERLAY ─────────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    }
+
+    /* ── STICKY HEADER ─────────────────────────────────────────────────── */
+    header {
+      position: sticky; top: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 58px;
+      background: rgba(7,7,14,0.75);
+      backdrop-filter: blur(24px) saturate(200%);
+      border-bottom: 1px solid var(--m-border);
+    }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; user-select: none;
+    }
+    .logo-mark {
+      width: 30px; height: 30px; border-radius: 9px;
+      background: var(--m-grad);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 15px; color: white;
+      letter-spacing: -0.05em;
+      box-shadow: 0 0 20px rgba(108,99,255,0.4);
+    }
+    .logo-name {
+      font-size: 16px; font-weight: 800;
+      background: var(--m-grad-text);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      letter-spacing: -0.03em;
+    }
+    .logo-tagline {
+      font-size: 11px; color: var(--m-text-3); font-family: var(--m-mono);
+      margin-top: 1px;
+    }
+    .logo-info { display: flex; flex-direction: column; }
+    .header-badge {
+      font-size: 10px; padding: 2px 8px; border-radius: 999px;
+      background: var(--m-surface-2); border: 1px solid var(--m-border);
+      color: var(--m-text-3); font-family: var(--m-mono);
+    }
+    nav { display: flex; align-items: center; gap: 6px; }
+    .nav-link {
+      padding: 6px 14px; border-radius: var(--m-radius-sm); font-size: 13px; font-weight: 500;
+      color: var(--m-text-2); text-decoration: none; transition: all .2s;
+    }
+    .nav-link:hover { color: var(--m-text); background: var(--m-surface); }
+    .nav-cta {
+      padding: 6px 16px; border-radius: var(--m-radius-sm); font-size: 13px; font-weight: 600;
+      background: var(--m-grad); color: white; text-decoration: none;
+      box-shadow: 0 0 16px rgba(108,99,255,0.3);
+      transition: all .2s;
+    }
+    .nav-cta:hover { box-shadow: 0 0 28px rgba(108,99,255,0.5); transform: translateY(-1px); }
+
+    /* ── HERO ──────────────────────────────────────────────────────────── */
+    .hero {
+      position: relative; z-index: 1;
+      padding: 7rem 2rem 5rem;
+      text-align: center; overflow: hidden;
+    }
+    /* Radial glow behind hero */
+    .hero::before {
+      content: '';
+      position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+      width: 900px; height: 600px; border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(108,99,255,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(108,99,255,0.08);
+      border: 1px solid rgba(108,99,255,0.25);
+      border-radius: 999px; padding: 5px 16px;
+      font-size: 12px; font-family: var(--m-mono);
+      color: oklch(0.75 0.16 265);
+      margin-bottom: 1.75rem; letter-spacing: 0.04em;
+    }
+    .hero-eyebrow::before { content: '⬡'; font-size: 10px; }
+    h1 {
+      font-size: clamp(2.8rem, 7vw, 5.2rem);
+      font-weight: 900; letter-spacing: -0.05em; line-height: 1.05;
+      background: var(--m-grad-text);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 1.25rem;
+    }
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.2rem); color: var(--m-text-2);
+      max-width: 580px; margin: 0 auto 0.75rem; line-height: 1.6;
+    }
+    .hero-tagline {
+      font-family: var(--m-mono); font-size: 14px; color: var(--m-text-3);
+      margin-bottom: 2.5rem; letter-spacing: 0.06em;
+    }
+    .hero-tagline strong { color: var(--m-accent); font-weight: 600; }
+    .hero-actions {
+      display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+      margin-bottom: 3.5rem;
+    }
+    .btn {
+      padding: 11px 24px; border-radius: var(--m-radius-sm); font-size: 14px; font-weight: 600;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 7px;
+      transition: all .22s; cursor: pointer; border: none; font-family: inherit;
+    }
+    .btn-primary {
+      background: var(--m-grad); color: white;
+      box-shadow: 0 0 20px rgba(108,99,255,0.35), 0 1px 2px rgba(0,0,0,0.5);
+    }
+    .btn-primary:hover { box-shadow: 0 0 35px rgba(108,99,255,0.55); transform: translateY(-2px); }
+    .btn-ghost {
+      background: var(--m-surface); border: 1px solid var(--m-border);
+      color: var(--m-text);
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.2); background: var(--m-surface-2); }
+
+    /* ── HERO STATS ────────────────────────────────────────────────────── */
+    .hero-stats {
+      display: flex; justify-content: center; gap: clamp(2rem, 5vw, 4.5rem);
+      padding: 1.5rem 2rem; flex-wrap: wrap;
+    }
+    .stat { text-align: center; }
+    .stat-n {
+      font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 900;
+      font-family: var(--m-mono); letter-spacing: -0.05em;
+      background: var(--m-grad-text);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .stat-l { font-size: 11px; color: var(--m-text-3); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px; }
+
+    /* ── DIVIDER ───────────────────────────────────────────────────────── */
+    .divider {
+      height: 1px; background: linear-gradient(90deg, transparent, var(--m-border), transparent);
+      margin: 0;
+    }
+
+    /* ── SECTION WRAPPER ───────────────────────────────────────────────── */
+    section {
+      position: relative; z-index: 1;
+      padding: 5rem 2rem;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .section-label {
+      font-size: 11px; font-family: var(--m-mono); letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--m-accent); margin-bottom: 0.75rem;
+    }
+    h2 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800;
+      letter-spacing: -0.04em; line-height: 1.15; color: var(--m-text);
+      margin-bottom: 1rem;
+    }
+    h2 span {
+      background: var(--m-grad-text);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .section-desc { font-size: 1.05rem; color: var(--m-text-2); max-width: 640px; margin-bottom: 3rem; }
+
+    /* ── VISUAL DIAGRAMS SECTION ───────────────────────────────────────── */
+    .diagrams-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+    .diagram-card {
+      position: relative; border-radius: 20px; overflow: hidden;
+      border: 1px solid var(--m-border);
+      background: var(--m-surface);
+      box-shadow: 0 0 0 1px transparent, 0 4px 40px rgba(0,0,0,0.4);
+      transition: all .3s;
+      cursor: pointer;
+    }
+    .diagram-card:hover {
+      border-color: var(--m-border-glow);
+      box-shadow: 0 0 0 1px rgba(108,99,255,0.15), 0 8px 60px rgba(0,0,0,0.5), 0 0 40px rgba(108,99,255,0.08);
+      transform: translateY(-4px);
+    }
+    .diagram-card img {
+      width: 100%; height: auto; display: block;
+      border-radius: 20px 20px 0 0;
+      filter: saturate(0.95) brightness(0.97);
+      transition: filter .3s;
+    }
+    .diagram-card:hover img { filter: saturate(1.05) brightness(1); }
+    .diagram-caption {
+      padding: 1.25rem 1.5rem;
+      border-top: 1px solid var(--m-border);
+    }
+    .diagram-caption h3 {
+      font-size: 15px; font-weight: 700; color: var(--m-text);
+      margin-bottom: 4px; letter-spacing: -0.02em;
+    }
+    .diagram-caption p { font-size: 13px; color: var(--m-text-2); line-height: 1.5; }
+    .diagram-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 10px; font-family: var(--m-mono);
+      padding: 2px 8px; border-radius: 999px;
+      background: rgba(108,99,255,0.08); border: 1px solid rgba(108,99,255,0.2);
+      color: oklch(0.72 0.15 265); margin-top: 8px;
+    }
+    .diagram-tag::before { content: '⬡'; font-size: 9px; }
+
+    /* ── FULLSCREEN IMAGE MODAL ────────────────────────────────────────── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(12px);
+      align-items: center; justify-content: center; padding: 2rem;
+      cursor: zoom-out;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-img {
+      max-width: 90vw; max-height: 90vh;
+      border-radius: 16px;
+      box-shadow: 0 0 80px rgba(108,99,255,0.2);
+    }
+    .modal-close {
+      position: fixed; top: 1.5rem; right: 1.5rem;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--m-surface-2); border: 1px solid var(--m-border);
+      color: var(--m-text-2); cursor: pointer; font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── MODULES GRID ──────────────────────────────────────────────────── */
+    .modules-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;
+    }
+    .module-card {
+      background: var(--m-surface); border: 1px solid var(--m-border);
+      border-radius: var(--m-radius); padding: 1.5rem;
+      transition: all .2s; position: relative; overflow: hidden;
+    }
+    .module-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: var(--m-grad); opacity: 0; transition: opacity .3s;
+    }
+    .module-card:hover { border-color: rgba(108,99,255,0.3); transform: translateY(-2px); }
+    .module-card:hover::before { opacity: 1; }
+    .module-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; margin-bottom: 1rem;
+      background: var(--m-surface-2); border: 1px solid var(--m-border);
+    }
+    .module-card h3 {
+      font-size: 15px; font-weight: 700; color: var(--m-text);
+      margin-bottom: 6px; letter-spacing: -0.02em;
+    }
+    .module-card p { font-size: 13px; color: var(--m-text-2); line-height: 1.5; }
+    .module-count {
+      display: inline-block; margin-top: 10px;
+      font-size: 10px; font-family: var(--m-mono);
+      padding: 2px 7px; border-radius: 4px;
+      background: var(--m-surface-2); color: var(--m-text-3);
+    }
+
+    /* ── SEARCH & API EXPLORER ─────────────────────────────────────────── */
+    .search-row {
+      display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; align-items: center;
+    }
+    .search-wrap { position: relative; flex: 1; min-width: 260px; }
+    .search-wrap input {
+      width: 100%; padding: 11px 16px 11px 44px;
+      background: var(--m-surface); border: 1px solid var(--m-border);
+      border-radius: var(--m-radius-sm); color: var(--m-text); font-size: 14px; font-family: inherit;
+      outline: none; transition: border-color .2s;
+    }
+    .search-wrap input:focus { border-color: var(--m-accent); box-shadow: 0 0 0 3px rgba(108,99,255,0.1); }
+    .search-wrap input::placeholder { color: var(--m-text-3); }
+    .search-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--m-text-3); font-size: 17px; pointer-events: none;
+    }
+    .filter-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .pill {
+      padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 500;
+      border: 1px solid var(--m-border); color: var(--m-text-2);
+      cursor: pointer; transition: all .15s; background: none; font-family: inherit;
+    }
+    .pill:hover { border-color: rgba(255,255,255,0.2); color: var(--m-text); }
+    .pill.active { background: var(--m-grad); border-color: transparent; color: white; box-shadow: 0 0 12px rgba(108,99,255,0.3); }
+
+    /* ── API CARDS ─────────────────────────────────────────────────────── */
+    .api-grid { display: flex; flex-direction: column; gap: 8px; }
+    .api-card {
+      background: var(--m-surface); border: 1px solid var(--m-border);
+      border-radius: var(--m-radius-sm); overflow: hidden; transition: border-color .2s;
+    }
+    .api-card:hover { border-color: rgba(108,99,255,0.25); }
+    .api-card-header {
+      padding: 0.85rem 1.15rem; cursor: pointer;
+      display: flex; align-items: center; gap: 12px;
+      user-select: none;
+    }
+    .api-card-header:hover { background: var(--m-surface-2); }
+    .type-pill {
+      flex-shrink: 0; font-size: 10px; font-family: var(--m-mono);
+      padding: 2px 7px; border-radius: 4px; border: 1px solid;
+    }
+    .type-fn    { color: oklch(0.75 0.18 155); border-color: rgba(100,220,140,0.25); background: rgba(100,220,140,0.06); }
+    .type-class { color: oklch(0.75 0.15 275); border-color: rgba(120,100,255,0.25); background: rgba(120,100,255,0.06); }
+    .api-sig {
+      font-family: var(--m-mono); font-size: 13px; flex: 1;
+      color: var(--m-text); overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    }
+    .sig-name  { color: oklch(0.80 0.18 155); }
+    .sig-class { color: oklch(0.76 0.16 265); }
+    .sig-ret   { color: oklch(0.72 0.14 45); }
+    .sig-param { color: var(--m-text-2); }
+    .api-desc-short { font-size: 12px; color: var(--m-text-3); flex-shrink: 0; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chevron { color: var(--m-text-3); transition: transform .2s; flex-shrink: 0; font-size: 12px; }
+    .api-card.open .chevron { transform: rotate(90deg); }
+    .api-card-body {
+      display: none; padding: 1rem 1.15rem; border-top: 1px solid var(--m-border);
+      background: rgba(7,7,14,0.6);
+    }
+    .api-card.open .api-card-body { display: block; }
+    .api-full-desc { font-size: 13px; color: var(--m-text-2); margin-bottom: 0.75rem; line-height: 1.6; }
+    .api-params { margin-bottom: 0.75rem; }
+    .api-params-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--m-text-3); margin-bottom: 6px; }
+    .param-row { display: flex; gap: 0; font-size: 12px; margin-bottom: 3px; }
+    .param-name { font-family: var(--m-mono); color: var(--m-text); min-width: 120px; }
+    .param-type { font-family: var(--m-mono); color: oklch(0.65 0.12 200); min-width: 100px; }
+    .param-desc { color: var(--m-text-2); }
+    .api-returns { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+    .returns-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--m-text-3); }
+    .returns-val { font-family: var(--m-mono); font-size: 12px; color: oklch(0.72 0.14 45); }
+    .api-standard { font-size: 11px; color: var(--m-text-3); margin-bottom: 6px; }
+    .api-note {
+      font-size: 12px; color: oklch(0.72 0.15 265); margin-bottom: 0.75rem;
+      padding: 6px 10px; border-radius: 6px;
+      background: rgba(108,99,255,0.06); border: 1px solid rgba(108,99,255,0.15);
+    }
+    .code-block {
+      background: #050510; border: 1px solid var(--m-border); border-radius: 8px;
+      padding: 0.85rem 1rem; font-family: var(--m-mono); font-size: 12px;
+      color: #c8d0e0; overflow-x: auto; position: relative;
+    }
+    .copy-btn {
+      position: absolute; top: 6px; right: 8px;
+      padding: 3px 9px; font-size: 11px; font-family: var(--m-mono);
+      background: var(--m-surface-2); border: 1px solid var(--m-border);
+      color: var(--m-text-3); border-radius: 4px; cursor: pointer; transition: all .2s;
+    }
+    .copy-btn:hover { color: var(--m-text); background: var(--m-surface); }
+
+    /* ── QUICKSTART SECTION ────────────────────────────────────────────── */
+    .qs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(480px, 1fr)); gap: 1rem; }
+    .qs-card {
+      border-radius: var(--m-radius); overflow: hidden;
+      border: 1px solid var(--m-border); background: var(--m-surface);
+    }
+    .qs-header {
+      padding: 1rem 1.25rem; border-bottom: 1px solid var(--m-border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .qs-num {
+      width: 22px; height: 22px; border-radius: 6px;
+      background: var(--m-grad); display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800; color: white; flex-shrink: 0;
+    }
+    .qs-title { font-size: 14px; font-weight: 600; color: var(--m-text); }
+    .qs-desc { font-size: 12px; color: var(--m-text-3); margin-left: auto; }
+
+    /* ── PHYSICS PANEL ─────────────────────────────────────────────────── */
+    .physics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 1rem; }
+    .physics-card {
+      background: var(--m-surface); border: 1px solid var(--m-border);
+      border-radius: var(--m-radius-sm); padding: 1.1rem 1.25rem;
+      transition: border-color .2s;
+    }
+    .physics-card:hover { border-color: rgba(108,99,255,0.25); }
+    .physics-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--m-text-3); margin-bottom: 0.6rem; }
+    .physics-vals { font-family: var(--m-mono); font-size: 13px; line-height: 1.8; }
+    .physics-vals span { color: var(--m-text-2); font-size: 12px; }
+
+    /* ── ARCHITECTURE DIAGRAM ──────────────────────────────────────────── */
+    .arch-box {
+      background: var(--m-surface); border: 1px solid var(--m-border);
+      border-radius: var(--m-radius); padding: 1.75rem 2rem;
+      font-family: var(--m-mono); font-size: 12.5px; line-height: 1.85;
+      color: var(--m-text-2); overflow-x: auto; white-space: pre;
+    }
+    .arch-accent { color: var(--m-accent); }
+    .arch-green  { color: var(--m-green); }
+    .arch-violet { color: var(--m-violet); }
+
+    /* ── INSTALL CALLOUT ───────────────────────────────────────────────── */
+    .install-box {
+      background: var(--m-surface); border: 1px solid var(--m-border-glow);
+      border-radius: var(--m-radius); padding: 1.5rem 2rem;
+      display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
+      margin-bottom: 2rem;
+      box-shadow: 0 0 30px rgba(108,99,255,0.05);
+    }
+    .install-box code {
+      font-family: var(--m-mono); font-size: 14px;
+      color: oklch(0.75 0.15 265);
+      background: rgba(108,99,255,0.06); padding: 4px 10px; border-radius: 6px;
+    }
+    .install-note { font-size: 12px; color: var(--m-text-3); }
+
+    /* ── FOOTER ────────────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--m-border);
+      padding: 3rem 2rem;
+      text-align: center;
+      position: relative; z-index: 1;
+    }
+    .footer-logo {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+    .footer-tagline {
+      font-size: 18px; font-weight: 800; letter-spacing: -0.03em;
+      background: var(--m-grad-text);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .footer-links { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .footer-links a {
+      font-size: 13px; color: var(--m-text-2); text-decoration: none; transition: color .2s;
+    }
+    .footer-links a:hover { color: var(--m-text); }
+    .footer-copy { font-size: 12px; color: var(--m-text-3); }
+    .footer-standards {
+      font-size: 11px; color: var(--m-text-3); font-family: var(--m-mono);
+      margin-top: 6px; letter-spacing: 0.04em;
+    }
+
+    /* ── RESPONSIVE ────────────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      header { padding: 0 1rem; }
+      .logo-tagline { display: none; }
+      .nav-link { display: none; }
+      section { padding: 3rem 1rem; }
+      .qs-grid { grid-template-columns: 1fr; }
+      .diagrams-grid { grid-template-columns: 1fr; }
+      .hero { padding: 4rem 1rem 3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ─────────────────────────────────────────────────────────── -->
+<header>
+  <a href="#" class="logo">
+    <div class="logo-mark">M</div>
+    <div class="logo-info">
+      <span class="logo-name">Momoto</span>
+      <span class="logo-tagline">Momoto decides. Momoto UI renders.</span>
+    </div>
+  </a>
+  <nav>
+    <a href="#architecture" class="nav-link">Architecture</a>
+    <a href="#api" class="nav-link">API</a>
+    <a href="#quickstart" class="nav-link">Quickstart</a>
+    <a href="https://github.com/zuclubit/momoto-ui" class="nav-link" target="_blank">GitHub ↗</a>
+    <a href="momoto.json" class="nav-cta">JSON Spec</a>
+  </nav>
+</header>
+
+<!-- ── HERO ───────────────────────────────────────────────────────────── -->
+<div class="hero">
+  <div class="hero-eyebrow">Rust → WebAssembly &nbsp;·&nbsp; v7.0.0 &nbsp;·&nbsp; MIT License</div>
+  <h1>Chromatic Intelligence<br/>for the Web</h1>
+  <p class="hero-sub">Perceptual color science, WCAG/APCA accessibility metrics, glass physics, and AI color recommendations — compiled to a single WASM module.</p>
+  <p class="hero-tagline"><strong>Momoto decides.</strong> &nbsp;Momoto UI renders.</p>
+  <div class="hero-actions">
+    <a href="#quickstart" class="btn btn-primary">⚡ Quickstart</a>
+    <a href="#api" class="btn btn-ghost">📖 API Reference</a>
+    <a href="https://github.com/zuclubit/momoto-ui" class="btn btn-ghost" target="_blank">★ GitHub</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-n">9</div><div class="stat-l">WASM Modules</div></div>
+    <div class="stat"><div class="stat-n">150+</div><div class="stat-l">Public Functions</div></div>
+    <div class="stat"><div class="stat-n">483</div><div class="stat-l">SIREN Params</div></div>
+    <div class="stat"><div class="stat-n">7</div><div class="stat-l">Harmony Types</div></div>
+    <div class="stat"><div class="stat-n">40+</div><div class="stat-l">Physics Files</div></div>
+    <div class="stat"><div class="stat-n">3</div><div class="stat-l">CVD Types</div></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ── VISUAL DIAGRAMS ─────────────────────────────────────────────────── -->
+<section id="how-it-works">
+  <p class="section-label">Visual Architecture</p>
+  <h2>How <span>Momoto</span> Works</h2>
+  <p class="section-desc">Momoto is not a palette picker. It is a physics-accurate perceptual pipeline: from raw OKLCH mathematics through neural correction to validated, accessible output.</p>
+
+  <div class="diagrams-grid">
+    <div class="diagram-card" onclick="openModal('assets/momoto-ui-geno1.png', 'SIREN Neural Correction Flow')">
+      <img src="assets/momoto-ui-geno1.png"
+           alt="Flujo de Corrección Neural en Momoto — pipeline from rendered input through SIREN neural analysis to perceptually corrected output"
+           loading="lazy" />
+      <div class="diagram-caption">
+        <h3>SIREN Neural Correction Flow</h3>
+        <p>The SIREN network (9→16→16→3, 483 params) analyzes background/foreground OKLCH pairs and computes perceptual correction deltas (ΔL, ΔC, ΔH) to maximize both contrast compliance and visual harmony.</p>
+        <span class="diagram-tag">momoto-wasm · siren.rs</span>
+      </div>
+    </div>
+
+    <div class="diagram-card" onclick="openModal('assets/momoto-ui-geno2.png', 'Momoto AI Visual Generator Process')">
+      <img src="assets/momoto-ui-geno2.png"
+           alt="Proceso Esperado para Momoto AI Visual Generator — 4-phase pipeline: Recommendation, Configuration, Rendering, Validation"
+           loading="lazy" />
+      <div class="diagram-caption">
+        <h3>AI Visual Generator Pipeline</h3>
+        <p>Four-phase AI pipeline: the agent recommends colors from momoto-intelligence, applies advanced materials from momoto-materials, generates visuals through the GPU/WebGL pipeline, and validates output through momoto-metrics.</p>
+        <span class="diagram-tag">momoto-agent · momoto-materials</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── ARCHITECTURE ─────────────────────────────────────────────────────── -->
+<section id="architecture">
+  <p class="section-label">Technical Architecture</p>
+  <h2>Rust → WASM → <span>TypeScript</span></h2>
+  <p class="section-desc">Nine specialized crates, compiled to a single WASM module via wasm-bindgen. The TypeScript layer follows hexagonal architecture: domain → application → adapters → infrastructure.</p>
+  <div class="arch-box" id="arch-diagram"></div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── MODULES OVERVIEW ─────────────────────────────────────────────────── -->
+<section id="modules">
+  <p class="section-label">API Surface</p>
+  <h2>Nine Specialized <span>Modules</span></h2>
+  <p class="section-desc">Each module is independently importable. Mix what you need — use only color metrics, only materials, or the full stack.</p>
+  <div class="modules-grid" id="modules-grid"></div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── QUICKSTART ──────────────────────────────────────────────────────── -->
+<section id="quickstart">
+  <p class="section-label">Get Started</p>
+  <h2><span>Quickstart</span> Examples</h2>
+  <p class="section-desc">Production-ready code. Copy, run, ship.</p>
+
+  <div class="install-box">
+    <div>
+      <div style="font-size:13px;color:var(--m-text-2);margin-bottom:6px">Install</div>
+      <code>npm install momoto-wasm</code>
+    </div>
+    <div style="width:1px;background:var(--m-border);align-self:stretch"></div>
+    <div>
+      <div style="font-size:13px;color:var(--m-text-2);margin-bottom:6px">Local (monorepo)</div>
+      <code>"momoto-wasm": "file:./momoto/crates/momoto-wasm/pkg"</code>
+    </div>
+    <div>
+      <p class="install-note">⚠️ Always call <code style="background:none;padding:0;color:var(--m-accent)">await init()</code> before any WASM function.</p>
+    </div>
+  </div>
+
+  <div class="qs-grid" id="qs-grid"></div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── API EXPLORER ────────────────────────────────────────────────────── -->
+<section id="api">
+  <p class="section-label">API Reference</p>
+  <h2>Complete <span>Function Reference</span></h2>
+  <div class="search-row">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" id="search" placeholder="Search functions, classes, parameters…" oninput="onSearch(this.value)" />
+    </div>
+    <div class="filter-pills" id="filter-pills"></div>
+  </div>
+  <div class="api-grid" id="api-grid"></div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── PHYSICS CONSTANTS ───────────────────────────────────────────────── -->
+<section id="constants">
+  <p class="section-label">Reference</p>
+  <h2>Physics & Algorithm <span>Constants</span></h2>
+  <div class="physics-grid">
+    <div class="physics-card">
+      <div class="physics-label">WCAG 2.1 Contrast</div>
+      <div class="physics-vals">
+        AA Normal: <span>4.5:1</span><br/>AA Large: <span>3.0:1</span><br/>AAA Normal: <span>7.0:1</span><br/>AAA Large: <span>4.5:1</span>
+      </div>
+    </div>
+    <div class="physics-card">
+      <div class="physics-label">APCA-W3 v0.1.9 (Lc)</div>
+      <div class="physics-vals">
+        Body text: <span>≥75</span><br/>Heading: <span>≥60</span><br/>Caption: <span>≥90</span><br/>Max Lc: <span>106</span>
+      </div>
+    </div>
+    <div class="physics-card">
+      <div class="physics-label">SIREN Architecture</div>
+      <div class="physics-vals">
+        Layers: <span>[9,16,16,3]</span><br/>Params: <span>483</span><br/>ω₀: <span>30.0</span><br/>Seed: <span>421337</span>
+      </div>
+    </div>
+    <div class="physics-card">
+      <div class="physics-label">Thin Film (nm)</div>
+      <div class="physics-vals">
+        Visible: <span>380–700nm</span><br/>Soap bubble: <span>100–800nm</span><br/>Water IOR: <span>1.33</span><br/>Glass IOR: <span>1.52</span>
+      </div>
+    </div>
+    <div class="physics-card">
+      <div class="physics-label">Metal IOR (n, k)</div>
+      <div class="physics-vals">
+        Gold: <span>0.17, 3.5</span><br/>Silver: <span>0.05, 4.2</span><br/>Copper: <span>0.25, 2.8</span><br/>Chrome: <span>3.17, 3.31</span>
+      </div>
+    </div>
+    <div class="physics-card">
+      <div class="physics-label">Color Spaces</div>
+      <div class="physics-vals">
+        OKLCH L: <span>[0, 1]</span><br/>OKLCH H: <span>[0, 360°)</span><br/>HCT Tone: <span>[0, 100]</span><br/>BSDF: <span>R+T+A = 1</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ──────────────────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-logo">
+    <div class="logo-mark" style="width:38px;height:38px;font-size:18px">M</div>
+    <div class="footer-tagline">Momoto Engine</div>
+  </div>
+  <div class="footer-links">
+    <a href="https://github.com/zuclubit/momoto-ui" target="_blank">GitHub ↗</a>
+    <a href="momoto.json">JSON Spec</a>
+    <a href="llms.txt">llms.txt</a>
+    <a href="#api">API Reference</a>
+    <a href="#quickstart">Quickstart</a>
+    <a href="#constants">Constants</a>
+  </div>
+  <p class="footer-copy">v7.0.0 · MIT License · © 2026 Zuclubit</p>
+  <p class="footer-standards">WCAG 2.1 · APCA-W3 v0.1.9 · HCT/CAM16 · Cook-Torrance · Oren-Nayar · Thin-Film TM · Viénot CVD · SIREN · Perlin fBm</p>
+</footer>
+
+<!-- ── MODAL ───────────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal" onclick="closeModal()">
+  <button class="modal-close" onclick="closeModal()">✕</button>
+  <img class="modal-img" id="modal-img" src="" alt="" />
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────
+
+const MODULES = [
+  { key:'hct',          icon:'⬡', name:'HCT Color Space',       desc:'Google Material Design 3 perceptual model. CAM16 hue + CIELAB tone. Guaranteed gamut-safe tonal palettes.', fns:8 },
+  { key:'core',         icon:'◈', name:'Core & Luminance',       desc:'OKLCH, OKLab, LinearRGBA. WCAG + APCA metrics, gamma conversion, batch luminance, math utilities.', fns:18 },
+  { key:'intelligence', icon:'◉', name:'Intelligence',           desc:'AI color recommendations, perceptual scoring, 7 harmony types, CVD simulation (Viénot 1999), constraint solving.', fns:12 },
+  { key:'materials',    icon:'◬', name:'Materials & Physics',    desc:'Cook-Torrance BRDF, Oren-Nayar diffuse, thin-film interference, refraction, lighting, PBR glass.', fns:10 },
+  { key:'temporal',     icon:'◷', name:'Temporal Materials',     desc:'Time-evolving physics: drying paint, soap bubbles, heated metals. Energy-conserving (R+T+A=1).', fns:7 },
+  { key:'procedural',   icon:'⬦', name:'Procedural Noise',       desc:'Perlin fBm for material micro-textures. Same seed → same field every frame (animation-safe).', fns:5 },
+  { key:'siren',        icon:'◎', name:'SIREN Neural Network',   desc:'9→16→16→3 network (483 params, ω₀=30) for perceptual color correction. Deterministic.', fns:6 },
+  { key:'events',       icon:'◌', name:'Events & Streaming',     desc:'Pub/sub event bus + SSE-compatible stream. Progress, metrics, validation, custom events.', fns:15 },
+  { key:'agent',        icon:'◩', name:'Agent API',              desc:'High-level JSON query/response interface. Validation, recommendations, batch operations.', fns:10 },
+];
+
+const API_ITEMS = [
+  // HCT
+  { mod:'hct', type:'fn', name:'hexToHct', sig:'hexToHct(hex)', desc:'Convert hex to flat [hue, chroma, tone].', returns:'Float64Array [H,C,T]', example:'const [h,c,t] = hexToHct("#3a7bd5"); // h≈250, c≈38, t≈47' },
+  { mod:'hct', type:'fn', name:'hctToHex', sig:'hctToHex(hue,chroma,tone)', desc:'HCT components to hex string. Auto gamut-clamps.', returns:'string "#rrggbb"', example:'hctToHex(250, 40, 60) // "#3370cc"' },
+  { mod:'hct', type:'fn', name:'hctTonalPalette', sig:'hctTonalPalette(hue,chroma)', desc:'Generate 13-tone MD3 palette at tones [0,10,20,30,40,50,60,70,80,90,95,99,100]. Returns 39 floats.', returns:'Float64Array (39 values: 13×[H,C,T])', example:'const pal = hctTonalPalette(250, 40);\nfor(let i=0;i<13;i++) console.log(hctToHex(pal[i*3],pal[i*3+1],pal[i*3+2]));' },
+  { mod:'hct', type:'fn', name:'hctMaxChroma', sig:'hctMaxChroma(hue,tone)', desc:'Maximum sRGB-gamut chroma for given hue+tone via binary search (50 iterations).', returns:'number', example:'const maxC = hctMaxChroma(250, 60); // ~48' },
+  { mod:'hct', type:'class', name:'HCT', sig:'new HCT(hue,chroma,tone)', desc:'HCT color object. Methods: fromHex, fromArgb, toHex, toArgb, toOklch, withTone, withChroma, withHue, clampToGamut.', example:'const c = HCT.fromHex("#3a7bd5");\nconsole.log(c.hue, c.chroma, c.tone);\nconst darker = c.withTone(30).toHex();' },
+  // CORE
+  { mod:'core', type:'fn', name:'wcagContrastRatio', sig:'wcagContrastRatio(fg,bg)', desc:'WCAG contrast ratio = (L_lighter+0.05)/(L_darker+0.05). Range [1, 21].', returns:'number [1,21]', standard:'WCAG 2.1 §1.4.3', example:'const ratio = wcagContrastRatio(Color.fromHex("#000"), Color.fromHex("#fff"));\n// 21.0' },
+  { mod:'core', type:'fn', name:'wcagPasses', sig:'wcagPasses(ratio,level,isLarge)', desc:'Check WCAG compliance. level: 0=AA (4.5:1 / 3:1 large), 1=AAA (7:1 / 4.5:1 large).', returns:'boolean', example:'wcagPasses(4.5, 0, false) // true — AA normal text\nwcagPasses(4.5, 1, false) // false — AAA needs 7:1' },
+  { mod:'core', type:'fn', name:'relativeLuminanceSrgb', sig:'relativeLuminanceSrgb(color)', desc:'WCAG 2.1 relative luminance Y∈[0,1] per IEC 61966-2-1.', standard:'WCAG 2.1 / IEC 61966-2-1', example:'relativeLuminanceSrgb(Color.fromHex("#3a7bd5")) // 0.149' },
+  { mod:'core', type:'fn', name:'relativeLuminanceBatch', sig:'relativeLuminanceBatch(rgbData)', desc:'Batch WCAG luminance. Input: Uint8Array [r,g,b, r,g,b, ...]. Length must be multiple of 3.', returns:'Float64Array', example:'const lums = relativeLuminanceBatch(new Uint8Array([255,0,0, 0,255,0]));\n// [0.2126, 0.7152]' },
+  { mod:'core', type:'fn', name:'wcagContrastRatioBatch', sig:'wcagContrastRatioBatch(pairs)', desc:'Batch WCAG ratios. Input: Uint8Array [fg_r,fg_g,fg_b,bg_r,bg_g,bg_b,...]. Length must be multiple of 6.', returns:'Float64Array' },
+  { mod:'core', type:'fn', name:'isLargeText', sig:'isLargeText(fontSizePx,fontWeight)', desc:'Check WCAG large-text: 18pt+ regular or 14pt+ bold (700+).', example:'isLargeText(24, 400) // true\nisLargeText(14, 700) // true (bold)' },
+  { mod:'core', type:'fn', name:'apcaConstants', sig:'apcaConstants()', desc:'Get APCA-W3 v0.1.9 algorithm constants as JSON: mainTrc, sRco, sGco, sBco, blkThrs, blkClmp, normBg, normTxt, etc.', returns:'object', standard:'APCA-W3 v0.1.9' },
+  { mod:'core', type:'fn', name:'srgbToLinear', sig:'srgbToLinear(value)', desc:'sRGB gamma decoding IEC 61966-2-1. Encoded [0,1] → linear [0,1].', example:'srgbToLinear(0.5) // 0.2140' },
+  { mod:'core', type:'class', name:'OKLab.interpolate', sig:'OKLab.interpolate(from,to,t)', desc:'Perceptually uniform linear interpolation in OKLab space.', example:'const mid = OKLab.interpolate(a.toOklab(), b.toOklab(), 0.5).toColor();' },
+  { mod:'core', type:'class', name:'OKLab.deltaE', sig:'lab.deltaE(other)', desc:'Euclidean distance in OKLab — perceptual color difference.', returns:'number', example:'const diff = a.toOklab().deltaE(b.toOklab()); // ~0.1 = barely noticeable' },
+  // INTELLIGENCE
+  { mod:'intelligence', type:'class', name:'RecommendationEngine', sig:'new RecommendationEngine()', desc:'Color recommendation engine. Optimizes foreground for accessibility + perceptual quality.', example:'const engine = new RecommendationEngine();\nconst rec = engine.recommendForeground("#1a1a2e", "body_text", "wcag_aa");\nconsole.log(rec.hex, rec.score, rec.passes);' },
+  { mod:'intelligence', type:'fn', name:'generatePalette', sig:'generatePalette(baseColor,harmonyType,count)', desc:'Generate harmonious palette. harmonyType: "complementary" | "triadic" | "analogous" | "split_complementary" | "tetradic" | "square" | "monochromatic".', returns:'string[]', example:'const triad = generatePalette("#3a7bd5", "triadic", 3);' },
+  { mod:'intelligence', type:'fn', name:'generateShades', sig:'generateShades(color,count)', desc:'Generate perceptual shades (light→dark) in OKLCH. Typical count: 5–11.', example:'const shades = generateShades("#3a7bd5", 9);' },
+  { mod:'intelligence', type:'fn', name:'simulateCVD', sig:'simulateCVD(hex,cvdType,severity)', desc:'Simulate color vision deficiency. Viénot 1999 row-stochastic matrices in linear sRGB. D65 white preserved exactly.', params:{hex:'string',cvdType:'"protanopia"|"deuteranopia"|"tritanopia"',severity:'number [0,1]'}, note:'Uses Viénot 1999, NOT Brettel 1997 (Brettel uses equal-energy white E — causes white-shift with D65).', returns:'string hex', example:'const sim = simulateCVD("#3a7bd5", "protanopia", 1.0);' },
+  { mod:'intelligence', type:'fn', name:'solveColorConstraints', sig:'solveColorConstraints(constraints,initialColor)', desc:'Penalty-method optimization to find a color satisfying multiple constraints simultaneously.', returns:'{ hex, score, iterations, converged }', example:'const r = solveColorConstraints([\n  { type: "wcag_aa", against: "#fff" },\n  { type: "lightness_range", min: 0.3, max: 0.7 }\n], "#888");' },
+  // MATERIALS
+  { mod:'materials', type:'fn', name:'cookTorranceBRDF', sig:'cookTorranceBRDF(normal,view,light,roughness,ior,cosTheta)', desc:'Cook-Torrance microfacet BRDF: GGX NDF + Smith G2 + Schlick Fresnel. Energy conserving.', standard:'Cook & Torrance 1982; GGX: Walter 2007; Smith G2: Heitz 2014', example:'const s = cookTorranceBRDF([0,1,0],[0,1,0],[0.7,0.7,0], 0.2, 1.5, 0.8);' },
+  { mod:'materials', type:'fn', name:'orenNayarBRDF', sig:'orenNayarBRDF(roughness,normal,view,light)', desc:'Oren-Nayar diffuse BRDF. Generalizes Lambertian with inter-facet masking for rough surfaces.', standard:'Oren & Nayar 1994' },
+  { mod:'materials', type:'fn', name:'thinFilmToRgb', sig:'thinFilmToRgb(thickness,ior,incidentAngle,illuminantType)', desc:'Thin-film interference color. Transfer-matrix method, 380–700nm spectrum, CIE 1931 CMFs.', params:{thickness:'nm (200–800 for visible)',ior:'film IOR',incidentAngle:'radians',illuminantType:'0=D65, 1=A, 2=F2'}, returns:'Float64Array [r,g,b]', example:'const [r,g,b] = thinFilmToRgb(350, 1.33, 0.0, 0); // soap bubble' },
+  { mod:'materials', type:'fn', name:'gradientToCss', sig:'gradientToCss(env,curvature,shininess,samples,baseL,baseC,baseH)', desc:'Generate CSS linear-gradient string for glass surface rendering.', returns:'string CSS gradient' },
+  { mod:'materials', type:'fn', name:'materialToDominantColor', sig:'materialToDominantColor(material,context)', desc:'Extract dominant perceptual color from material definition given lighting context.', returns:'string hex' },
+  // TEMPORAL
+  { mod:'temporal', type:'class', name:'TemporalMaterial', sig:'new TemporalMaterial(roughnessBase,roughnessTarget,roughnessTau,iorBase)', desc:'Time-evolving dielectric. Roughness evolves exponentially. Presets: .dryingPaint(), .weatheringGlass(). All BSDF evaluations guarantee R+T+A=1.0.', example:'const paint = TemporalMaterial.dryingPaint();\nconst [r,t,a] = paint.evalAtTime(30, 0.8); // halfway through drying' },
+  { mod:'temporal', type:'class', name:'TemporalThinFilmMaterial', sig:'new TemporalThinFilmMaterial(thicknessBase,amplitude,frequencyHz,filmIor,substrateIor)', desc:'Oscillating thin-film — iridescent color shifts over time. Presets: .soapBubble(), .oilSlick().', example:'const bubble = TemporalThinFilmMaterial.soapBubble();\nconst tl = bubble.sampleTimeline(3.0, 180, 0.8); // 3s @ 60fps' },
+  { mod:'temporal', type:'class', name:'TemporalConductorMaterial', sig:'new TemporalConductorMaterial(nBase,kBase,roughness,nTempCoeff,kTempCoeff)', desc:'Temperature-dependent conductor. Presets: .heatedGold(), .heatedCopper().', example:'const gold = TemporalConductorMaterial.heatedGold();\nconst [r,t,a] = gold.evalAtTemperature(800, 0.8); // glowing' },
+  // PROCEDURAL
+  { mod:'procedural', type:'class', name:'ProceduralNoise', sig:'new ProceduralNoise(seed,octaves,persistence,lacunarity)', desc:'Improved Perlin fBm. Same seed → same field. Presets: .frosted() 6oct, .regular() 3oct, .clear() 1oct, .thick() 4oct.', example:'const noise = ProceduralNoise.frosted();\nconst v = noise.sample(1.5, 2.3); // [0,1]' },
+  { mod:'procedural', type:'fn', name:'variationField', sig:'variationField(baseIor,variation,cols,rows,seed)', desc:'2D IOR variation field for frosted-glass distortion maps.', returns:'Float64Array [baseIor±variation]', example:'const iorMap = variationField(1.5, 0.05, 256, 256, 42);' },
+  // SIREN
+  { mod:'siren', type:'fn', name:'computeSirenCorrection', sig:'computeSirenCorrection(bgL,bgC,bgH,fgL,fgC,fgH,apcaLc,wcagRatio,quality)', desc:'SIREN forward pass: compute perceptual correction deltas for OKLCH pair. Inputs normalized internally.', returns:'SirenCorrection { deltaL∈[−0.15,0.15], deltaC∈[−0.05,0.05], deltaH∈[−10°,10°] }', example:'const corr = computeSirenCorrection(0.15,0.1,250, 0.9,0.02,250, 75,8.5,70);\nconst [L,C,H] = applySirenCorrection(0.9,0.02,250, corr.deltaL,corr.deltaC,corr.deltaH);' },
+  { mod:'siren', type:'fn', name:'computeSirenCorrectionBatch', sig:'computeSirenCorrectionBatch(inputs)', desc:'Batch SIREN inference. Input flat Float64Array (multiples of 9). Returns flat [dL,dC,dH,...].', example:'const batch = computeSirenCorrectionBatch(new Float64Array([...inputs]));' },
+  { mod:'siren', type:'fn', name:'sirenMetadata', sig:'sirenMetadata()', desc:'Get network metadata: architecture, totalParams, omega0, seed, activations, clampRanges.', returns:'object' },
+  // EVENTS
+  { mod:'events', type:'class', name:'MomotoEventBus', sig:'new MomotoEventBus()', desc:'Pub/sub event bus. Supports filtered subscriptions, buffer, max-age. Categories: progress, metrics, recommendation, validation, error, system, chart, heartbeat, custom.', example:'const bus = new MomotoEventBus();\nbus.subscribe(e => updateUI(e.category, e.payload));\nbus.emitProgress("engine", 50, "Analyzing…");' },
+  { mod:'events', type:'class', name:'MomotoEventStream', sig:'MomotoEventStream.fromBus(bus)', desc:'SSE-compatible streaming consumer. Poll-based: call poll() each frame. Supports pause/resume/close.', example:'const stream = MomotoEventStream.fromBus(bus);\n// In render loop:\nstream.poll().forEach(e => handleEvent(e));' },
+  // AGENT
+  { mod:'agent', type:'fn', name:'agentValidatePair', sig:'agentValidatePair(fg,bg,standard,level)', desc:'Validate fg/bg contrast. standard: "wcag"|"apca", level: "aa"|"aaa".', returns:'JSON: { passes, ratio, level }', example:'const r = JSON.parse(agentValidatePair("#000","#fff","wcag","aa"));\n// { passes: true, ratio: 21.0, level: "aaa" }' },
+  { mod:'agent', type:'fn', name:'agentGetMetrics', sig:'agentGetMetrics(color)', desc:'Comprehensive metrics: hex, oklch, hct, luminance.', returns:'JSON string', example:'const m = JSON.parse(agentGetMetrics("#3a7bd5"));\n// { hex, oklch, hct, luminance: 0.149 }' },
+  { mod:'agent', type:'class', name:'ContractBuilder', sig:'new ContractBuilder()', desc:'Fluent constraint builder. Methods: .minContrastWcagAa(against), .minContrastWcagAaa, .inSrgb, .inP3, .lightnessRange(min,max), .chromaRange(min,max).', example:'const c = new ContractBuilder().minContrastWcagAa("#fff").lightnessRange(0.2,0.7);\nagentValidate("#3a7bd5", JSON.stringify(c));' },
+];
+
+const QS_EXAMPLES = [
+  { title:'WCAG AA Compliance', desc:'Check contrast ratio', code:`import init, { Color, wcagContrastRatio, wcagPasses } from 'momoto-wasm';
+await init();
+const fg = Color.fromHex('#1a1a2e');
+const bg = Color.fromHex('#f0f4ff');
+const ratio = wcagContrastRatio(fg, bg);
+const aa = wcagPasses(ratio, 0, false);
+console.log(\`\${ratio.toFixed(2)}:1 — AA: \${aa}\`);` },
+  { title:'HCT Tonal Palette (MD3)', desc:'13-tone Material Design 3 palette', code:`import init, { hexToHct, hctTonalPalette, hctToHex } from 'momoto-wasm';
+await init();
+const [hue, chroma] = hexToHct('#3a7bd5');
+const pal = hctTonalPalette(hue, chroma);
+const tones = [0,10,20,30,40,50,60,70,80,90,95,99,100];
+for (let i = 0; i < 13; i++) {
+  const hex = hctToHex(pal[i*3], pal[i*3+1], pal[i*3+2]);
+  console.log(\`Tone \${tones[i]}: \${hex}\`);
+}` },
+  { title:'Cook-Torrance BRDF', desc:'Physical specular reflectance (PBR)', code:`import init, { cookTorranceBRDF } from 'momoto-wasm';
+await init();
+const brdf = cookTorranceBRDF(
+  new Float64Array([0, 1, 0]),     // surface normal
+  new Float64Array([0, 1, 0]),     // view direction
+  new Float64Array([0.7, 0.7, 0]), // light direction
+  0.2, 1.5, 0.8                   // roughness, IOR, cosTheta
+);
+console.log(\`Specular: \${brdf.toFixed(4)}\`);` },
+  { title:'CVD Simulation', desc:'Simulate protanopia color blindness', code:`import init, { simulateCVD, cvdDeltaE } from 'momoto-wasm';
+await init();
+const original = '#3a7bd5';
+const simulated = simulateCVD(original, 'protanopia', 1.0);
+const deltaE = cvdDeltaE(original, 'protanopia');
+console.log('Original: ', original);
+console.log('Simulated:', simulated);
+console.log('ΔE OKLab: ', deltaE.toFixed(3));` },
+  { title:'Soap Bubble Timeline', desc:'Animate thin-film iridescence at 60fps', code:`import init, { TemporalThinFilmMaterial } from 'momoto-wasm';
+await init();
+const bubble = TemporalThinFilmMaterial.soapBubble();
+// 3 seconds at 60fps = 180 samples
+const timeline = bubble.sampleTimeline(3.0, 180, 0.8);
+for (let i = 0; i < 10; i++) {
+  const t = timeline[i*2];
+  const r = timeline[i*2+1];
+  console.log(\`t=\${t.toFixed(2)}s: R=\${r.toFixed(4)}\`);
+}` },
+  { title:'SIREN Neural Correction', desc:'Perceptual correction via neural network', code:`import init, { computeSirenCorrection, applySirenCorrection } from 'momoto-wasm';
+await init();
+const corr = computeSirenCorrection(
+  0.15, 0.10, 250,   // background OKLCH
+  0.55, 0.03, 250,   // foreground OKLCH
+  75.0, 4.5, 65.0    // APCA Lc, WCAG ratio, quality
+);
+console.log('ΔL', corr.deltaL.toFixed(4), 'ΔC', corr.deltaC.toFixed(4), 'ΔH', corr.deltaH.toFixed(2) + '°');
+const [L, C, H] = applySirenCorrection(
+  0.55, 0.03, 250, corr.deltaL, corr.deltaC, corr.deltaH
+);` },
+];
+
+const ARCH_TEXT = `┌─────────────── momoto-wasm ─── Public WASM API surface ──────────────────┐
+│                                                                            │
+│  hct.rs         ← HCT/CAM16 color space                                   │
+│  core_ext.rs    ← OKLCH, OKLab, luminance, WCAG, APCA helpers             │
+│  intelligence.rs← Recommendations, scoring, harmony, CVD, constraints     │
+│  materials_ext.rs← Cook-Torrance, Oren-Nayar, thin-film, refraction       │
+│  temporal.rs    ← Time-evolving dielectric, thin-film, conductor          │
+│  procedural.rs  ← Perlin fBm noise, IOR variation fields                  │
+│  siren.rs       ← Neural network [9→16→16→3], 483 params, ω₀=30          │
+│  events.rs      ← Pub/sub bus + SSE-compatible streaming                  │
+│  agent.rs       ← High-level JSON query/response API                      │
+│                                                                            │
+├─────────────── Rust Crates ──────────────────────────────────────────────┤
+│                                                                            │
+│  momoto-core        Color, OKLCH, OKLab, HCT, luminance, gamma           │
+│  momoto-metrics     WCAG 2.1 (AA/AAA), APCA-W3 v0.1.9                    │
+│  momoto-intelligence Recommendations, harmony, CVD, constraint solver     │
+│  momoto-materials   40+ physics files: BRDFs, thin-film, Perlin, SSS     │
+│  momoto-agent       Contracts, workflows, sessions, certification         │
+│  momoto-events      Pub/sub, EventBroadcaster, EventStream               │
+│  momoto-engine      (stub — future SIMD/WASM performance layer)          │
+│                                                                            │
+├─────────────── TypeScript (src/) ────────────────────────────────────────┤
+│                                                                            │
+│  domain/        Color entities, tokens, perceptual value objects          │
+│  application/   Use cases: generate palette, validate contrast, export    │
+│  adapters/      React, Angular, Vue, Svelte, CSS, Tailwind                │
+│  infrastructure/ WASM bridge (MomotoBridge.ts), W3C token exporter       │
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘`;
+
+// ── RENDER ─────────────────────────────────────────────────────────────────
+
+function renderArch() {
+  document.getElementById('arch-diagram').textContent = ARCH_TEXT;
+}
+
+function renderModules() {
+  document.getElementById('modules-grid').innerHTML = MODULES.map(m => `
+    <div class="module-card" onclick="filterByMod('${m.key}')">
+      <div class="module-icon">${m.icon}</div>
+      <h3>${m.name}</h3>
+      <p>${m.desc}</p>
+      <span class="module-count">${m.fns} functions</span>
+    </div>`).join('');
+}
+
+function renderPills() {
+  const pills = [['all','All'], ...MODULES.map(m => [m.key, m.name.split(' ')[0]])];
+  document.getElementById('filter-pills').innerHTML = pills.map(([k,l]) =>
+    `<button class="pill${k==='all'?' active':''}" onclick="filterByMod('${k}')">${l}</button>`
+  ).join('');
+}
+
+function renderQS() {
+  document.getElementById('qs-grid').innerHTML = QS_EXAMPLES.map((ex,i) => `
+    <div class="qs-card">
+      <div class="qs-header">
+        <span class="qs-num">${i+1}</span>
+        <span class="qs-title">${ex.title}</span>
+        <span class="qs-desc">${ex.desc}</span>
+      </div>
+      <div class="code-block" style="border-radius:0;border:none;border-top:1px solid var(--m-border)">
+        <button class="copy-btn" onclick="copyCode(this,'${escAttr(ex.code)}')">copy</button>
+        <pre style="white-space:pre-wrap">${escHtml(ex.code)}</pre>
+      </div>
+    </div>`).join('');
+}
+
+let currentMod = 'all';
+let currentQ   = '';
+
+function renderAPI() {
+  const items = API_ITEMS.filter(item => {
+    if (currentMod !== 'all' && item.mod !== currentMod) return false;
+    if (currentQ) {
+      const q = currentQ.toLowerCase();
+      return item.name.toLowerCase().includes(q) ||
+             item.sig.toLowerCase().includes(q) ||
+             item.desc.toLowerCase().includes(q);
+    }
+    return true;
+  });
+
+  if (!items.length) {
+    document.getElementById('api-grid').innerHTML = '<p style="color:var(--m-text-3);padding:2rem">No results. Try a different search.</p>';
+    return;
+  }
+
+  document.getElementById('api-grid').innerHTML = items.map((item,i) => {
+    const coloredSig = item.sig
+      .replace(/^([A-Z][a-zA-Z]+)\./, '<span class="sig-class">$1</span>.')
+      .replace(/^([a-z][a-zA-Z]+)(\(|$)/, '<span class="sig-name">$1</span>$2');
+
+    const paramsHtml = item.params ? `
+      <div class="api-params">
+        <div class="api-params-title">Parameters</div>
+        ${Object.entries(item.params).map(([k,v]) =>
+          `<div class="param-row"><span class="param-name">${k}</span><span class="param-desc">${v}</span></div>`
+        ).join('')}
+      </div>` : '';
+
+    const exCode = item.example || '';
+
+    return `
+      <div class="api-card" id="card-${i}">
+        <div class="api-card-header" onclick="toggleCard('card-${i}')">
+          <span class="type-pill type-${item.type}">${item.type}</span>
+          <span class="api-sig">${coloredSig}</span>
+          <span class="api-desc-short">${item.desc.slice(0,60)}${item.desc.length>60?'…':''}</span>
+          <span class="chevron">›</span>
+        </div>
+        <div class="api-card-body">
+          <p class="api-full-desc">${item.desc}</p>
+          ${item.note ? `<p class="api-note">ⓘ ${item.note}</p>` : ''}
+          ${paramsHtml}
+          ${item.returns ? `<div class="api-returns"><span class="returns-label">Returns</span><span class="returns-val">${item.returns}</span></div>` : ''}
+          ${item.standard ? `<div class="api-standard">Standard: ${item.standard}</div>` : ''}
+          ${exCode ? `<div class="code-block" style="margin-top:0.75rem">
+            <button class="copy-btn" onclick="copyCode(this,'${escAttr(exCode)}')">copy</button>
+            <pre style="white-space:pre-wrap">${escHtml(exCode)}</pre>
+          </div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── INTERACTIONS ───────────────────────────────────────────────────────────
+
+function toggleCard(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+function filterByMod(mod) {
+  currentMod = mod;
+  document.querySelectorAll('.pill').forEach(p => p.classList.toggle('active', p.textContent.toLowerCase().trim() === (mod === 'all' ? 'all' : MODULES.find(m=>m.key===mod)?.name.split(' ')[0].toLowerCase() || mod)));
+  document.getElementById('search').value = '';
+  currentQ = '';
+  renderAPI();
+  document.getElementById('api').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function onSearch(q) {
+  currentQ = q;
+  renderAPI();
+}
+
+function openModal(src, alt) {
+  const modal = document.getElementById('modal');
+  const img   = document.getElementById('modal-img');
+  img.src = src; img.alt = alt;
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+function copyCode(btn, code) {
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = '✓ copied';
+    setTimeout(() => btn.textContent = 'copy', 1500);
+  });
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/"/g,'&quot;').replace(/\n/g,'\\n').replace(/'/g,"\\'"); }
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+
+renderArch();
+renderModules();
+renderPills();
+renderQS();
+renderAPI();
+</script>
+</body>
+</html>

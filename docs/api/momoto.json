@@ -1,0 +1,1127 @@
+{
+  "$schema": "https://zuclubit.github.io/momoto-ui/momoto.json",
+  "info": {
+    "title": "Momoto Engine API",
+    "version": "7.0.0",
+    "description": "Chromatic intelligence and material physics engine compiled to WebAssembly. Provides perceptual color science, accessibility metrics, glass physics, and AI-powered design recommendations.",
+    "homepage": "https://zuclubit.github.io/momoto-ui/",
+    "license": { "name": "MIT" },
+    "contact": { "name": "Zuclubit", "url": "https://github.com/zuclubit/momoto-ui" },
+    "tags": ["color", "accessibility", "materials", "wasm", "design-system"],
+    "runtime": {
+      "language": "Rust",
+      "target": "WebAssembly (wasm32-unknown-unknown)",
+      "bindgen": "wasm-bindgen 0.2",
+      "edition": "2021",
+      "rustVersion": "≥1.70"
+    }
+  },
+
+  "modules": {
+
+    "hct": {
+      "description": "HCT (Hue-Chroma-Tone) color space — Google Material Design 3 perceptual model based on CAM16 and CIELAB.",
+      "import": "import init, { HCT, hexToHct, hctToHex, hctTonalPalette, hctMaxChroma } from 'momoto-wasm'",
+      "classes": {
+        "HCT": {
+          "description": "HCT color wrapper. Hue is CAM16 angle (0–360°), Chroma is CAM16 chroma (≥0), Tone is CIELAB L* (0=black, 100=white).",
+          "constructors": [
+            {
+              "signature": "new HCT(hue: number, chroma: number, tone: number): HCT",
+              "params": {
+                "hue": "CAM16 hue angle, degrees [0, 360)",
+                "chroma": "CAM16 chroma, non-negative",
+                "tone": "CIELAB L*, [0, 100]"
+              },
+              "example": "const c = new HCT(250, 40, 60);"
+            }
+          ],
+          "staticMethods": [
+            {
+              "name": "fromHex",
+              "signature": "HCT.fromHex(hex: string): HCT",
+              "description": "Parse sRGB hex string to HCT. Returns HCT(0,0,0) on invalid input.",
+              "params": { "hex": "e.g. '#3a7bd5' or '3a7bd5'" },
+              "returns": "HCT instance",
+              "example": "const blue = HCT.fromHex('#3a7bd5');"
+            },
+            {
+              "name": "fromArgb",
+              "signature": "HCT.fromArgb(argb: number): HCT",
+              "description": "Create HCT from ARGB integer (0xAARRGGBB).",
+              "params": { "argb": "32-bit ARGB integer" },
+              "example": "const c = HCT.fromArgb(0xFF3A7BD5);"
+            }
+          ],
+          "properties": [
+            { "name": "hue",    "type": "number (readonly)", "description": "CAM16 hue angle, degrees [0, 360)" },
+            { "name": "chroma", "type": "number (readonly)", "description": "CAM16 chroma ≥ 0" },
+            { "name": "tone",   "type": "number (readonly)", "description": "CIELAB L* [0, 100]" }
+          ],
+          "methods": [
+            {
+              "name": "toHex",
+              "signature": "toHex(): string",
+              "description": "Convert HCT to lowercase hex string (e.g. '#3a7bd5'). Chroma is gamut-clamped automatically.",
+              "returns": "string '#rrggbb'",
+              "example": "const hex = new HCT(250, 40, 60).toHex(); // '#3370cc'"
+            },
+            {
+              "name": "toArgb",
+              "signature": "toArgb(): number",
+              "description": "Convert to ARGB integer (0xFF_RR_GG_BB).",
+              "returns": "number"
+            },
+            {
+              "name": "toOklch",
+              "signature": "toOklch(): Float64Array",
+              "description": "Convert to OKLCH flat array [L, C, H].",
+              "returns": "Float64Array [L ∈[0,1], C ≥0, H ∈[0,360)]",
+              "example": "const [l, c, h] = new HCT(250, 40, 60).toOklch();"
+            },
+            {
+              "name": "withTone",
+              "signature": "withTone(tone: number): HCT",
+              "description": "Return new HCT with different tone, preserving hue and chroma. Tone is clamped to [0, 100].",
+              "example": "const darker = color.withTone(30);"
+            },
+            {
+              "name": "withChroma",
+              "signature": "withChroma(chroma: number): HCT",
+              "description": "Return new HCT with different chroma, preserving hue and tone. Chroma clamped to ≥0.",
+              "example": "const muted = color.withChroma(10);"
+            },
+            {
+              "name": "withHue",
+              "signature": "withHue(hue: number): HCT",
+              "description": "Return new HCT with different hue via rem_euclid(360).",
+              "example": "const rotated = color.withHue(color.hue + 180);"
+            },
+            {
+              "name": "clampToGamut",
+              "signature": "clampToGamut(): HCT",
+              "description": "Return new HCT with chroma clamped to maximum achievable in sRGB gamut."
+            }
+          ]
+        }
+      },
+      "functions": [
+        {
+          "name": "hexToHct",
+          "signature": "hexToHct(hex: string): Float64Array",
+          "description": "Convert hex color string to HCT flat array [hue, chroma, tone]. Returns [0,0,0] on invalid input.",
+          "params": { "hex": "e.g. '#3a7bd5'" },
+          "returns": "Float64Array [hue, chroma, tone]",
+          "example": "const [h, c, t] = hexToHct('#3a7bd5'); // [250.4, 38.2, 47.1]"
+        },
+        {
+          "name": "hctToHex",
+          "signature": "hctToHex(hue: number, chroma: number, tone: number): string",
+          "description": "Convert HCT components to hex string. Chroma is gamut-clamped.",
+          "params": { "hue": "[0,360)", "chroma": "≥0", "tone": "[0,100]" },
+          "returns": "string '#rrggbb'",
+          "example": "const hex = hctToHex(250, 40, 60); // '#3370cc'"
+        },
+        {
+          "name": "hctToOklch",
+          "signature": "hctToOklch(hue: number, chroma: number, tone: number): Float64Array",
+          "description": "Convert HCT to OKLCH flat array [L, C, H].",
+          "returns": "Float64Array [L, C, H]"
+        },
+        {
+          "name": "oklchToHct",
+          "signature": "oklchToHct(l: number, c: number, h: number): Float64Array",
+          "description": "Convert OKLCH to HCT flat array [hue, chroma, tone].",
+          "returns": "Float64Array [hue, chroma, tone]"
+        },
+        {
+          "name": "hctTonalPalette",
+          "signature": "hctTonalPalette(hue: number, chroma: number): Float64Array",
+          "description": "Generate a 13-step tonal palette at tones [0,10,20,30,40,50,60,70,80,90,95,99,100]. Returns flat array [H0,C0,T0, H1,C1,T1, ...] (39 values). Each HCT is gamut-clamped.",
+          "params": { "hue": "CAM16 hue [0,360)", "chroma": "target chroma" },
+          "returns": "Float64Array of 39 values",
+          "example": "const palette = hctTonalPalette(250, 40); // 13 HCT triples"
+        },
+        {
+          "name": "hctMaxChroma",
+          "signature": "hctMaxChroma(hue: number, tone: number): number",
+          "description": "Get maximum achievable chroma in sRGB gamut for given hue and tone, via binary search (50 iterations). Useful for building chroma sliders.",
+          "params": { "hue": "[0,360)", "tone": "[0,100]" },
+          "returns": "number — max chroma in sRGB",
+          "example": "const maxC = hctMaxChroma(250, 60); // ~48"
+        }
+      ]
+    },
+
+    "core": {
+      "description": "Core color spaces, luminance primitives, WCAG/APCA helpers, gamma conversion, and math utilities.",
+      "classes": {
+        "Color": {
+          "description": "sRGB color with linear and gamma-encoded representations.",
+          "constructors": [
+            { "signature": "new Color(r: number, g: number, b: number): Color", "description": "Normalized sRGB [0,1]" }
+          ],
+          "staticMethods": [
+            { "name": "fromHex", "signature": "Color.fromHex(hex: string): Color", "description": "Parse hex string" },
+            { "name": "fromSrgb8", "signature": "Color.fromSrgb8(r: number, g: number, b: number): Color", "description": "8-bit [0,255] sRGB" },
+            { "name": "fromArgb", "signature": "Color.fromArgb(argb: number): Color", "description": "ARGB integer" }
+          ],
+          "methods": [
+            { "name": "toHex", "signature": "toHex(): string", "description": "Convert to '#rrggbb'" },
+            { "name": "toSrgb8", "signature": "toSrgb8(): Uint8Array", "description": "Get [r,g,b] in [0,255]" },
+            { "name": "toArgb", "signature": "toArgb(): number", "description": "Get ARGB integer" },
+            { "name": "toOklch", "signature": "toOklch(): OKLCH", "description": "Convert to OKLCH" },
+            { "name": "toOklab", "signature": "toOklab(): OKLab", "description": "Convert to OKLab" }
+          ]
+        },
+        "OKLCH": {
+          "description": "Cylindrical perceptual color space (Ottosson 2020). L=lightness[0,1], C=chroma≥0, H=hue[0,360).",
+          "methods": [
+            { "name": "fromHex", "signature": "OKLCH.fromHex(hex: string): OKLCH" },
+            { "name": "toColor", "signature": "toColor(): Color" },
+            { "name": "toHex", "signature": "toHex(): string" },
+            { "name": "isInGamut", "signature": "isInGamut(): boolean" },
+            { "name": "clampToGamut", "signature": "clampToGamut(): OKLCH" },
+            { "name": "lighten", "signature": "lighten(amount: number): OKLCH", "description": "Perceptual lightening" },
+            { "name": "darken", "signature": "darken(amount: number): OKLCH" },
+            { "name": "saturate", "signature": "saturate(amount: number): OKLCH" },
+            { "name": "desaturate", "signature": "desaturate(amount: number): OKLCH" },
+            { "name": "rotateHue", "signature": "rotateHue(degrees: number): OKLCH" },
+            { "name": "estimateMaxChroma", "signature": "estimateMaxChroma(): number" }
+          ]
+        },
+        "OKLab": {
+          "description": "Cartesian perceptual color space. L=lightness[0,1], a=green-red axis, b=blue-yellow axis.",
+          "methods": [
+            { "name": "fromColor", "signature": "OKLab.fromColor(color: Color): OKLab" },
+            { "name": "toColor", "signature": "toColor(): Color" },
+            { "name": "toOklch", "signature": "toOklch(): OKLCH" },
+            { "name": "interpolate", "signature": "OKLab.interpolate(from: OKLab, to: OKLab, t: number): OKLab", "description": "Linear interpolation in OKLab space (perceptually uniform)" },
+            { "name": "deltaE", "signature": "deltaE(other: OKLab): number", "description": "Euclidean distance — perceptual color difference" }
+          ]
+        },
+        "LinearRgba": {
+          "description": "Linear-light RGBA (pre-gamma) for physical calculations.",
+          "methods": [
+            { "name": "fromOklch", "signature": "LinearRgba.fromOklch(oklch: OKLCH, alpha: number): LinearRgba" },
+            { "name": "rgb", "signature": "LinearRgba.rgb(r, g, b): LinearRgba", "description": "Opaque, linear RGB" }
+          ],
+          "properties": [
+            { "name": "r", "type": "number" },
+            { "name": "g", "type": "number" },
+            { "name": "b", "type": "number" },
+            { "name": "a", "type": "number (alpha)" }
+          ]
+        },
+        "CssRenderConfig": {
+          "description": "Configuration for CSS glass-effect rendering (specular, Fresnel, elevation, borders).",
+          "staticPresets": [
+            { "name": "minimal", "description": "Minimal glass effect" },
+            { "name": "premium", "description": "Full premium glass with all effects" },
+            { "name": "modal", "description": "Modal dialog glass" },
+            { "name": "subtle", "description": "Subtle backdrop blur" },
+            { "name": "darkMode", "description": "Optimised for dark backgrounds" }
+          ],
+          "builderMethods": [
+            { "name": "withSpecularIntensity", "signature": "withSpecularIntensity(intensity: number): CssRenderConfig" },
+            { "name": "withFresnelIntensity", "signature": "withFresnelIntensity(intensity: number): CssRenderConfig" },
+            { "name": "withElevation", "signature": "withElevation(level: number): CssRenderConfig", "description": "Level 0–5" },
+            { "name": "withBorderRadius", "signature": "withBorderRadius(radius: number): CssRenderConfig" },
+            { "name": "withLightMode", "signature": "withLightMode(lightMode: boolean): CssRenderConfig" },
+            { "name": "withEffectsEnabled", "signature": "withEffectsEnabled(enabled: boolean): CssRenderConfig" },
+            { "name": "toJson", "signature": "toJson(): object", "description": "Serialise config to plain object" }
+          ]
+        }
+      },
+      "functions": [
+        {
+          "name": "relativeLuminanceSrgb",
+          "signature": "relativeLuminanceSrgb(color: Color): number",
+          "description": "Calculate WCAG 2.1 relative luminance per IEC 61966-2-1. Returns Y ∈[0,1].",
+          "standard": "WCAG 2.1 §1.4.3",
+          "example": "const Y = relativeLuminanceSrgb(Color.fromHex('#3a7bd5')); // 0.149"
+        },
+        {
+          "name": "relativeLuminanceApca",
+          "signature": "relativeLuminanceApca(color: Color): number",
+          "description": "Calculate APCA-W3 v0.1.9 relative luminance (linearized with soft-clamp black). Returns Y ∈[0,1].",
+          "standard": "APCA-W3 v0.1.9"
+        },
+        {
+          "name": "softClamp",
+          "signature": "softClamp(y: number, threshold: number, exponent: number): number",
+          "description": "APCA soft-clamp function for near-black linearization. Threshold=0.022, exponent=1.414 per APCA spec."
+        },
+        {
+          "name": "wcagContrastRatio",
+          "signature": "wcagContrastRatio(fg: Color, bg: Color): number",
+          "description": "Calculate WCAG contrast ratio = (L_lighter + 0.05) / (L_darker + 0.05). Range [1, 21].",
+          "example": "const ratio = wcagContrastRatio(fgColor, bgColor); // e.g. 4.5"
+        },
+        {
+          "name": "wcagPasses",
+          "signature": "wcagPasses(ratio: number, level: number, isLarge: boolean): boolean",
+          "description": "Check if a contrast ratio passes WCAG. level: 0=AA, 1=AAA.",
+          "params": { "ratio": "[1, 21]", "level": "0=AA, 1=AAA", "isLarge": "true if 18pt+ or 14pt+ bold" },
+          "example": "wcagPasses(4.5, 0, false) // true — passes AA normal text"
+        },
+        {
+          "name": "wcagLevel",
+          "signature": "wcagLevel(ratio: number, isLarge: boolean): number",
+          "description": "Get highest passing WCAG level: 0=fails, 1=AA, 2=AAA.",
+          "returns": "0 | 1 | 2"
+        },
+        {
+          "name": "wcagRequirement",
+          "signature": "wcagRequirement(level: number, isLarge: boolean): number",
+          "description": "Get minimum required contrast ratio for WCAG level + text size.",
+          "returns": "4.5 | 3 | 7 | 4.5"
+        },
+        {
+          "name": "wcagRequirementsMatrix",
+          "signature": "wcagRequirementsMatrix(): Float64Array",
+          "description": "Get full requirements matrix as flat Float64Array [AA_normal, AA_large, AAA_normal, AAA_large].",
+          "returns": "Float64Array [4.5, 3.0, 7.0, 4.5]"
+        },
+        {
+          "name": "isLargeText",
+          "signature": "isLargeText(fontSizePx: number, fontWeight: number): boolean",
+          "description": "Check if text qualifies as 'large text' per WCAG (18pt+ regular or 14pt+ bold).",
+          "example": "isLargeText(24, 400) // true"
+        },
+        {
+          "name": "relativeLuminanceBatch",
+          "signature": "relativeLuminanceBatch(rgbData: Uint8Array): Float64Array",
+          "description": "SIMD-ready batch luminance. Input: flat [r,g,b, r,g,b, ...]. Returns one luminance per color.",
+          "throws": "Error if rgbData.length % 3 !== 0"
+        },
+        {
+          "name": "wcagContrastRatioBatch",
+          "signature": "wcagContrastRatioBatch(pairs: Uint8Array): Float64Array",
+          "description": "Batch WCAG contrast ratios. Input: flat [fg_r,fg_g,fg_b,bg_r,bg_g,bg_b, ...]. Returns one ratio per pair.",
+          "throws": "Error if pairs.length % 6 !== 0"
+        },
+        {
+          "name": "apcaConstants",
+          "signature": "apcaConstants(): object",
+          "description": "Get APCA-W3 v0.1.9 algorithm constants as JSON: mainTrc, sRco, sGco, sBco, blkThrs, blkClmp, normBg, normTxt, revBg, revTxt, scaleBow, scaleWob, loBowOffset, loWobOffset, loClip, deltaYMin."
+        },
+        {
+          "name": "srgbToLinear",
+          "signature": "srgbToLinear(value: number): number",
+          "description": "sRGB gamma decoding (IEC 61966-2-1). Converts encoded [0,1] to linear [0,1]."
+        },
+        {
+          "name": "linearToSrgb",
+          "signature": "linearToSrgb(value: number): number",
+          "description": "sRGB gamma encoding. Converts linear [0,1] to encoded [0,1]."
+        },
+        {
+          "name": "mathLerp",
+          "signature": "mathLerp(a: number, b: number, t: number): number",
+          "description": "Linear interpolation: a + (b - a) * t."
+        },
+        {
+          "name": "mathInverseLerp",
+          "signature": "mathInverseLerp(a: number, b: number, value: number): number",
+          "description": "Inverse linear interpolation: (value - a) / (b - a)."
+        },
+        {
+          "name": "materialIsTransparent",
+          "signature": "materialIsTransparent(material: EvaluatedMaterial): boolean"
+        },
+        {
+          "name": "materialHasScattering",
+          "signature": "materialHasScattering(material: EvaluatedMaterial): boolean"
+        },
+        {
+          "name": "materialIsEmissive",
+          "signature": "materialIsEmissive(material: EvaluatedMaterial): boolean"
+        },
+        {
+          "name": "materialEffectiveSpecular",
+          "signature": "materialEffectiveSpecular(material: EvaluatedMaterial): number"
+        }
+      ],
+      "enums": {
+        "ColorSpaceEnum": { "values": { "SRgb": 0, "DisplayP3": 1, "Rec2020": 2, "LinearRgb": 3 } },
+        "TargetMediumEnum": { "values": { "Screen": 0, "Print": 1, "Projection": 2 } },
+        "AccessibilityModeEnum": { "values": { "HighContrast": 0, "ReducedMotion": 1, "ReducedTransparency": 2, "InvertedColors": 3 } },
+        "MaterialTypeEnum": { "values": { "Glass": 0, "Metal": 1, "Plastic": 2, "Liquid": 3, "Custom": 4 } }
+      }
+    },
+
+    "intelligence": {
+      "description": "AI recommendation engine, perceptual scoring, color harmony generation, CVD simulation, and constraint solving.",
+      "classes": {
+        "RecommendationEngine": {
+          "description": "Color recommendation engine. Suggests or improves foreground colors to satisfy contrast standards and perceptual quality.",
+          "constructors": [{ "signature": "new RecommendationEngine(): RecommendationEngine" }],
+          "methods": [
+            {
+              "name": "recommendForeground",
+              "signature": "recommendForeground(bg: string, usage: string, target: string): Recommendation",
+              "description": "Recommend an optimal foreground color for a given background and usage context.",
+              "params": {
+                "bg": "background hex color e.g. '#1a1a2e'",
+                "usage": "'body_text' | 'heading' | 'button' | 'decorative' | 'link' | 'caption' | 'icon'",
+                "target": "'wcag_aa' | 'wcag_aaa' | 'apca_lc' | 'any'"
+              },
+              "returns": "Recommendation object",
+              "example": "const rec = engine.recommendForeground('#1a1a2e', 'body_text', 'wcag_aa');"
+            },
+            {
+              "name": "improveForeground",
+              "signature": "improveForeground(fg: string, bg: string, usage: string, target: string): Recommendation",
+              "description": "Improve an existing foreground color to meet compliance targets, minimizing perceptual change.",
+              "example": "const better = engine.improveForeground('#888', '#fff', 'body_text', 'wcag_aaa');"
+            }
+          ]
+        },
+        "Recommendation": {
+          "description": "Result from the recommendation engine.",
+          "properties": [
+            { "name": "hex", "type": "string", "description": "Recommended color as hex" },
+            { "name": "score", "type": "number", "description": "Overall quality score [0–100]" },
+            { "name": "compliance", "type": "number", "description": "Accessibility compliance sub-score [0–100]" },
+            { "name": "perceptual", "type": "number", "description": "Perceptual quality sub-score [0–100]" },
+            { "name": "appropriateness", "type": "number", "description": "Context appropriateness sub-score [0–100]" },
+            { "name": "confidence", "type": "number", "description": "Confidence level [0–1]" },
+            { "name": "reason", "type": "string", "description": "Human-readable explanation" },
+            { "name": "passes", "type": "boolean", "description": "Whether the color passes the target standard" },
+            { "name": "assessment", "type": "string", "description": "'excellent' | 'good' | 'acceptable' | 'poor'" }
+          ],
+          "methods": [
+            { "name": "colorRgb", "signature": "colorRgb(): Float64Array", "description": "Get [r, g, b] normalized [0,1]" },
+            { "name": "modificationType", "signature": "modificationType(): string", "description": "How the color was modified: 'lightness' | 'chroma' | 'hue' | 'combined' | 'none'" },
+            { "name": "oklchDeltas", "signature": "oklchDeltas(): Float64Array", "description": "Get [delta_L, delta_C, delta_H] from original" }
+          ]
+        },
+        "ExplanationGenerator": {
+          "description": "Generate human-readable explanations for color recommendations.",
+          "constructors": [{ "signature": "new ExplanationGenerator(): ExplanationGenerator" }],
+          "methods": [
+            {
+              "name": "explainContrastImprovement",
+              "signature": "explainContrastImprovement(fg: string, bg: string, target: string): string",
+              "description": "Generate a plain-English explanation of why/how a foreground was changed."
+            },
+            {
+              "name": "explainQualityImprovement",
+              "signature": "explainQualityImprovement(fg: string, bg: string, context: string): string",
+              "description": "Explain quality improvements in plain English."
+            }
+          ]
+        }
+      },
+      "functions": [
+        {
+          "name": "generatePalette",
+          "signature": "generatePalette(baseColor: string, harmonyType: string, count: number): string[]",
+          "description": "Generate a harmonious color palette from a base color.",
+          "params": {
+            "baseColor": "hex color string",
+            "harmonyType": "'complementary' | 'triadic' | 'analogous' | 'split_complementary' | 'tetradic' | 'square' | 'monochromatic'",
+            "count": "number of colors to generate"
+          },
+          "returns": "Array of hex color strings",
+          "example": "const palette = generatePalette('#3a7bd5', 'triadic', 3);"
+        },
+        {
+          "name": "harmonyScore",
+          "signature": "harmonyScore(colors: string[], harmonyType: string): number",
+          "description": "Score how well a set of colors achieves a given harmony type. Returns [0, 100].",
+          "example": "const score = harmonyScore(['#3a7bd5', '#d5793a', '#7bd53a'], 'triadic');"
+        },
+        {
+          "name": "generateShades",
+          "signature": "generateShades(color: string, count: number): string[]",
+          "description": "Generate a range of shades (light to dark) for a color in OKLCH space. Count typically 5–11.",
+          "example": "const shades = generateShades('#3a7bd5', 9);"
+        },
+        {
+          "name": "simulateCVD",
+          "signature": "simulateCVD(hex: string, cvdType: string, severity: number): string",
+          "description": "Simulate color vision deficiency (CVD) using Viénot 1999 method. Matrices operate in linear sRGB; D65 white is preserved exactly.",
+          "params": {
+            "hex": "source color hex",
+            "cvdType": "'protanopia' | 'deuteranopia' | 'tritanopia'",
+            "severity": "severity [0=none, 1=complete]"
+          },
+          "returns": "Simulated color as hex",
+          "technicalNote": "Uses Viénot 1999 row-stochastic matrices in linear sRGB (not Brettel 1997 LMS, which is calibrated for equal-energy white E and causes white-shift with D65).",
+          "example": "const simulated = simulateCVD('#3a7bd5', 'protanopia', 1.0);"
+        },
+        {
+          "name": "cvdDeltaE",
+          "signature": "cvdDeltaE(hex: string, cvdType: string): number",
+          "description": "Compute perceptual distance between original color and its CVD simulation. Euclidean distance in OKLab space.",
+          "example": "const diff = cvdDeltaE('#3a7bd5', 'protanopia'); // how much the color shifts"
+        },
+        {
+          "name": "solveColorConstraints",
+          "signature": "solveColorConstraints(constraints: object[], initialColor: string): object",
+          "description": "Solve a set of color constraints using penalty method optimization. Find a color satisfying all constraints simultaneously.",
+          "params": {
+            "constraints": "Array of constraint objects (see ColorConstraint schema)",
+            "initialColor": "Starting color hex string"
+          },
+          "returns": "{ hex: string, score: number, iterations: number, converged: boolean }",
+          "example": "const result = solveColorConstraints([{type:'wcag_aa', against:'#fff'}, {type:'lightness_range', min:0.2, max:0.6}], '#888');"
+        },
+        {
+          "name": "usageMinWcagAa",
+          "signature": "usageMinWcagAa(usage: string): number",
+          "description": "Get minimum WCAG AA contrast ratio required for a usage context."
+        },
+        {
+          "name": "usageMinWcagAaa",
+          "signature": "usageMinWcagAaa(usage: string): number"
+        },
+        {
+          "name": "usageMinApcaLc",
+          "signature": "usageMinApcaLc(usage: string): number",
+          "description": "Get minimum APCA Lc value required for a usage context."
+        },
+        {
+          "name": "usageRequiresCompliance",
+          "signature": "usageRequiresCompliance(usage: string): boolean"
+        },
+        {
+          "name": "complianceTargetDescription",
+          "signature": "complianceTargetDescription(target: string): string",
+          "description": "Human-readable description of a compliance target."
+        }
+      ]
+    },
+
+    "materials": {
+      "description": "Glass physics, PBR BRDFs, thin-film interference, refraction, lighting, and material-to-color extraction.",
+      "classes": {
+        "RefractionParams": {
+          "description": "Refraction parameters for glass surface simulation.",
+          "constructors": [{
+            "signature": "new RefractionParams(index: number, distortion: number, aberration: number, lensing: number): RefractionParams",
+            "params": {
+              "index": "index of refraction (1.0=air, 1.33=water, 1.5=glass, 1.9=sapphire)",
+              "distortion": "distortion strength [0, 1]",
+              "aberration": "chromatic aberration [0, 1]",
+              "lensing": "edge lensing strength [0, 1]"
+            }
+          }],
+          "staticPresets": [
+            { "name": "clear", "description": "Clear glass: IOR=1.52, minimal distortion" },
+            { "name": "frosted", "description": "Frosted glass: IOR=1.52, high distortion" },
+            { "name": "thick", "description": "Thick glass: IOR=1.7" },
+            { "name": "subtle", "description": "Subtle effect: IOR=1.35" },
+            { "name": "highIndex", "description": "High-index lens: IOR=1.9" }
+          ],
+          "properties": [
+            { "name": "index", "type": "number" },
+            { "name": "distortionStrength", "type": "number" },
+            { "name": "chromaticAberration", "type": "number" },
+            { "name": "edgeLensing", "type": "number" }
+          ]
+        },
+        "LightSource": {
+          "description": "Light source for physical rendering calculations.",
+          "constructors": [{
+            "signature": "new LightSource(dirX: number, dirY: number, dirZ: number, intensity: number, colorL: number, colorC: number, colorH: number): LightSource"
+          }],
+          "staticPresets": [
+            { "name": "defaultKeyLight", "description": "Standard 3/4 key light from upper-left" },
+            { "name": "defaultFillLight", "description": "Soft fill light" },
+            { "name": "dramaticTopLight", "description": "Top-down dramatic lighting" }
+          ]
+        },
+        "LightingEnvironment": {
+          "description": "Collection of light sources for lighting calculations.",
+          "constructors": [{ "signature": "new LightingEnvironment(): LightingEnvironment" }],
+          "methods": [
+            { "name": "addLight", "signature": "addLight(light: LightSource): void" }
+          ]
+        }
+      },
+      "functions": [
+        {
+          "name": "cookTorranceBRDF",
+          "signature": "cookTorranceBRDF(normal: Float64Array, view: Float64Array, light: Float64Array, roughness: number, ior: number, cosTheta: number): number",
+          "description": "Cook-Torrance microfacet BRDF for specular reflection. Uses GGX NDF + Smith G2 + Schlick Fresnel. Energy conserving.",
+          "params": {
+            "normal": "[nx, ny, nz] surface normal (unit vector)",
+            "view": "[vx, vy, vz] view direction (unit vector, toward camera)",
+            "light": "[lx, ly, lz] light direction (unit vector, toward light)",
+            "roughness": "surface roughness [0=mirror, 1=fully rough]",
+            "ior": "index of refraction",
+            "cosTheta": "cosine of incident angle [0, 1]"
+          },
+          "returns": "number — BRDF value (specular reflectance contribution)",
+          "standard": "Cook & Torrance 1982; GGX: Walter et al. 2007; Smith G2: Heitz 2014",
+          "example": "const s = cookTorranceBRDF([0,1,0],[0,1,0],[0.7,0.7,0], 0.3, 1.5, 0.8);"
+        },
+        {
+          "name": "orenNayarBRDF",
+          "signature": "orenNayarBRDF(roughness: number, normal: Float64Array, view: Float64Array, light: Float64Array): number",
+          "description": "Oren-Nayar diffuse BRDF for rough surfaces. Generalizes Lambertian model with inter-facet masking.",
+          "standard": "Oren & Nayar 1994",
+          "example": "const d = orenNayarBRDF(0.5, [0,1,0], [0,1,0], [0.7,0.7,0]);"
+        },
+        {
+          "name": "thinFilmToRgb",
+          "signature": "thinFilmToRgb(thickness: number, ior: number, incidentAngle: number, illuminantType: number): Float64Array",
+          "description": "Simulate thin-film interference and return RGB color. Uses transfer-matrix method across 380–700nm spectrum.",
+          "params": {
+            "thickness": "film thickness in nanometers (e.g. 200–800 for visible iridescence)",
+            "ior": "film index of refraction (1.33=water, 1.5=glass)",
+            "incidentAngle": "angle of incidence in radians",
+            "illuminantType": "0=D65, 1=A, 2=F2 illuminant"
+          },
+          "returns": "Float64Array [r, g, b] in [0, 1]",
+          "example": "const [r,g,b] = thinFilmToRgb(350, 1.33, 0.0, 0); // soap bubble blue"
+        },
+        {
+          "name": "evaluateDielectricBatch",
+          "signature": "evaluateDielectricBatch(materials: object[], context: object): object[]",
+          "description": "Batch evaluation of dielectric materials (glass, plastic, etc.). More efficient than calling individually.",
+          "params": {
+            "materials": "Array of material spec objects: { ior, roughness, thickness? }",
+            "context": "{ cosTheta, illuminant? }"
+          },
+          "returns": "Array of { reflectance, transmittance, absorption }"
+        },
+        {
+          "name": "materialToDominantColor",
+          "signature": "materialToDominantColor(material: object, context: object): string",
+          "description": "Extract the dominant perceptual color from a material definition given a lighting context.",
+          "params": {
+            "material": "Material spec: { type, ior, roughness, color?, metalPreset? }",
+            "context": "Lighting context: { ambient, lightAngle, backgroundHex }"
+          },
+          "returns": "hex color string"
+        },
+        {
+          "name": "calculateRefraction",
+          "signature": "calculateRefraction(params: RefractionParams, x: number, y: number, incidentAngle: number): Float64Array",
+          "description": "Calculate refracted UV offset at a surface point. Returns [offsetX, offsetY] for texture lookup.",
+          "returns": "Float64Array [offsetX, offsetY]"
+        },
+        {
+          "name": "applyRefractionToColor",
+          "signature": "applyRefractionToColor(params: RefractionParams, l: number, c: number, h: number, x: number, y: number, angle: number): Float64Array",
+          "description": "Apply refraction distortion to an OKLCH color, producing RGB output with optional chromatic aberration.",
+          "returns": "Float64Array [r, g, b]"
+        },
+        {
+          "name": "generateDistortionMap",
+          "signature": "generateDistortionMap(params: RefractionParams, gridSize: number): Float64Array",
+          "description": "Generate a 2D distortion map for refraction. Returns flat [dx, dy, dx, dy, ...] for gridSize×gridSize cells.",
+          "returns": "Float64Array of length gridSize² × 2"
+        },
+        {
+          "name": "calculateLighting",
+          "signature": "calculateLighting(normal: Float64Array, view: Float64Array, env: LightingEnvironment, shininess: number): Float64Array",
+          "description": "Blinn-Phong lighting calculation for glass surfaces. Returns [diffuse, specular, ambient].",
+          "returns": "Float64Array [diffuse, specular, ambient]"
+        },
+        {
+          "name": "deriveGradient",
+          "signature": "deriveGradient(env: LightingEnvironment, curvature: number, shininess: number, samples: number): Float64Array",
+          "description": "Derive a gradient for glass surface visualization from lighting environment. Returns flat OKLCH triples.",
+          "returns": "Float64Array [L0,C0,H0, L1,C1,H1, ...]"
+        },
+        {
+          "name": "gradientToCss",
+          "signature": "gradientToCss(env: LightingEnvironment, curvature: number, shininess: number, samples: number, baseL: number, baseC: number, baseH: number): string",
+          "description": "Generate a CSS linear-gradient string for glass surface rendering.",
+          "returns": "CSS gradient string e.g. 'linear-gradient(135deg, oklch(...) 0%, oklch(...) 100%)'"
+        }
+      ]
+    },
+
+    "temporal": {
+      "description": "Time-evolving material physics. Models materials that change optical properties over time or temperature.",
+      "classes": {
+        "TemporalMaterial": {
+          "description": "Time-evolving dielectric (roughness + IOR evolution). BSDF output always sums to 1.0 (energy conserved).",
+          "constructors": [{
+            "signature": "new TemporalMaterial(roughnessBase: number, roughnessTarget: number, roughnessTau: number, iorBase: number): TemporalMaterial",
+            "params": {
+              "roughnessBase": "initial roughness at t=0 [0=mirror, 1=diffuse]",
+              "roughnessTarget": "final roughness as t→∞",
+              "roughnessTau": "time constant in seconds (e.g. 60 = dries in ~1 min)",
+              "iorBase": "index of refraction (1.52=glass)"
+            }
+          }],
+          "staticPresets": [
+            { "name": "dryingPaint", "description": "Roughness 0.05→0.4 over ~60s, τ=60s" },
+            { "name": "weatheringGlass", "description": "Roughness 0.01→0.15 over ~1h, τ=3600s" }
+          ],
+          "methods": [
+            {
+              "name": "evalAtTime",
+              "signature": "evalAtTime(t: number, cosTheta: number): Float64Array",
+              "description": "Evaluate BSDF at simulation time t seconds. Returns [reflectance, transmittance, absorption], sum=1.0.",
+              "example": "const [r,t,a] = mat.evalAtTime(30, 0.8); // halfway through drying"
+            },
+            { "name": "evalStatic", "signature": "evalStatic(cosTheta: number): Float64Array", "description": "Evaluate at t=0 (static fallback)" },
+            { "name": "supportsTemoral", "type": "boolean (getter)", "description": "Whether this material has temporal behaviour" }
+          ]
+        },
+        "TemporalThinFilmMaterial": {
+          "description": "Time-evolving thin-film with oscillating thickness (soap bubbles, oil slicks). Produces iridescent color shifts over time.",
+          "constructors": [{
+            "signature": "new TemporalThinFilmMaterial(thicknessBase: number, amplitude: number, frequencyHz: number, filmIor: number, substrateIor: number): TemporalThinFilmMaterial",
+            "params": {
+              "thicknessBase": "base film thickness in nm (e.g. 300)",
+              "amplitude": "oscillation amplitude in nm",
+              "frequencyHz": "oscillation frequency in Hz",
+              "filmIor": "film IOR (1.33=water)",
+              "substrateIor": "substrate IOR (1.0=air)"
+            }
+          }],
+          "staticPresets": [
+            { "name": "soapBubble", "description": "300nm base, 100nm amplitude, 2Hz, damped" },
+            { "name": "oilSlick", "description": "400nm base, slow oscillation" }
+          ],
+          "methods": [
+            {
+              "name": "evalAtTime",
+              "signature": "evalAtTime(t: number, cosTheta: number): Float64Array",
+              "description": "Evaluate thin-film BSDF at time t. Returns [reflectance, transmittance, absorption]."
+            },
+            {
+              "name": "sampleTimeline",
+              "signature": "sampleTimeline(duration: number, samples: number, cosTheta: number): Float64Array",
+              "description": "Sample reflectance over a time range. Returns flat [t0, r0, t1, r1, ...] (samples × 2 values).",
+              "example": "const timeline = mat.sampleTimeline(5.0, 60, 0.8); // 5s at 60fps"
+            }
+          ]
+        },
+        "TemporalConductorMaterial": {
+          "description": "Time-evolving conductor with temperature-dependent optical constants (n, k). Models heated metals changing color.",
+          "constructors": [{
+            "signature": "new TemporalConductorMaterial(nBase: number, kBase: number, roughness: number, nTempCoeff: number, kTempCoeff: number): TemporalConductorMaterial",
+            "params": {
+              "nBase": "real part of IOR at reference temperature (293.15K)",
+              "kBase": "extinction coefficient at reference temperature",
+              "roughness": "surface roughness [0, 1]",
+              "nTempCoeff": "dn/dT (e.g. -3e-4 for gold)",
+              "kTempCoeff": "dk/dT"
+            }
+          }],
+          "staticPresets": [
+            { "name": "heatedGold", "description": "Gold: n=0.17, k=3.5 at 293K, reddish at high T" },
+            { "name": "heatedCopper", "description": "Copper: n=0.25, k=2.8 at 293K" }
+          ],
+          "methods": [
+            {
+              "name": "evalAtTemperature",
+              "signature": "evalAtTemperature(temperatureK: number, cosTheta: number): Float64Array",
+              "description": "Evaluate BSDF at given temperature in Kelvin. Returns [reflectance, transmittance, absorption].",
+              "example": "const [r,t,a] = gold.evalAtTemperature(800, 0.8); // red-hot gold"
+            },
+            { "name": "evalAtRoomTemp", "signature": "evalAtRoomTemp(cosTheta: number): Float64Array", "description": "Evaluate at 293.15K (20°C)" }
+          ]
+        }
+      },
+      "functions": [
+        {
+          "name": "temporalDryingPaint",
+          "signature": "temporalDryingPaint(t: number, cosTheta: number): Float64Array",
+          "description": "Convenience: evaluate drying-paint material at time t. Returns [reflectance, transmittance, absorption]."
+        },
+        {
+          "name": "temporalSoapBubble",
+          "signature": "temporalSoapBubble(t: number, cosTheta: number): Float64Array",
+          "description": "Convenience: evaluate soap-bubble thin-film at time t. Returns [reflectance, transmittance, absorption]."
+        }
+      ]
+    },
+
+    "procedural": {
+      "description": "Perlin-noise procedural material variation. Generates deterministic texture fields for frosted glass and micro-surface detail.",
+      "classes": {
+        "ProceduralNoise": {
+          "description": "Improved Perlin noise with fractional Brownian motion (fBm). Same seed always produces same field — safe for animations.",
+          "constructors": [{
+            "signature": "new ProceduralNoise(seed: number, octaves: number, persistence: number, lacunarity: number): ProceduralNoise",
+            "params": {
+              "seed": "u32 deterministic seed",
+              "octaves": "number of noise layers [1=simple, 6=detailed]",
+              "persistence": "amplitude falloff per octave (0.5 is standard)",
+              "lacunarity": "frequency growth per octave (2.0 is standard)"
+            }
+          }],
+          "staticPresets": [
+            { "name": "frosted", "description": "6 octaves — high detail, frosted glass" },
+            { "name": "regular", "description": "3 octaves — balanced, regular glass" },
+            { "name": "clear", "description": "1 octave — minimal texture, clear glass" },
+            { "name": "thick", "description": "4 octaves — thick glass texture" }
+          ],
+          "methods": [
+            {
+              "name": "sample",
+              "signature": "sample(x: number, y: number): number",
+              "description": "Sample fBm noise at (x, y). Returns [0, 1] (normalized).",
+              "example": "const v = noise.sample(1.5, 2.3); // [0, 1]"
+            },
+            {
+              "name": "sampleRaw",
+              "signature": "sampleRaw(x: number, y: number): number",
+              "description": "Sample raw Perlin value at (x, y). Returns approximately [-1, 1]."
+            },
+            {
+              "name": "generateField",
+              "signature": "generateField(cols: number, rows: number, scale: number): Float64Array",
+              "description": "Generate a 2D noise field. Row-major, values in [0, 1]. scale: 0.05=large features, 0.5=fine detail.",
+              "returns": "Float64Array of length cols × rows",
+              "example": "const field = noise.generateField(256, 256, 0.05);"
+            }
+          ]
+        }
+      },
+      "functions": [
+        {
+          "name": "variationField",
+          "signature": "variationField(baseIor: number, variation: number, cols: number, rows: number, seed: number): Float64Array",
+          "description": "Generate a 2D IOR variation field for frosted-glass distortion. Values in [baseIor - variation, baseIor + variation].",
+          "params": { "baseIor": "central IOR (1.5)", "variation": "max deviation (0.05)", "cols": "width", "rows": "height", "seed": "u32 seed" },
+          "returns": "Float64Array of length cols × rows",
+          "example": "const iorMap = variationField(1.5, 0.05, 256, 256, 42);"
+        },
+        {
+          "name": "roughnessVariationField",
+          "signature": "roughnessVariationField(baseRoughness: number, variation: number, cols: number, rows: number, seed: number): Float64Array",
+          "description": "Generate a roughness variation field for micro-surface texture. Values clamped to [0, 1].",
+          "example": "const roughMap = roughnessVariationField(0.3, 0.1, 128, 128, 7);"
+        }
+      ]
+    },
+
+    "siren": {
+      "description": "SIREN neural network (Sinusoidal Representation Network) for perceptual color correction. Statically initialized with deterministic weights (seed=421337). Architecture: 9→16→16→3.",
+      "architecture": {
+        "layers": [9, 16, 16, 3],
+        "totalParams": 483,
+        "omega0": 30.0,
+        "activations": ["sin(ω₀·x)", "sin(x)", "linear"],
+        "seed": 421337,
+        "inputs": ["bg_L", "bg_C", "bg_H_norm", "fg_L", "fg_C", "fg_H_norm", "apca_lc_norm", "wcag_ratio_norm", "quality_norm"],
+        "outputs": ["delta_L [−0.15, 0.15]", "delta_C [−0.05, 0.05]", "delta_H [−10°, 10°]"]
+      },
+      "classes": {
+        "SirenCorrection": {
+          "description": "SIREN neural network correction output.",
+          "properties": [
+            { "name": "deltaL", "type": "number", "description": "OKLCH lightness correction [−0.15, 0.15]" },
+            { "name": "deltaC", "type": "number", "description": "OKLCH chroma correction [−0.05, 0.05]" },
+            { "name": "deltaH", "type": "number", "description": "OKLCH hue correction in degrees [−10°, 10°]" }
+          ]
+        }
+      },
+      "functions": [
+        {
+          "name": "computeSirenCorrection",
+          "signature": "computeSirenCorrection(bgL: number, bgC: number, bgH: number, fgL: number, fgC: number, fgH: number, apcaLc: number, wcagRatio: number, quality: number): SirenCorrection",
+          "description": "Compute SIREN perceptual correction for a foreground/background color pair. Inputs are normalized internally before inference.",
+          "params": {
+            "bgL": "background OKLCH L [0, 1]",
+            "bgC": "background OKLCH C ≥0",
+            "bgH": "background OKLCH H [0, 360)",
+            "fgL": "foreground OKLCH L [0, 1]",
+            "fgC": "foreground OKLCH C ≥0",
+            "fgH": "foreground OKLCH H [0, 360)",
+            "apcaLc": "APCA Lc value (signed)",
+            "wcagRatio": "WCAG contrast ratio [1, 21]",
+            "quality": "current quality score [0, 100]"
+          },
+          "returns": "SirenCorrection { deltaL, deltaC, deltaH }",
+          "example": "const corr = computeSirenCorrection(0.15, 0.1, 250, 0.9, 0.02, 250, 75, 8.5, 70);"
+        },
+        {
+          "name": "applySirenCorrection",
+          "signature": "applySirenCorrection(l: number, c: number, h: number, deltaL: number, deltaC: number, deltaH: number): Float64Array",
+          "description": "Apply a SIREN correction delta to OKLCH values. L is clamped [0,1], C clamped ≥0, H wrapped [0,360).",
+          "returns": "Float64Array [L, C, H]"
+        },
+        {
+          "name": "computeSirenCorrectionBatch",
+          "signature": "computeSirenCorrectionBatch(inputs: Float64Array): Float64Array",
+          "description": "Batch SIREN inference. Input: flat [bg_L, bg_C, bg_H, fg_L, fg_C, fg_H, apca, wcag, quality, ...] (multiples of 9). Returns flat [delta_L, delta_C, delta_H, ...] (multiples of 3).",
+          "throws": "Error if inputs.length % 9 !== 0"
+        },
+        {
+          "name": "sirenMetadata",
+          "signature": "sirenMetadata(): object",
+          "description": "Get SIREN network metadata as JSON: architecture, totalParams, omega0, seed, activations, clampRanges, inputFeatures."
+        },
+        {
+          "name": "sirenWeights",
+          "signature": "sirenWeights(): object",
+          "description": "Export raw network weights for inspection. Returns { W1, B1, W2, B2, W3, B3 } with shape annotations."
+        }
+      ]
+    },
+
+    "events": {
+      "description": "Real-time pub/sub event system for progress tracking, metrics, and streaming. Designed for UI feedback during long-running operations.",
+      "classes": {
+        "MomotoEventBus": {
+          "description": "Event broadcaster with configurable buffer size and age. Supports filtered subscriptions.",
+          "constructors": [
+            { "signature": "new MomotoEventBus(): MomotoEventBus", "description": "Default: 100 events, 30s max age" }
+          ],
+          "staticMethods": [
+            {
+              "name": "withConfig",
+              "signature": "MomotoEventBus.withConfig(bufferSize: number, maxAgeMs: number): MomotoEventBus",
+              "description": "Create with explicit buffer and age configuration."
+            }
+          ],
+          "methods": [
+            {
+              "name": "subscribe",
+              "signature": "subscribe(callback: (event: object) => void): number",
+              "description": "Subscribe to all events. Returns subscriber ID.",
+              "example": "const id = bus.subscribe(e => console.log(e.category, e.payload));"
+            },
+            {
+              "name": "subscribeFiltered",
+              "signature": "subscribeFiltered(categories: string[], callback: (event: object) => void): number",
+              "description": "Subscribe to specific event categories only.",
+              "params": { "categories": "['progress', 'metrics', 'recommendation', 'validation', 'error', 'system', 'chart', 'heartbeat', 'custom']" }
+            },
+            { "name": "emitProgress", "signature": "emitProgress(source: string, progress: number, message: string): void" },
+            { "name": "emitMetric", "signature": "emitMetric(source: string, name: string, value: number): void" },
+            { "name": "emitError", "signature": "emitError(source: string, description: string): void" },
+            { "name": "emitCustom", "signature": "emitCustom(source: string, payloadJson: string): void" },
+            { "name": "emitJson", "signature": "emitJson(eventJson: string): void", "description": "Emit event from JSON string" },
+            { "name": "subscriberCount", "signature": "subscriberCount(): number" },
+            { "name": "eventCount", "signature": "eventCount(): number" },
+            { "name": "bufferedEvents", "signature": "bufferedEvents(): object[]", "description": "Get buffered events as JSON array" },
+            { "name": "clearBuffer", "signature": "clearBuffer(): void" }
+          ]
+        },
+        "MomotoEventStream": {
+          "description": "Streaming event consumer with batching support. Designed for SSE (Server-Sent Events) or WebSocket streaming patterns.",
+          "staticMethods": [
+            { "name": "fromBus", "signature": "MomotoEventStream.fromBus(bus: MomotoEventBus): MomotoEventStream" },
+            {
+              "name": "fromBusBatched",
+              "signature": "MomotoEventStream.fromBusBatched(bus: MomotoEventBus, batchSize: number, timeoutMs: number): MomotoEventStream",
+              "description": "Create batching stream — accumulates events before flushing."
+            },
+            { "name": "standalone", "signature": "MomotoEventStream.standalone(): MomotoEventStream" }
+          ],
+          "methods": [
+            { "name": "push", "signature": "push(eventJson: string): void", "description": "Push event from JSON string" },
+            { "name": "poll", "signature": "poll(): object[]", "description": "Poll for pending events (non-blocking). Returns array of event objects." },
+            { "name": "flush", "signature": "flush(): object[]", "description": "Force flush pending events" },
+            { "name": "shouldFlush", "signature": "shouldFlush(): boolean" },
+            { "name": "pendingCount", "signature": "pendingCount(): number" },
+            { "name": "totalEvents", "signature": "totalEvents(): number" },
+            { "name": "droppedEvents", "signature": "droppedEvents(): number" },
+            { "name": "state", "type": "string (getter)", "description": "'active' | 'paused' | 'closed'" },
+            { "name": "pause", "signature": "pause(): void" },
+            { "name": "resume", "signature": "resume(): void" },
+            { "name": "close", "signature": "close(): void" },
+            { "name": "stats", "signature": "stats(): object", "description": "Get stream statistics as JSON" }
+          ]
+        }
+      },
+      "eventSchema": {
+        "description": "All events follow this structure",
+        "fields": {
+          "id": "string — unique event ID",
+          "category": "'progress' | 'metrics' | 'recommendation' | 'validation' | 'error' | 'system' | 'chart' | 'heartbeat' | 'custom'",
+          "source": "string — emitting component",
+          "timestamp": "number — Unix timestamp ms",
+          "priority": "'low' | 'normal' | 'high' | 'critical'",
+          "payload": "object — category-specific data"
+        }
+      }
+    },
+
+    "agent": {
+      "description": "High-level agent API for color validation, recommendations, and material queries. JSON-in/JSON-out interface.",
+      "classes": {
+        "AgentExecutor": {
+          "description": "Query/response executor for complex agent operations.",
+          "constructors": [{ "signature": "new AgentExecutor(): AgentExecutor" }],
+          "methods": [{
+            "name": "execute",
+            "signature": "execute(queryJson: string): string",
+            "description": "Execute a JSON-encoded query. Returns JSON response string.",
+            "example": "const resp = JSON.parse(executor.execute(JSON.stringify({ type: 'validate', color: '#3a7bd5', contract: {} })));"
+          }]
+        },
+        "ContractBuilder": {
+          "description": "Fluent builder for color contracts (constraint specifications).",
+          "constructors": [{ "signature": "new ContractBuilder(): ContractBuilder" }],
+          "methods": [
+            { "name": "minContrastWcagAa", "signature": "minContrastWcagAa(against: string): ContractBuilder", "description": "Require WCAG AA contrast against a color" },
+            { "name": "minContrastWcagAaa", "signature": "minContrastWcagAaa(against: string): ContractBuilder" },
+            { "name": "inSrgb", "signature": "inSrgb(): ContractBuilder", "description": "Require color to be in sRGB gamut" },
+            { "name": "inP3", "signature": "inP3(): ContractBuilder", "description": "Require color to be in Display P3 gamut" },
+            { "name": "lightnessRange", "signature": "lightnessRange(min: number, max: number): ContractBuilder", "description": "OKLCH L* range constraint" },
+            { "name": "chromaRange", "signature": "chromaRange(min: number, max: number): ContractBuilder", "description": "OKLCH C range constraint" }
+          ]
+        }
+      },
+      "functions": [
+        {
+          "name": "agentValidate",
+          "signature": "agentValidate(color: string, contractJson: string): string",
+          "description": "Validate a color against a JSON-encoded contract. Returns JSON validation response.",
+          "returns": "JSON string: { passes: boolean, violations: string[], metrics: object }"
+        },
+        {
+          "name": "agentValidatePair",
+          "signature": "agentValidatePair(fg: string, bg: string, standard: string, level: string): string",
+          "description": "Validate a foreground/background color pair for contrast.",
+          "params": { "standard": "'wcag' | 'apca'", "level": "'aa' | 'aaa'" },
+          "returns": "JSON string: { passes: boolean, ratio: number, level: string }"
+        },
+        {
+          "name": "agentGetMetrics",
+          "signature": "agentGetMetrics(color: string): string",
+          "description": "Get comprehensive metrics for a color.",
+          "returns": "JSON string: { hex, oklch, hct, luminance, hue, chroma, tone }"
+        },
+        {
+          "name": "agentGetMaterial",
+          "signature": "agentGetMaterial(preset: string): string",
+          "description": "Get material properties for a named preset.",
+          "returns": "JSON string with material parameters"
+        },
+        {
+          "name": "agentListMaterials",
+          "signature": "agentListMaterials(category: string): string",
+          "description": "List available material presets by category.",
+          "params": { "category": "'glass' | 'metal' | 'all'" },
+          "returns": "JSON array of material names"
+        },
+        {
+          "name": "agentRecommendForeground",
+          "signature": "agentRecommendForeground(bg: string, context: string, target: string): string",
+          "description": "Recommend foreground color (high-level agent wrapper).",
+          "returns": "JSON string: { hex, score, reason, passes }"
+        },
+        {
+          "name": "agentImproveForeground",
+          "signature": "agentImproveForeground(fg: string, bg: string, context: string, target: string): string",
+          "description": "Improve foreground color pair.",
+          "returns": "JSON string recommendation"
+        },
+        {
+          "name": "agentScorePair",
+          "signature": "agentScorePair(fg: string, bg: string, context: string, target: string): string",
+          "description": "Score a color pair quality.",
+          "returns": "JSON string: { overall, compliance, perceptual, appropriateness, assessment }"
+        },
+        {
+          "name": "agentValidatePairsBatch",
+          "signature": "agentValidatePairsBatch(pairsJson: string): string",
+          "description": "Batch validate multiple color pairs.",
+          "params": { "pairsJson": "JSON array of { fg, bg, standard, level }" },
+          "returns": "JSON array of validation results"
+        },
+        {
+          "name": "agentGetMetricsBatch",
+          "signature": "agentGetMetricsBatch(colorsJson: string): string",
+          "description": "Batch get metrics for multiple colors.",
+          "params": { "colorsJson": "JSON array of hex strings" },
+          "returns": "JSON array of metric objects"
+        }
+      ]
+    }
+  },
+
+  "colorConstraintSchema": {
+    "description": "Schema for constraint objects used in solveColorConstraints()",
+    "types": {
+      "wcag_aa":      { "fields": { "against": "string hex color" }, "description": "WCAG AA contrast ≥4.5:1 against target" },
+      "wcag_aaa":     { "fields": { "against": "string hex color" }, "description": "WCAG AAA contrast ≥7:1 against target" },
+      "apca_lc":      { "fields": { "against": "string hex color", "minLc": "number" }, "description": "APCA Lc ≥ minLc" },
+      "lightness_range": { "fields": { "min": "number [0,1]", "max": "number [0,1]" }, "description": "OKLCH L must be in [min, max]" },
+      "chroma_range": { "fields": { "min": "number ≥0", "max": "number ≥0" }, "description": "OKLCH C must be in [min, max]" },
+      "in_srgb":      { "fields": {}, "description": "Color must be in sRGB gamut" },
+      "in_p3":        { "fields": {}, "description": "Color must be in Display P3 gamut" }
+    }
+  },
+
+  "physicsConstants": {
+    "wcag": {
+      "aaNormalText": 4.5,
+      "aaLargeText": 3.0,
+      "aaaNormalText": 7.0,
+      "aaaLargeText": 4.5,
+      "largeTextMinPx": 18.5,
+      "largeTextBoldMinPx": 14.0,
+      "largeTextBoldMinWeight": 700
+    },
+    "apca": {
+      "version": "0.1.9",
+      "lcBodyText": 75,
+      "lcLargeText": 60,
+      "lcHeading": 60,
+      "lcSubtitle": 45,
+      "lcCaption": 90,
+      "maxLc": 106
+    },
+    "colorSpaces": {
+      "oklchLRange": [0, 1],
+      "oklchCRange": [0, "~0.4 (gamut-dependent)"],
+      "oklchHRange": [0, 360],
+      "hctToneRange": [0, 100],
+      "hctHueRange": [0, 360]
+    },
+    "thinFilm": {
+      "visibleSpectrumNm": [380, 700],
+      "soapBubbleThicknessNm": [100, 800],
+      "waterIOR": 1.33,
+      "glassIOR": 1.52,
+      "sapphireIOR": 1.77
+    },
+    "conductors": {
+      "gold":   { "n": 0.17, "k": 3.5 },
+      "silver": { "n": 0.05, "k": 4.2 },
+      "copper": { "n": 0.25, "k": 2.8 },
+      "iron":   { "n": 2.87, "k": 3.08 },
+      "chrome": { "n": 3.17, "k": 3.31 }
+    }
+  },
+
+  "quickstartExamples": [
+    {
+      "title": "WCAG AA Compliance Check",
+      "description": "Check if a text color meets WCAG AA on a background",
+      "code": "import init, { Color, wcagContrastRatio, wcagPasses } from 'momoto-wasm';\nawait init();\nconst fg = Color.fromHex('#1a1a2e');\nconst bg = Color.fromHex('#f0f4ff');\nconst ratio = wcagContrastRatio(fg, bg);\nconst passes = wcagPasses(ratio, 0, false); // level 0 = AA, not large text\nconsole.log(`Ratio: ${ratio.toFixed(2)}, AA: ${passes}`);"
+    },
+    {
+      "title": "Generate HCT Tonal Palette (Material Design 3)",
+      "description": "Generate a 13-tone palette for a brand color",
+      "code": "import init, { hexToHct, hctTonalPalette, hctToHex } from 'momoto-wasm';\nawait init();\nconst [hue, chroma] = hexToHct('#3a7bd5');\nconst palette = hctTonalPalette(hue, chroma);\nconst hexColors = [];\nfor (let i = 0; i < 13; i++) {\n  hexColors.push(hctToHex(palette[i*3], palette[i*3+1], palette[i*3+2]));\n}\nconsole.log(hexColors);"
+    },
+    {
+      "title": "Cook-Torrance BRDF (PBR Specular)",
+      "description": "Calculate specular reflectance for a glass surface",
+      "code": "import init, { cookTorranceBRDF } from 'momoto-wasm';\nawait init();\nconst normal = new Float64Array([0, 1, 0]);\nconst view   = new Float64Array([0, 1, 0]);\nconst light  = new Float64Array([0.707, 0.707, 0]);\nconst roughness = 0.2;\nconst ior = 1.5;\nconst cosTheta = 0.8;\nconst brdf = cookTorranceBRDF(normal, view, light, roughness, ior, cosTheta);\nconsole.log(`Specular: ${brdf.toFixed(4)}`);"
+    },
+    {
+      "title": "CVD Simulation",
+      "description": "Simulate how a color looks to someone with protanopia",
+      "code": "import init, { simulateCVD, cvdDeltaE } from 'momoto-wasm';\nawait init();\nconst original = '#3a7bd5';\nconst simulated = simulateCVD(original, 'protanopia', 1.0);\nconst diff = cvdDeltaE(original, 'protanopia');\nconsole.log(`Original: ${original}, Simulated: ${simulated}, ΔE: ${diff.toFixed(2)}`);"
+    },
+    {
+      "title": "Temporal Thin Film (Soap Bubble Animation)",
+      "description": "Animate soap bubble iridescence over time",
+      "code": "import init, { TemporalThinFilmMaterial } from 'momoto-wasm';\nawait init();\nconst bubble = TemporalThinFilmMaterial.soapBubble();\n// Sample reflectance at 60fps for 3 seconds\nconst timeline = bubble.sampleTimeline(3.0, 180, 0.8);\nfor (let i = 0; i < 180; i++) {\n  const t = timeline[i*2];\n  const reflectance = timeline[i*2+1];\n  console.log(`t=${t.toFixed(3)}s: reflectance=${reflectance.toFixed(4)}`);\n}"
+    },
+    {
+      "title": "SIREN Neural Color Correction",
+      "description": "Apply perceptual neural correction to a color pair",
+      "code": "import init, { computeSirenCorrection, applySirenCorrection, Color } from 'momoto-wasm';\nawait init();\nconst fg = Color.fromHex('#888888');\nconst bg = Color.fromHex('#ffffff');\nconst fgOklch = fg.toOklch();\nconst bgOklch = bg.toOklch();\nconst correction = computeSirenCorrection(\n  bgOklch.l, bgOklch.c, bgOklch.h,\n  fgOklch.l, fgOklch.c, fgOklch.h,\n  75.0, 4.5, 72.0\n);\nconst corrected = applySirenCorrection(\n  fgOklch.l, fgOklch.c, fgOklch.h,\n  correction.deltaL, correction.deltaC, correction.deltaH\n);"
+    }
+  ]
+}

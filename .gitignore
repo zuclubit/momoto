@@ -29,6 +29,9 @@ yarn-error.log*
 .DS_Store
 *.tsbuildinfo
 
+# tsup generated artefacts
+tsup.config.bundled_*.mjs
+
 # IDE
 .idea/
 .vscode/

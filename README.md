@@ -7,6 +7,20 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.0+-61DAFB.svg)](https://reactjs.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Docs](https://img.shields.io/badge/Docs-GitHub%20Pages-7c3aed.svg)](https://zuclubit.github.io/momoto-ui/)
+[![API](https://img.shields.io/badge/API-momoto.json-0ea5e9.svg)](https://zuclubit.github.io/momoto-ui/momoto.json)
+[![LLMs](https://img.shields.io/badge/LLM%20Context-llms.txt-10b981.svg)](https://zuclubit.github.io/momoto-ui/llms.txt)
+
+---
+
+## Live Documentation
+
+| Resource | URL |
+|----------|-----|
+| **Interactive API Explorer** | [zuclubit.github.io/momoto-ui](https://zuclubit.github.io/momoto-ui/) |
+| **JSON API Spec** | [momoto.json](https://zuclubit.github.io/momoto-ui/momoto.json) |
+| **LLM Context** | [llms.txt](https://zuclubit.github.io/momoto-ui/llms.txt) |
+| **MCP Server** | [`docs/mcp/`](docs/mcp/README.md) — stdio context server for AI assistants |
 
 ---
 
@@ -81,6 +95,27 @@ Those responsibilities belong to **Momoto Core**.
 │   Color Intelligence • APCA • OKLCH • Policies • AI Guards           │
 └────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## Engine Internals
+
+<table>
+<tr>
+<td align="center" width="50%">
+<img src="docs/momoto-ui-geno1.png" alt="SIREN Neural Correction Flow — Momoto perceptual pipeline corrects HCT chroma and lightness through a 483-parameter neural network trained on human color perception data" width="420"/>
+<br/>
+<strong>SIREN Neural Correction Flow</strong><br/>
+<sub>483-param network · ω₀=30 · [9,16,16,3] · seed=421337</sub>
+</td>
+<td align="center" width="50%">
+<img src="docs/momoto-ui-geno2.png" alt="AI Visual Generator Pipeline — Momoto orchestrates color decisions through physics-based rendering, accessibility validation, and token export" width="420"/>
+<br/>
+<strong>AI Visual Generator Pipeline</strong><br/>
+<sub>Physics · OKLCH · WCAG + APCA · Token export</sub>
+</td>
+</tr>
+</table>
 
 ---
 
@@ -347,11 +382,12 @@ function Dashboard() {
 ### Documentation
 
 - [Crystal Components README](packages/momoto-ui-crystal/README.md)
-- [Crystal Design System 2025](CRYSTAL-DESIGN-SYSTEM-2025.md)
-- [UI Mockup Prompts](UI-MOCKUP-PROMPT.md)
-- [Phase 5 Complete](IMPLEMENTATION-PHASE5-COMPLETE.md)
-- [Phase 6 Complete](IMPLEMENTATION-PHASE6-COMPLETE.md)
-- [Project Summary 2026](PROJECT-SUMMARY-2026.md)
+- [Crystal Design System 2025](docs/design/CRYSTAL-DESIGN-SYSTEM-2025.md)
+- [UI Mockup Prompts](docs/design/UI-MOCKUP-PROMPT.md)
+- [Phase 5 Complete](docs/archive/phases/IMPLEMENTATION-PHASE5-COMPLETE.md)
+- [Phase 6 Complete](docs/archive/phases/IMPLEMENTATION-PHASE6-COMPLETE.md)
+- [Project Summary 2026](docs/reports/PROJECT-SUMMARY-2026.md)
+- [Interactive API Explorer](https://zuclubit.github.io/momoto-ui/)
 
 ### Interactive Playground
 

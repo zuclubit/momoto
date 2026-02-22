@@ -1,0 +1,65 @@
+# Momoto Engine
+
+> Chromatic intelligence and material physics engine compiled to WebAssembly. Provides perceptual color science, WCAG/APCA accessibility metrics, glass physics (PBR BRDFs, thin-film interference), AI-powered color recommendations, and real-time event streaming.
+
+Momoto is a Rust library (v7.0.0) compiled to WASM via wasm-bindgen. It implements the full photometric and perceptual pipeline: from gamma-correct sRGB ↔ OKLCH ↔ OKLab ↔ HCT color space conversions, through physically-based rendering (Cook-Torrance, Oren-Nayar, Mie scattering, thin-film transfer matrix), to WCAG 2.1 and APCA-W3 v0.1.9 contrast metrics, a SIREN neural network for perceptual correction, and a constraint solver for finding colors satisfying multiple simultaneous accessibility constraints.
+
+## Modules
+
+- [HCT Color Space](https://zuclubit.github.io/momoto-ui/#module-hct): Google Material Design 3 color space (CAM16 + CIELAB). Functions: hexToHct, hctToHex, hctTonalPalette, hctMaxChroma, HCT class.
+- [Core: Color & Luminance](https://zuclubit.github.io/momoto-ui/#module-core): OKLCH, OKLab, Color, LinearRgba. WCAG contrast, APCA luminance, gamma, math utilities. Batch operations.
+- [Intelligence: Recommendations](https://zuclubit.github.io/momoto-ui/#module-intelligence): RecommendationEngine, Recommendation, ExplanationGenerator. Color harmony (7 types), CVD simulation (Viénot 1999), constraint solving.
+- [Materials: Glass Physics](https://zuclubit.github.io/momoto-ui/#module-materials): Cook-Torrance BRDF, Oren-Nayar BRDF, thin-film interference, refraction, procedural noise, lighting.
+- [Temporal Materials](https://zuclubit.github.io/momoto-ui/#module-temporal): Time-evolving materials (TemporalMaterial, TemporalThinFilmMaterial, TemporalConductorMaterial). Drying paint, soap bubbles, heated metals.
+- [Procedural Noise](https://zuclubit.github.io/momoto-ui/#module-procedural): Perlin noise (ProceduralNoise), IOR variation fields, roughness maps. Deterministic/reproducible.
+- [SIREN Neural Network](https://zuclubit.github.io/momoto-ui/#module-siren): Perceptual color correction via SIREN (9→16→16→3, 483 params, ω₀=30). computeSirenCorrection, applySirenCorrection, batch inference.
+- [Events](https://zuclubit.github.io/momoto-ui/#module-events): Pub/sub event system (MomotoEventBus, MomotoEventStream). Progress, metrics, validation, streaming.
+- [Agent API](https://zuclubit.github.io/momoto-ui/#module-agent): High-level JSON query/response interface. agentValidate, agentValidatePair, agentRecommendForeground, ContractBuilder.
+- [Full API Reference (JSON)](https://zuclubit.github.io/momoto-ui/momoto.json): Machine-readable complete API spec.
+
+## Key Facts
+
+- **Color spaces**: sRGB (gamma + linear), OKLCH, OKLab, HCT (CAM16+CIELAB), LinearRGBA
+- **Accessibility**: WCAG 2.1 (AA=4.5:1 / AAA=7:1 normal; AA=3:1 / AAA=4.5:1 large), APCA-W3 v0.1.9 (Lc body≥75, heading≥60)
+- **CVD**: Viénot 1999 protanopia/deuteranopia/tritanopia in linear sRGB. D65 white preserved exactly.
+- **PBR**: Cook-Torrance BRDF (GGX NDF + Smith G2 + Schlick Fresnel), Oren-Nayar diffuse
+- **Thin film**: Transfer-matrix method 380–700nm, soap bubble / oil slick / AR coating
+- **SIREN**: Architecture [9,16,16,3], 483 params, Mulberry32 PRNG seed=421337, deterministic
+- **Return types**: Most functions return `Float64Array` (flat packed arrays) or JSON strings
+- **Energy conservation**: All BSDF evaluations guarantee reflectance + transmittance + absorption = 1.0
+
+## Usage Pattern
+
+```js
+import init, { Color, wcagContrastRatio, wcagPasses } from 'momoto-wasm';
+await init(); // Required: load WASM binary
+const fg = Color.fromHex('#1a1a2e');
+const bg = Color.fromHex('#f0f4ff');
+const ratio = wcagContrastRatio(fg, bg);
+const passes = wcagPasses(ratio, 0, false); // 0=AA
+```
+
+## Flat Array Conventions
+
+Many functions return `Float64Array` with packed data:
+- OKLCH: `[L, C, H]` — L∈[0,1], C≥0, H∈[0,360)
+- HCT: `[hue, chroma, tone]` — hue∈[0,360), tone∈[0,100]
+- RGB: `[r, g, b]` — ∈[0,1]
+- BSDF: `[reflectance, transmittance, absorption]` — sums to 1.0
+- Tonal palette: 13 HCT triples → 39 values total
+- Timeline: `[t0, r0, t1, r1, ...]` — time,reflectance pairs
+
+## Installation
+
+```bash
+npm install momoto-wasm
+# or local file:
+# "momoto-wasm": "file:./momoto/crates/momoto-wasm/pkg"
+```
+
+## Repository
+
+- Source: https://github.com/zuclubit/momoto-ui
+- Rust workspace: `/momoto/crates/`
+- WASM bindings: `/momoto/crates/momoto-wasm/src/`
+- TypeScript UI: `/src/` (hexagonal architecture: domain/application/adapters/infrastructure)

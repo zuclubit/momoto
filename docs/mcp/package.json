@@ -1,0 +1,16 @@
+{
+  "name": "momoto-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP context server for the Momoto chromatic intelligence engine",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node server.js",
+    "dev": "npx ts-node --esm server.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  }
+}

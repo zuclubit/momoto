@@ -13,32 +13,32 @@ export default defineConfig({
   // Entry points matching package.json exports
   entry: {
     // Main entry
-    'index': 'index.ts',
+    'index': 'src/index.ts',
 
     // Domain layer
-    'domain/index': 'domain/index.ts',
+    'domain/index': 'src/domain/index.ts',
 
     // Application layer
-    'application/index': 'application/index.ts',
+    'application/index': 'src/application/index.ts',
 
     // Adapters layer
-    'adapters/index': 'adapters/index.ts',
-    'adapters/react/index': 'adapters/react/index.ts',
-    'adapters/css/index': 'adapters/css/index.ts',
-    'adapters/tailwind/index': 'adapters/tailwind/index.ts',
+    'adapters/index': 'src/adapters/index.ts',
+    'adapters/react/index': 'src/adapters/react/index.ts',
+    'adapters/css/index': 'src/adapters/css/index.ts',
+    'adapters/tailwind/index': 'src/adapters/tailwind/index.ts',
 
     // Infrastructure layer
-    'infrastructure/index': 'infrastructure/index.ts',
-    'infrastructure/audit/index': 'infrastructure/audit/index.ts',
-    'infrastructure/exporters/index': 'infrastructure/exporters/index.ts',
+    'infrastructure/index': 'src/infrastructure/index.ts',
+    'infrastructure/audit/index': 'src/infrastructure/audit/index.ts',
+    'infrastructure/exporters/index': 'src/infrastructure/exporters/index.ts',
 
     // Components layer
-    'components/index': 'components/index.ts',
-    'components/primitives/index': 'components/primitives/index.ts',
-    'components/composed/index': 'components/composed/index.ts',
+    'components/index': 'src/components/index.ts',
+    'components/primitives/index': 'src/components/primitives/index.ts',
+    'components/composed/index': 'src/components/composed/index.ts',
 
     // Validation layer
-    'validation/index': 'validation/index.ts',
+    'validation/index': 'src/validation/index.ts',
   },
 
   // Output formats
