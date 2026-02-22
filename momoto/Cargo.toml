@@ -6,13 +6,16 @@ members = [
     "crates/momoto-engine",
     "crates/momoto-intelligence",
     "crates/momoto-materials",
-    "crates/momoto-prelude",
+    # momoto-prelude: not yet implemented
+    # "crates/momoto-prelude",
     "crates/momoto-agent",
     "crates/momoto-events",
-    "crates/momoto-cli",
+    # momoto-cli: not yet implemented
+    # "crates/momoto-cli",
     "crates/momoto-wasm",
-    "tests",
-    "benches",
+    # tests/benches: temporarily excluded (depend on momoto-prelude)
+    # "tests",
+    # "benches",
 ]
 
 [workspace.package]

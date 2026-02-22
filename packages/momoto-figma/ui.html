@@ -410,8 +410,9 @@ async function fixForeground(nodeId, bg) {
   let hex = '#ffffff'
   if (wasm) {
     try {
-      const bgC = wasm.Color.fromHex(bg)
-      hex = wasm.agentRecommendForeground(bgC)
+      // agentRecommendForeground(bg_hex, context, target) → JSON string {color, quality_score, …}
+      const result = JSON.parse(wasm.agentRecommendForeground(bg, 'body_text', 'wcag_aa'))
+      hex = result.color || '#ffffff'
     } catch {}
   }
   parent.postMessage({ pluginMessage: { type: 'apply-foreground', hex, nodeId } }, '*')
@@ -492,7 +493,8 @@ async function simulateCvd() {
 
     const results = types.map(type => {
       const simHex = wasm.simulateCVD(hex, type)
-      const delta  = wasm.cvdDeltaE(hex, simHex).toFixed(1)
+      // cvdDeltaE(original_hex, cvd_type) → f64 (ΔE between original and simulated)
+      const delta  = wasm.cvdDeltaE(hex, type).toFixed(1)
       return { type, label: labels[type], simHex, delta }
     })
 

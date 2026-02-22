@@ -1,0 +1,11 @@
+[package]
+name = "momoto-events"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Momoto event pub/sub system"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
