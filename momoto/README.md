@@ -26,16 +26,16 @@ and WASM-ready.
 
 | Crate | Dominio | Descripción | Tests |
 |-------|---------|-------------|-------|
-| [`momoto-core`](./crates/momoto-core) | Foundation | OKLCH · traits · domains · zero deps | 137+ |
-| [`momoto-metrics`](./crates/momoto-metrics) | Color | WCAG 2.1 + APCA-W3 contrast | 43 |
-| [`momoto-intelligence`](./crates/momoto-intelligence) | Color | Harmony · CVD simulation · constraint solver | 15+ |
-| [`momoto-materials`](./crates/momoto-materials) | Color | Glass physics · PBR · thin-film interference | 1 511 |
-| [`momoto-audio`](./crates/momoto-audio) | Audio | ITU-R BS.1770-4 · EBU R128 · FFT · Mel filterbank | 70 |
-| [`momoto-haptics`](./crates/momoto-haptics) | Haptics | Weber's law · LRA/ERM/Piezo · energy budget · waveforms | 34+ |
-| [`momoto-engine`](./crates/momoto-engine) | Orchestration | MomotoEngine · DomainVariant · cross-domain normalization | 22+ |
-| [`momoto-events`](./crates/momoto-events) | Infrastructure | PubSub · EventBroadcaster · EventStream | — |
-| [`momoto-agent`](./crates/momoto-agent) | Orchestration | Workflow · session · visual generation | — |
-| [`momoto-wasm`](./crates/momoto-wasm) | WASM | Bindings JS/TS: color + audio + haptics | — |
+| [`momoto-core`](./crates/momoto-core) | Foundation | OKLCH · HCT · CAM16 · traits · zero deps | 290 |
+| [`momoto-metrics`](./crates/momoto-metrics) | Color | WCAG 2.1 + APCA-W3 contrast | 14 |
+| [`momoto-intelligence`](./crates/momoto-intelligence) | Color | Harmony (7 tipos) · CVD (Viénot 1999) · constraint solver | 18 |
+| [`momoto-materials`](./crates/momoto-materials) | Color | Glass physics · GGX PBR · SSS · thin-film · shadows | 1 616 |
+| [`momoto-audio`](./crates/momoto-audio) | Audio | ITU-R BS.1770-4 · EBU R128 · FFT radix-2 · Mel filterbank | 70 |
+| [`momoto-haptics`](./crates/momoto-haptics) | Haptics | Weber's law · LRA/ERM/Piezo · energy budget · waveforms | 36 |
+| [`momoto-engine`](./crates/momoto-engine) | Orchestration | MomotoEngine · DomainVariant · cross-domain normalization | 24 |
+| [`momoto-events`](./crates/momoto-events) | Infrastructure | PubSub · EventBroadcaster · EventStream (RAII) | — |
+| [`momoto-agent`](./crates/momoto-agent) | Orchestration | Workflow · session · visual generation · audit | — |
+| [`momoto-wasm`](./crates/momoto-wasm) | WASM | Bindings JS/TS: 280+ exports color · 13 audio · haptics planned | — |
 
 ---
 
@@ -43,9 +43,9 @@ and WASM-ready.
 
 | Domain | Physical quantity | Standard | WASM exports |
 |--------|------------------|----------|-------------|
-| **Color** | Photon wavelength 380–780 nm | WCAG 2.1, APCA-W3, CIE | 180+ |
+| **Color** | Photon wavelength 380–780 nm | WCAG 2.1, APCA-W3, CIE, ITU-R | 280+ |
 | **Audio** | Sound pressure 20 Hz–20 kHz | ITU-R BS.1770-4, EBU R128 | 13 |
-| **Haptics** | Vibrotactile force (Hz, N, J) | IEEE 1451.4, Weber's law | planned |
+| **Haptics** | Vibrotactile force (Hz, N, J) | IEEE 1451.4, Weber–Fechner | planned |
 
 ---
 
@@ -64,19 +64,26 @@ momoto-haptics     = "7.1"   # Energy budget, waveforms
 momoto-engine      = "7.1"   # Cross-domain orchestrator
 ```
 
-### Color (OKLCH + APCA)
+### Color (OKLCH + APCA + Harmony)
 
 ```rust
 use momoto_core::color::Color;
+use momoto_core::space::oklch::OKLCH;
 use momoto_metrics::{APCAMetric, WCAGMetric};
+use momoto_intelligence::{generate_palette, harmony_score, HarmonyType};
 
 let fg = Color::from_hex("#FFFFFF").unwrap();
 let bg = Color::from_hex("#3B82F6").unwrap();
 
+// Contrast metrics
 let wcag = WCAGMetric::new().evaluate(fg, bg).contrast;
 let apca = APCAMetric::new().evaluate(fg, bg).contrast;
+println!("WCAG: {:.2}:1  APCA Lc: {:.1}", wcag, apca);  // 3.06:1  55.2
 
-println!("WCAG: {:.2}:1  APCA Lc: {:.1}", wcag, apca);
+// Color harmony
+let seed = OKLCH::new(0.65, 0.18, 210.0);
+let palette = generate_palette(seed, HarmonyType::Analogous { spread: 45.0 });
+println!("Harmony score: {:.3}", harmony_score(&palette.colors)); // 0.0–1.0
 ```
 
 ### Audio (ITU-R BS.1770-4 / EBU R128)
@@ -243,18 +250,19 @@ cargo run --example 07_multimodal_engine --package momoto-engine
 
 ## Project Status — v7.1.0
 
-| Crate | Status | Tests |
-|-------|--------|-------|
-| momoto-core | STABLE | 137+ |
-| momoto-metrics | STABLE | 43 |
-| momoto-intelligence | STABLE | 15+ |
-| momoto-materials | STABLE | 1 511 |
-| momoto-audio | STABLE | 70 |
-| momoto-haptics | STABLE | 34+ |
-| momoto-engine | STABLE | 22+ |
-| momoto-events | STABLE | — |
-| momoto-agent | BETA | — |
-| momoto-wasm | STABLE | — |
+| Crate | Status | Unit tests | Doc tests | Total |
+|-------|--------|-----------|-----------|-------|
+| momoto-core | STABLE | 222 | 68 | **290** |
+| momoto-metrics | STABLE | 7 | 7 | **14** |
+| momoto-intelligence | STABLE | 18 | — | **18** |
+| momoto-materials | STABLE | 1 556 | 60 | **1 616** |
+| momoto-audio | STABLE | 70 | — | **70** |
+| momoto-haptics | STABLE | 34 | 2 | **36** |
+| momoto-engine | STABLE | 22 | 2 | **24** |
+| momoto-events | STABLE | — | — | — |
+| momoto-agent | BETA | — | — | — |
+| momoto-wasm | STABLE | — | — | — |
+| **Total** | | **2 029** | **139** | **2 068** |
 
 ---
 
