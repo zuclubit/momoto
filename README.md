@@ -1,16 +1,15 @@
+# Momoto
 
-# momoto-ui
+> **Multimodal Perceptual Physics Engine — Color · Audio · Haptics**
+> Compiled to WebAssembly. Grounded in published standards. Deterministic on all platforms.
 
-> **Chromatic intelligence and material physics engine — compiled to WebAssembly.**
-> Momoto decides. Momoto UI renders.
-
-[![Engine](https://img.shields.io/badge/Engine-v7.0.0-6c63ff.svg)](https://zuclubit.github.io/momoto-ui/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-18.0+-61DAFB.svg)](https://reactjs.org/)
+[![Engine](https://img.shields.io/badge/Engine-v7.1.0-6c63ff.svg)](https://zuclubit.github.io/momoto/)
+[![Rust](https://img.shields.io/badge/Rust-1.70+-orange.svg)](https://www.rust-lang.org/)
+[![WASM](https://img.shields.io/badge/WASM-ready-blue.svg)](https://webassembly.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Docs](https://img.shields.io/badge/Docs-GitHub%20Pages-7c3aed.svg)](https://zuclubit.github.io/momoto-ui/)
-[![API](https://img.shields.io/badge/API-momoto.json-0ea5e9.svg)](https://zuclubit.github.io/momoto-ui/momoto.json)
-[![LLMs](https://img.shields.io/badge/LLM%20Context-llms.txt-10b981.svg)](https://zuclubit.github.io/momoto-ui/llms.txt)
+[![Docs](https://img.shields.io/badge/Docs-GitHub%20Pages-7c3aed.svg)](https://zuclubit.github.io/momoto/)
+[![API](https://img.shields.io/badge/API-momoto.json-0ea5e9.svg)](https://zuclubit.github.io/momoto/momoto.json)
+[![LLMs](https://img.shields.io/badge/LLM%20Context-llms.txt-10b981.svg)](https://zuclubit.github.io/momoto/llms.txt)
 
 ---
 
@@ -18,9 +17,9 @@
 
 | Resource | URL |
 |----------|-----|
-| **Interactive API Explorer** | [zuclubit.github.io/momoto-ui](https://zuclubit.github.io/momoto-ui/) |
-| **JSON API Spec** | [momoto.json](https://zuclubit.github.io/momoto-ui/momoto.json) |
-| **LLM Context** | [llms.txt](https://zuclubit.github.io/momoto-ui/llms.txt) |
+| **Interactive API Explorer** | [zuclubit.github.io/momoto](https://zuclubit.github.io/momoto/) |
+| **JSON API Spec** | [momoto.json](https://zuclubit.github.io/momoto/momoto.json) |
+| **LLM Context** | [llms.txt](https://zuclubit.github.io/momoto/llms.txt) |
 | **MCP Server** | [`docs/mcp/`](docs/mcp/README.md) — stdio context server for AI assistants |
 | **WASM Package** | [`momoto/crates/momoto-wasm/`](momoto/crates/momoto-wasm/README.md) |
 
@@ -28,233 +27,227 @@
 
 ## What is Momoto?
 
-Momoto is a **Rust library (v7.0.0) compiled to WebAssembly** via wasm-bindgen. It implements the full photometric and perceptual pipeline — from color science and accessibility metrics through physically-based glass physics and AI-powered recommendations.
+Momoto is a **Rust library (v7.1.0) compiled to WebAssembly** that models perceptual physics
+across three sensory domains. Every algorithm is grounded in a published standard;
+every output is deterministic, energy-conserving, and allocation-free in hot paths.
 
-`momoto-ui` is the **monorepo** that houses both the Momoto engine and the UI layer built on top of it.
+```
+┌────────────────────────────────────────────────────────────────┐
+│                    MomotoEngine  (v7.1.0)                      │
+│  ┌──────────────┐   ┌──────────────┐   ┌─────────────────────┐ │
+│  │  Color       │   │  Audio       │   │  Haptics            │ │
+│  │  OKLCH · HCT │   │  LUFS · FFT  │   │  LRA · ERM · Piezo  │ │
+│  │  APCA · CVD  │   │  Mel · EBU   │   │  Energy budget      │ │
+│  │  Harmony     │   │  R128        │   │  Waveform gen       │ │
+│  └──────────────┘   └──────────────┘   └─────────────────────┘ │
+│  Energy invariant: output + absorbed + scattered = input        │
+│  No dynamic dispatch · No heap in hot loops · No unsafe Rust    │
+└────────────────────────────────────────────────────────────────┘
+```
 
-| Layer | Package | Responsibility |
-|-------|---------|---------------|
-| **Momoto Engine (Rust/WASM)** | `@momoto-ui/wasm` | Color perception, contrast, physics, accessibility, AI |
-| **Crystal UI** | `@momoto-ui/crystal` | React components, design tokens, glass effects |
-
-> If Momoto is the **decision engine**, **Momoto UI is the execution surface**.
+| Domain | Physical quantity | Standard | WASM exports |
+|--------|------------------|----------|-------------|
+| **Color** | Photon wavelength 380–780 nm | WCAG 2.1, APCA-W3, CIE | 280+ |
+| **Audio** | Sound pressure 20 Hz–20 kHz | ITU-R BS.1770-4, EBU R128 | 13 |
+| **Haptics** | Vibrotactile force (Hz, N, J) | IEEE 1451.4, Weber–Fechner | planned |
 
 ---
 
-## Monorepo Structure
+## Crates
 
-```
-momoto-ui/                          ← Root (npm workspaces: packages/*)
-├── momoto/                         ← Rust engine (git subtree: zuclubit/momoto)
-│   ├── Cargo.toml                  ← Engine workspace (v7.0.0)
-│   └── crates/
-│       ├── momoto-core/            ← Color spaces, OKLCH, linear RGB
-│       ├── momoto-metrics/         ← WCAG 2.1 + APCA-W3 v0.1.9
-│       ├── momoto-intelligence/    ← Harmony, CVD, constraint solver
-│       ├── momoto-materials/       ← PBR physics, thin film, Mie, TMM
-│       ├── momoto-agent/           ← JSON workflow engine
-│       ├── momoto-events/          ← Pub/sub + SSE streaming
-│       └── momoto-wasm/            ← WASM bindings (wasm-pack output → packages/momoto-ui-wasm)
-│
-├── packages/                       ← npm workspace packages
-│   ├── momoto-ui-wasm/             ← @momoto-ui/wasm v7.0.0 (built from momoto/crates/momoto-wasm)
-│   └── momoto-ui-crystal/          ← @momoto-ui/crystal (React components, glass effects, tokens)
-│
-├── src/                            ← TypeScript design system (hexagonal architecture)
-│   ├── domain/                     ← Color entities, ports, value objects
-│   ├── application/                ← Use cases, recommendation pipeline
-│   ├── adapters/                   ← React, CSS, Tailwind adapters
-│   └── infrastructure/             ← WASM bridge, exporters, audit
-│
-├── crates/                         ← Rust UI bindings workspace
-│   └── momoto-ui-core/             ← UI-layer Rust crate (v1.0.0-rc1)
-│
-├── docs/                           ← All documentation
-│   ├── website/index.html          ← Interactive API explorer (GitHub Pages)
-│   ├── api/momoto.json             ← Machine-readable API spec
-│   ├── api/llms.txt                ← LLM context document
-│   └── mcp/                        ← MCP stdio server
-│
-├── examples/                       ← Standalone usage examples
-├── scripts/                        ← Build and verification scripts
-├── Cargo.toml                      ← UI Rust workspace root
-└── package.json                    ← Monorepo root (workspaces: packages/*)
-```
+| Crate | Dominio | Tests |
+|-------|---------|-------|
+| [`momoto-core`](momoto/crates/momoto-core) | OKLCH · HCT · CAM16 · traits · zero deps | 290 |
+| [`momoto-metrics`](momoto/crates/momoto-metrics) | WCAG 2.1 + APCA-W3 contrast | 50 |
+| [`momoto-intelligence`](momoto/crates/momoto-intelligence) | Harmony (7 tipos) · CVD (Viénot 1999) · constraint solver | 18 |
+| [`momoto-materials`](momoto/crates/momoto-materials) | Glass · GGX PBR · SSS · thin-film · shadows | 1 616 |
+| [`momoto-audio`](momoto/crates/momoto-audio) | ITU-R BS.1770-4 · EBU R128 · FFT radix-2 · Mel filterbank | 70 |
+| [`momoto-haptics`](momoto/crates/momoto-haptics) | Weber's law · LRA/ERM/Piezo · energy budget · waveforms | 36 |
+| [`momoto-engine`](momoto/crates/momoto-engine) | MomotoEngine · DomainVariant · cross-domain normalization | 24 |
+| [`momoto-events`](momoto/crates/momoto-events) | PubSub · EventBroadcaster · EventStream (RAII) | — |
+| [`momoto-agent`](momoto/crates/momoto-agent) | Workflow · session · visual generation · audit | — |
+| [`momoto-wasm`](momoto/crates/momoto-wasm) | WASM bindings JS/TS | — |
+| **Total** | | **2 104** |
 
 ---
 
-## Engine Overview
+## Repository Structure
 
-Momoto v7.0.0 provides **9 WASM modules** covering 280+ individual callable methods:
+```
+momoto/                             ← Rust engine workspace (v7.1.0)
+├── Cargo.toml                      ← Workspace root
+└── crates/
+    ├── momoto-core/                ← Color spaces, OKLCH, traits, zero deps
+    ├── momoto-metrics/             ← WCAG 2.1 + APCA-W3 v0.1.9
+    ├── momoto-intelligence/        ← Harmony, CVD, constraint solver
+    ├── momoto-materials/           ← PBR physics, thin film, Mie, TMM, shadows
+    ├── momoto-audio/               ← LUFS, K-weighting, FFT, Mel, EBU R128
+    ├── momoto-haptics/             ← Energy budget, LRA/ERM/Piezo, waveforms
+    ├── momoto-engine/              ← Cross-domain orchestrator, DomainVariant
+    ├── momoto-agent/               ← JSON workflow engine
+    ├── momoto-events/              ← Pub/sub + SSE streaming
+    └── momoto-wasm/                ← WASM bindings (wasm-pack)
 
-| Module | Description |
-|--------|-------------|
-| **HCT** | Google Material Design 3 (CAM16 + CIELAB). Tonal palettes, gamut-safe conversions. |
-| **Core** | sRGB ↔ OKLCH ↔ OKLab. WCAG 2.1 + APCA-W3 v0.1.9. Batch luminance. |
-| **Intelligence** | AI recommendations, 7 harmony types, CVD simulation (Viénot 1999), constraint solver. |
-| **Materials** | Sprint 1–4 PBR: thin film (12), dispersion (7+5), metals (12), Mie (9+8), TMM (9), SpectralPipeline. |
-| **Temporal** | Time-evolving physics: drying paint, soap bubbles, heated metals. R+T+A=1. |
-| **Procedural** | Perlin fBm noise, IOR variation fields, roughness maps. Deterministic seed. |
-| **SIREN** | Neural network [9→16→16→3], 483 params, ω₀=30. Perceptual color correction. |
-| **Events** | MomotoEventBus pub/sub + MomotoEventStream SSE-compatible. |
-| **Agent** | High-level JSON interface: validate, recommend, improve, material queries, workflows. |
+docs/
+├── website/index.html              ← Interactive API explorer (GitHub Pages)
+├── api/momoto.json                 ← Machine-readable API spec
+├── api/llms.txt                    ← LLM context document
+└── mcp/                            ← MCP stdio server
+
+src/                                ← TypeScript design system (hexagonal architecture)
+├── domain/                         ← Color entities, ports, value objects
+├── application/                    ← Use cases, recommendation pipeline
+├── adapters/                       ← React, CSS, Tailwind adapters
+└── infrastructure/                 ← WASM bridge, exporters, audit
+
+packages/
+├── momoto-ui-wasm/                 ← @momoto-ui/wasm (built from momoto-wasm crate)
+└── momoto-ui-crystal/              ← @momoto-ui/crystal (React components)
+```
 
 ---
 
 ## Getting Started
 
-### Install (npm workspace)
+### Rust
 
-```bash
-git clone https://github.com/zuclubit/momoto-ui.git
-cd momoto-ui
-npm install          # Links all workspace packages automatically
+```toml
+[dependencies]
+momoto-core        = "7.1"
+momoto-metrics     = "7.1"    # WCAG 2.1 + APCA contrast
+momoto-intelligence = "7.1"   # Harmony, CVD, constraint solver
+momoto-materials   = "7.1"    # Glass physics, PBR, thin-film
+momoto-audio       = "7.1"    # LUFS, FFT, Mel, EBU R128
+momoto-haptics     = "7.1"    # Energy budget, waveforms
+momoto-engine      = "7.1"    # Cross-domain orchestrator
 ```
 
-### Build the WASM Engine
+### WASM / npm
 
 ```bash
-# Requires wasm-pack: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-npm run build:wasm    # → packages/momoto-ui-wasm/ (bundler target)
-npm run build:wasm:web  # → web target (ES modules, no bundler)
-```
-
-### Build Everything
-
-```bash
-npm run build:all    # build:wasm + TypeScript + Crystal
-npm run build        # TypeScript design system only (dist/)
-npm run build:crystal # @momoto-ui/crystal only
-```
-
-### Engine Development
-
-```bash
-npm run build:engine  # cargo build --release (full engine)
-npm run test:engine   # cargo test (all engine tests)
-cd momoto && cargo test crates/momoto-wasm  # specific crate
-```
-
-### Design System Development
-
-```bash
-npm run dev          # TypeScript design system watch mode
-cd packages/momoto-ui-crystal && npm run storybook  # Crystal Storybook
-```
-
----
-
-## Installation (Standalone)
-
-```bash
-# WASM engine (published to npm)
 npm install momoto-wasm
+```
 
-# Crystal component library
-npm install @momoto-ui/crystal
-
-# Local workspace reference (monorepo)
-# packages automatically linked via npm workspaces
+```bash
+git clone https://github.com/zuclubit/momoto.git
+cd momoto
+cargo test --workspace       # 2 104 tests
+wasm-pack build --target web -- --features multimodal
 ```
 
 ---
 
 ## Quick Start
 
-### WASM Engine
+### Color (OKLCH + APCA)
 
-```js
-import init, { Color, wcagContrastRatio, wcagPasses } from 'momoto-wasm';
-
-await init(); // Required: load WASM binary
-
-const fg = Color.fromHex('#1a1a2e');
-const bg = Color.fromHex('#f0f4ff');
-
-const ratio = wcagContrastRatio(fg, bg);
-const passes = wcagPasses(ratio, 0, false); // 0=AA, false=normal text
-console.log(`${ratio.toFixed(2)}:1 — ${passes ? 'PASS' : 'FAIL'}`);
-```
-
-### Accessibility Validation
-
-```js
-import init, {
-  wcagContrastRatio, wcagPasses, wcagLevel,
-  apcaContrast, Color
-} from 'momoto-wasm';
+```javascript
+import init, { wcagContrastRatio, wcagPasses, apcaContrast } from 'momoto-wasm';
 
 await init();
-const fg = Color.fromHex('#c8d4ff');
-const bg = Color.fromHex('#07070e');
 
-const wcag = wcagContrastRatio(fg, bg);
-const apca = apcaContrast(fg, bg);
+const ratio = wcagContrastRatio('#FFFFFF', '#3B82F6');
+const apca  = apcaContrast('#FFFFFF', '#3B82F6');
 
-console.log(`WCAG: ${wcag.toFixed(2)}:1 (${wcagLevel(wcag, false)})`);
-console.log(`APCA: ${apca.toFixed(1)} Lc`); // body text needs ≥75
+console.log(`WCAG: ${ratio.toFixed(2)}:1`);   // 3.06:1
+console.log(`APCA: ${apca.toFixed(1)} Lc`);   // 55.2
+console.log(`AA:   ${wcagPasses(ratio, 0, false)}`); // false
 ```
 
-### HCT / Material Design 3
+### Audio (ITU-R BS.1770-4 / EBU R128)
 
-```js
+```javascript
+import init, { audioLufs, audioFftPowerSpectrum, audioValidateEbuR128 } from 'momoto-wasm';
+
+await init();
+
+// 1 kHz sine, 1 second, 48 kHz
+const sr = 48000;
+const samples = new Float32Array(sr);
+for (let i = 0; i < sr; i++)
+    samples[i] = Math.sin(2 * Math.PI * 1000 * i / sr);
+
+const lufs = audioLufs(samples, sr, 1);
+console.log(`Integrated: ${lufs.toFixed(2)} LUFS`);
+
+const compliance = JSON.parse(audioValidateEbuR128(lufs));
+console.log(`EBU R128 passes: ${compliance.passes}`);
+
+const fft = audioFftPowerSpectrum(samples, 2048);
+console.log(`FFT bins: ${fft.length}`);  // 1025
+```
+
+### Haptics (Weber's law / Energy budget — Rust)
+
+```rust
+use momoto_haptics::{ActuatorModel, EnergyBudget, HapticWaveform, WaveformKind};
+use momoto_haptics::mapping::FrequencyForceMapper;
+
+// 50 mJ LRA with passive recharge
+let mut budget = EnergyBudget::with_recharge(0.050, 0.010);
+budget.try_consume(0.005).expect("tap ok");
+budget.tick(0.1); // 100 ms elapsed
+
+let mapper = FrequencyForceMapper::new(ActuatorModel::Lra);
+let spec = mapper.map(0.7, 100.0); // intensity=0.7, duration=100 ms
+println!("{:.0} Hz  {:.4} N  {:.4} J", spec.freq_hz, spec.force_n, spec.energy_j());
+
+let wave = HapticWaveform::generate(WaveformKind::Buzz, 200.0, 50.0, 0.8, 8_000);
+println!("Samples: {}", wave.samples.len());
+```
+
+### Cross-Domain Engine (Rust)
+
+```rust
+use momoto_engine::MomotoEngine;
+use momoto_core::traits::domain::DomainId;
+
+let engine = MomotoEngine::new();
+
+// Normalize perceptual energy across domains
+let color_norm = engine.normalize_perceptual_energy(DomainId::Color, 0.72);
+// Audio: (lufs + 70) / 70 → [0, 1]
+let audio_norm = engine.normalize_perceptual_energy(DomainId::Audio, -23.0);
+
+let alignment = engine.perceptual_alignment(DomainId::Color, DomainId::Color, 0.72, 0.68);
+println!("Alignment: {:.3}", alignment);  // 0.960
+
+let report = engine.validate_system_energy();
+println!("System conserved: {}", report.system_conserved);
+```
+
+### HCT / Material Design 3 (WASM)
+
+```javascript
 import init, { hexToHct, hctTonalPalette, hctToHex } from 'momoto-wasm';
 
 await init();
 
 const [hue, chroma, tone] = hexToHct('#3a7bd5'); // [264.5, 41.2, 50.0]
-
-// 13-tone palette (39 values: hue,chroma,tone per step)
-const palette = hctTonalPalette(hue, chroma);
-const tone80 = hctToHex(palette[0], palette[1], 80); // "#a8c5f8"
+const palette = hctTonalPalette(hue, chroma);    // 39 values (13 × [h,c,t])
+const tone80  = hctToHex(palette[0], palette[1], 80); // "#a8c5f8"
 ```
 
-### Glass Physics
+### Glass Physics (WASM)
 
-```js
+```javascript
 import init, { ThinFilm, TransferMatrixFilm } from 'momoto-wasm';
 
 await init();
 
 // Soap bubble iridescence (Airy formula)
 const bubble = ThinFilm.soapBubbleMedium();
-const [r, g, b] = bubble.reflectanceRgb(1.0, 0.0);
 const css = bubble.toCssSoapBubble(80); // CSS conic-gradient
 
 // Morpho butterfly (9-layer TMM stack)
 const morpho = TransferMatrixFilm.morphoButterfly();
 console.log(morpho.toCssStructuralColor(0));   // 0° — deep blue
-console.log(morpho.toCssStructuralColor(45));  // 45° — shifts toward cyan
+console.log(morpho.toCssStructuralColor(45));  // 45° — cyan shift
 ```
 
-### AI Recommendations
+### Color Harmony & CVD (WASM)
 
-```js
-import init, {
-  agentRecommendForeground, agentValidatePair,
-  ContractBuilder, agentValidate
-} from 'momoto-wasm';
-
-await init();
-
-// Recommend best foreground for dark background
-const rec = JSON.parse(agentRecommendForeground('#07070e', 0, 0));
-// context=0: BodyText, target=0: WCAG_AA
-console.log(rec.hex, rec.wcagRatio, rec.passes);
-
-// Contract-based validation
-const contract = new ContractBuilder()
-  .minContrastWcagAA('#07070e')
-  .lightnessRange(0.4, 0.9)
-  .inSrgb()
-  .build();
-const result = JSON.parse(agentValidate('#6188d8', contract));
-console.log(result.passes, result.violations);
-```
-
-### Color Harmony
-
-```js
+```javascript
 import init, { generatePalette, harmonyScore, simulateCVD } from 'momoto-wasm';
 
 await init();
@@ -264,121 +257,115 @@ await init();
 const triad = generatePalette('#3a7bd5', 'triadic', 3);
 
 // CVD simulation (Viénot 1999, D65 white preserved)
-const protanope = simulateCVD('#3a7bd5', 'protanopia');
-```
-
-### Mie Scattering & Atmospheric Optics
-
-```js
-import init, {
-  MieParams, DynamicMieParams, henyeyGreenstein, rayleighIntensityRgb
-} from 'momoto-wasm';
-
-await init();
-
-const fog = MieParams.fogSmall();             // 2µm droplets
-const mist = DynamicMieParams.condensingFog();
-const [r, g, b] = mist.scatteringColorAtTime(2.5, 550); // t=2.5s, λ=550nm
-const css = mist.toCssFog();
-
-const sky = rayleighIntensityRgb(0.0); // 90° → [0.12, 0.24, 1.0] deep blue
-```
-
-### SpectralPipeline
-
-```js
-import init, {
-  SpectralPipeline, SpectralSignal, EvaluationContext,
-  ThinFilm, MieParams
-} from 'momoto-wasm';
-
-await init();
-
-const result = new SpectralPipeline()
-  .addThinFilm(ThinFilm.arCoating())
-  .addMieScattering(MieParams.cloud())
-  .addGold()
-  .evaluate(
-    SpectralSignal.d65Illuminant(),
-    new EvaluationContext().withAngle(30).withTemperature(293)
-  );
-
-const [r, g, b] = result.toRgb();
-const [X, Y, Z] = result.toXyz();
+const deuteranope = simulateCVD('#3a7bd5', 'deuteranopia');
 ```
 
 ---
 
-## Crystal Design System
-
-Production-ready React component library powered by the Momoto engine.
+## WASM Feature Flags
 
 ```bash
-npm install @momoto-ui/crystal
+# Color only (<350 KB)
+wasm-pack build --target web -- --no-default-features --features color
+
+# Color + Audio (<500 KB)
+wasm-pack build --target web -- --features audio
+
+# Full multimodal (<550 KB)
+wasm-pack build --target web -- --features multimodal
 ```
 
-```tsx
-import { Button, Input, Card, MetricCard } from '@momoto-ui/crystal';
-import '@momoto-ui/crystal/styles';
+| Feature | Adds |
+|---------|------|
+| `color` | OKLCH, HCT, APCA, materials — always compiled |
+| `audio` | LUFS, FFT, Mel, EBU R128 |
+| `haptics` | Energy budget, waveforms |
+| `multimodal` | audio + haptics |
+| `panic_hook` | Browser panic messages |
 
-function Dashboard() {
-  return (
-    <Card variant="elevated">
-      <MetricCard title="Revenue" value="$127,540" change="+12.5%" changeType="positive" />
-      <Input label="Email" type="email" placeholder="name@example.com" />
-      <Button variant="primary">Submit</Button>
-    </Card>
-  );
-}
-```
+---
 
-**Components**: Button (4 variants, 3 sizes) · Input (validation, icons) · Card (metric, elevated)
+## Engine Overview — WASM Modules
+
+| Module | Description | Exports |
+|--------|-------------|---------|
+| **HCT** | Google Material Design 3 (CAM16 + CIELAB). Tonal palettes, gamut-safe conversions. | 12 |
+| **Core** | sRGB ↔ OKLCH ↔ OKLab. WCAG 2.1 + APCA-W3 v0.1.9. Batch luminance. | 40+ |
+| **Intelligence** | AI recommendations, 7 harmony types, CVD simulation (Viénot 1999), constraint solver. | 30+ |
+| **Materials** | Sprint 1–4 PBR: thin film (12), dispersion (7+5), metals (12), Mie (9+8), TMM (9), SpectralPipeline. | 120+ |
+| **Temporal** | Time-evolving physics: drying paint, soap bubbles, heated metals. R+T+A=1. | 15+ |
+| **Procedural** | Perlin fBm noise, IOR variation fields, roughness maps. Deterministic seed. | 8+ |
+| **SIREN** | Neural network [9→16→16→3], 483 params, ω₀=30. Perceptual color correction. | 5 |
+| **Events** | MomotoEventBus pub/sub + MomotoEventStream SSE-compatible. | 20+ |
+| **Agent** | High-level JSON interface: validate, recommend, improve, material queries, workflows. | 20+ |
+| **Audio** | audioLufs, audioFftPowerSpectrum, audioMelSpectrum, audioValidateEbuR128, spectral. | 13 |
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         MONOREPO: zuclubit/momoto-ui                     │
-│                         npm workspaces + git subtree                      │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                           │
-│  momoto/ (Rust Engine — git subtree from zuclubit/momoto)                │
-│  ┌──────────────────────────────────────────────────────────────────┐   │
-│  │  lib.rs (7979 lines) + 9 module files                             │   │
-│  │  ┌──────────┐ ┌───────────┐ ┌────────────────────────────────┐  │   │
-│  │  │  hct.rs  │ │core_ext.rs│ │       lib.rs (materials)        │  │   │
-│  │  │CAM16/HCT │ │OKLCH/WCAG │ │S1: ThinFilm (12 presets)       │  │   │
-│  │  │tonal pal.│ │APCA batch │ │S2: Cauchy/Sellmeier/12 metals  │  │   │
-│  │  └──────────┘ └───────────┘ │S3: Mie (9+8 presets)           │  │   │
-│  │                              │S4: TMM (9 presets)              │  │   │
-│  │  ┌──────────────┐ ┌────────┐└────────────────────────────────┘  │   │
-│  │  │intelligence.rs│ │siren.rs│ ┌────────┐ ┌────────┐ ┌────────┐ │   │
-│  │  │Harmony/CVD    │ │[9,16,  │ │events  │ │agent.rs│ │temporal│ │   │
-│  │  │Constraints    │ │16,3]   │ │EventBus│ │JSON API│ │physics │ │   │
-│  │  └──────────────┘ └────────┘ └────────┘ └────────┘ └────────┘ │   │
-│  └──────────────────────────────────────────────────────────────────┘   │
-│                         │ wasm-pack build                                 │
-│                         ▼                                                 │
-│  packages/momoto-ui-wasm/ (@momoto-ui/wasm v7.0.0)                       │
-│  ┌──────────────────────────────────────────────────────────────────┐   │
-│  │  momoto_wasm.js · momoto_wasm.d.ts · momoto_wasm_bg.wasm        │   │
-│  └──────────────────────────────────────────────────────────────────┘   │
-│                         │ npm workspace                                    │
-│                         ▼                                                 │
-│  packages/momoto-ui-crystal/ (@momoto-ui/crystal)                         │
-│  src/ (domain · application · adapters · infrastructure)                  │
-└─────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                  momoto-wasm (WASM bindings)                     │
+│  feature: color ──── feature: audio ──── feature: haptics        │
+└────────┬────────────────────┬────────────────────┬───────────────┘
+         │                    │                    │
+   ┌─────▼──────┐     ┌───────▼─────┐     ┌───────▼─────┐
+   │momoto-     │     │momoto-audio │     │momoto-      │
+   │intelligence│     │(LUFS/FFT/   │     │haptics      │
+   │materials   │     │Mel/EBU R128)│     │(energy/wave)│
+   │metrics     │     └───────┬─────┘     └───────┬─────┘
+   └─────┬──────┘             │                    │
+         │                    └──────────┬──────────┘
+         └───────────────────────────────┤
+                                  ┌──────▼──────┐
+                                  │momoto-engine│
+                                  │(orchestrator│
+                                  │enum dispatch│
+                                  └──────┬──────┘
+                                         │
+                                  ┌──────▼──────┐
+                                  │momoto-core  │
+                                  │(OKLCH/traits│
+                                  │ zero deps)  │
+                                  └─────────────┘
 ```
+
+**Dispatch sin vtable:** `DomainVariant` enum en lugar de `Box<dyn Domain>` —
+LLVM inlinea todos los match arms, cero overhead de dynamic dispatch en hot paths.
 
 ---
 
 ## Module Reference
 
+### Audio: ITU-R BS.1770-4 / EBU R128
+
+```javascript
+// LUFS measurement (mono or stereo)
+const lufs = audioLufs(samples, sampleRate, channels);
+const momentary  = audioMomentaryLufs(samples, sampleRate);
+
+// EBU R128 broadcast compliance (−23 LUFS ±1)
+const report = JSON.parse(audioValidateEbuR128(lufs));
+// → { passes: bool, standard: "EBU R128", violations: [] }
+
+// FFT power spectrum (radix-2 Cooley-Tukey)
+const power = audioFftPowerSpectrum(samples, 2048); // N/2+1 bins
+
+// Mel filterbank (HTK scale)
+const mel = audioMelSpectrum(samples, sampleRate, 40); // 40 mel bands
+
+// Spectral features
+const centroid  = audioSpectralCentroid(power, sampleRate);   // Hz
+const brightness = audioSpectralBrightness(power, sampleRate, 2000); // 0–1
+const flux      = audioSpectralFlux(prevPower, power);
+const rolloff   = audioSpectralRolloff(power, sampleRate, 0.85);
+const flatness  = audioSpectralFlatness(power);
+```
+
 ### HCT Color Space
 
-```js
+```javascript
 hexToHct(hex) → Float64Array [hue, chroma, tone]
 hctToHex(hue, chroma, tone) → string
 hctTonalPalette(hue, chroma) → Float64Array  // 39 values: 13 × [h,c,t]
@@ -389,35 +376,31 @@ oklchToHct(l, c, h) → Float64Array [hue,chroma,tone]
 HCT.fromHex(hex), HCT.fromArgb(argb)
 hct.withTone(t), hct.withChroma(c), hct.withHue(h)
 hct.toArgb(), hct.clampToGamut()
-hct.hue, hct.chroma, hct.tone
 ```
 
 ### Core: Color & Luminance
 
-```js
+```javascript
 Color.fromHex(hex), Color.fromRgb(r,g,b)
 wcagContrastRatio(fg, bg) → number
 wcagPasses(ratio, level, isLargeText) → boolean  // level: 0=AA, 1=AAA
 wcagLevel(ratio, isLargeText) → "AAA"|"AA"|"AA-Large"|"fail"
 apcaContrast(fg, bg) → number                    // Lc; body≥75, heading≥60
 relativeLuminanceSrgb(color) → number
-relativeLuminanceApca(color) → number
-srgbToLinear(v), linearToSrgb(v)
 relativeLuminanceBatch(colors: Uint8Array) → Float64Array
 wcagContrastRatioBatch(pairs: Uint8Array) → Float64Array
 hexToOklch(hex) → Float64Array [L,C,H]
 oklchToHex(l,c,h) → string
 ```
 
-### Intelligence: Recommendations
+### Intelligence: Harmony, CVD, Constraints
 
-```js
+```javascript
 // Harmony (7 types)
 generatePalette(hex, type, count) → string[]
 // types: complementary|triadic|analogous|split_complementary|tetradic|square|monochromatic
 generateShades(hex, count) → string[]
 harmonyScore(lchFlat: Float64Array) → number [0,1]
-temperaturePalette(warm: boolean) → Float64Array [L,C,H × 5]
 
 // CVD (Viénot 1999, D65 preserved — NOT Brettel 1997)
 simulateCVD(hex, "protanopia"|"deuteranopia"|"tritanopia") → string
@@ -426,204 +409,99 @@ cvdDeltaE(hex, cvdType) → number  // <20=mild, 20-60=moderate, >60=severe
 // Constraint solver (penalty method, 500 iter, 1e-4 convergence)
 solveColorConstraints(lchFlat, constraintsJson, maxIterations)
 // → { colors, converged, iterations, finalPenalty, violations }
-
-// Helpers
-new StepSelector().selectStep(gradient, penalty) → number
-new CostEstimator().estimateCost(nColors, nConstraints) → { flops, memBytes, estimatedMs }
-usageMinWcagAA(usageContext) → number   // 0=BodyText→4.5, 1=LargeText→3.0
-usageMinApcaLc(usageContext) → number   // 0→75, 1→60, 2→45, 3→15
-complianceTargetDescription(target) → string
 ```
 
 ### Materials: Physics (Sprint 1–4)
 
 **Sprint 1 — Thin-Film Optics**
-```js
+```javascript
 // 12 presets: soapBubbleThin/Medium/Thick, oilThin/Medium/Thick,
 //             arCoating, oxideThin/Medium/Thick, beetleShell, nacre
 ThinFilm.soapBubbleMedium()
-new ThinFilm(nFilm, thicknessNm)
-film.reflectance(λNm, nSubstrate, cosTheta) → number
 film.reflectanceRgb(nSubstrate, cosTheta) → Float64Array [r,g,b]
 film.toCssSoapBubble(sizePercent) → CSS conic-gradient
 film.toCssOilSlick() → CSS gradient
-film.toCssIridescentGradient(nSubstrate, baseColor) → CSS
 ```
 
 **Sprint 2 — Chromatic Dispersion & Metals**
-```js
-CauchyDispersion.bk7()       // 7 presets: bk7/fk51a/sf11/lak9/sf57/nbk7/baf10
-SellmeierDispersion.bk7()    // 5 presets (higher accuracy)
-ComplexIOR.gold()             // 12 metals: gold(n=0.17,k=3.5), silver(0.05,4.2), copper...
-ior.f0(), ior.isConductor(), ior.penetrationDepthNm(λNm)
-SpectralComplexIOR.gold()    // 12 metals, wavelength-resolved
-spIor.f0Rgb(), spIor.fresnelRgb(cosTheta), spIor.toCssSurface(roughness)
-DrudeParams.aluminum()        // 7 metals, temperature-dependent
-drude.atTemperature(K) → DrudeParams
-drude.complexIor(λNm, K), drude.spectralIor(K)
-f0FromIor(ior) → number      // ((n-1)/(n+1))²
+```javascript
+CauchyDispersion.bk7()       // 7 glass presets
+ComplexIOR.gold()             // 12 metal presets
+SpectralComplexIOR.gold()    // wavelength-resolved
+DrudeParams.aluminum()        // temperature-dependent
 ```
 
 **Sprint 3 — Mie Scattering**
-```js
-// 9 static: fineDust(Rayleigh x~0.3), coarseDust, fogSmall(2µm),
-//           fogLarge(10µm), cloud(8µm), mist(3µm), smoke(0.3µm), milkGlobule(2.5µm), pollen(25µm)
-MieParams.fogSmall().asymmetryFactor(), .sizeParameter(λNm)
-
-// 8 dynamic: stratocumulus, fog, smoke, milk, dust, iceCrystals, condensingFog, evaporatingMist
+```javascript
+// 9 static + 8 dynamic presets
 DynamicMieParams.condensingFog().scatteringColorAtTime(t, λNm) → [r,g,b]
-DynamicMieParams.fog().toCssFog(), .toCssSmoke()
-
-// Phase functions
-henyeyGreenstein(cosTheta, g) → number
-doubleHenyeyGreenstein(cosTheta, gFwd, gBack, weight) → number
-rayleighPhase(cosTheta) → number
 rayleighIntensityRgb(cosTheta) → Float64Array [r,g,b]
-scatteringColorFromRadius(radiusUm, nParticle) → [r,g,b]
 ```
 
 **Sprint 4 — Multilayer Transfer Matrix**
-```js
-FilmLayer.dielectric(n, thicknessNm)
-FilmLayer.absorbing(n, k, thicknessNm)
-new TransferMatrixFilm(nIncident, nSubstrate)
-film.addLayer(n, nm), film.addAbsorbingLayer(n, k, nm)
-film.reflectance(λNm, angleDeg, pol)   // pol: 0=S, 1=P, 2=Average
-film.reflectanceRgb(angleDeg, pol) → [r,g,b]
-film.toCssStructuralColor(angleDeg) → CSS
-
-// 9 presets: braggMirror, arBroadband, notchFilter,
-//            dichroicBlueReflect, dichroicRedReflect,
-//            morphoButterfly, beetleShell, nacre, opticalDisc
+```javascript
+// 9 presets: braggMirror, arBroadband, morphoButterfly, beetleShell, nacre…
 TransferMatrixFilm.morphoButterfly()
+film.toCssStructuralColor(angleDeg) → CSS
 ```
 
 **SpectralPipeline**
-```js
-SpectralSignal.d65Illuminant()    // CIE D65
-SpectralSignal.uniformDefault()   // flat unit spectrum
-sig.toXyz() → [X,Y,Z], sig.toRgb() → [r,g,b]
-
-new EvaluationContext().withAngle(deg).withTemperature(K)
-
+```javascript
 new SpectralPipeline()
   .addThinFilm(film).addMieScattering(params).addGold()
-  .evaluate(signal, ctx) → SpectralSignal
+  .evaluate(SpectralSignal.d65Illuminant(), new EvaluationContext().withAngle(30))
   .verifyEnergyConservation() → { passes, maxViolation }
-```
-
-**Glass, Refraction & Shadows**
-```js
-// Glass surface (Apple HIG-inspired)
-GlassMaterial.frosted().css('#07070e') → CSS
-renderPremiumCss(material, CssRenderConfig.premium()) → CSS
-
-// Refraction
-RefractionParams.frosted()
-generateDistortionMap(params, cols, rows) → Float64Array  // N² × 4 floats
-
-// Shadows (Material Design elevation)
-AmbientShadowParams.elevated()
-calculateAmbientShadow(params, bgOklch) → CSS shadow string
-elevationDp(dp) → CSS
-
-// PBR BRDFs
-cookTorranceBRDF(normal, view, light, roughness, ior, cosTheta) → number
-orenNayarBRDF(roughness, normal, view, light) → number
-
-// Color difference
-deltaE2000(lab1, lab2) → number
-deltaE2000Batch(labPairs) → Float64Array
 ```
 
 ### Temporal Materials
 
-```js
+```javascript
 TemporalMaterial.dryingPaint().evalAtTime(t, cosTheta) → [R,T,A]
 TemporalThinFilmMaterial.soapBubble().sampleTimeline(durationS, frames, cosTheta)
 TemporalConductorMaterial.heatedGold().evalAtTemperature(K, cosTheta)
-
-// Free functions (zero allocation)
-temporalDryingPaint(t, cosTheta) → Float64Array [R,T,A]
-temporalSoapBubble(t, cosTheta)  → Float64Array [R,T,A]
 // All guarantee R + T + A = 1.0
-```
-
-### Procedural Noise
-
-```js
-// 4 presets: frosted (6 oct), regular (3 oct), clear (1 oct), thick (4 oct)
-ProceduralNoise.frosted()
-noise.sample(x, y) → number [0,1]       // deterministic
-noise.sampleTiled(x, y, period) → number // tileable
-
-variationField(baseIor, variation, cols, rows, seed) → Float64Array
-roughnessVariationField(baseRoughness, variation, cols, rows, seed) → Float64Array
 ```
 
 ### SIREN Neural Network
 
-```js
+```javascript
 // Architecture: [9,16,16,3], 483 params, ω₀=30, Mulberry32 seed=421337
 computeSirenCorrection(bgL,bgC,bgH, fgL,fgC,fgH, apcaLc,wcagRatio,quality)
   → { deltaL, deltaC, deltaH }
 applySirenCorrection(l,c,h, deltaL,deltaC,deltaH) → Float64Array [L,C,H]
-computeSirenCorrectionBatch(inputs: Float64Array) → Float64Array  // multiples of 9
-sirenMetadata() → { architecture:[9,16,16,3], totalParams:483, omega0:30, seed:421337 }
-sirenWeights() → { W1, B1, W2, B2, W3, B3 }
-```
-
-### Events & Streaming
-
-```js
-const bus = new MomotoEventBus();
-bus.subscribe(cb)
-bus.subscribeFiltered([0, 1], cb) // 0=Progress, 1=Metrics
-bus.emitProgress('engine', 50, 'Computing palette…')
-bus.emitMetric('wcag', 'ratio', 4.5)
-bus.subscriberCount(), bus.eventCount(), bus.bufferedEvents()
-
-const stream = MomotoEventStream.fromBus(bus);
-stream.poll() → { events, sequence, totalEvents, droppedEvents } | null
-stream.pause(), stream.resume(), stream.close()
 ```
 
 ### Agent API
 
-```js
-// Validation
-agentValidatePair(fg, bg, standard, level) → JSON { passes, ratio, level }
-agentValidatePairsBatch(pairsJson) → JSON
-agentGetMetrics(hex) → JSON { hex, oklch, hct, luminance }
-agentGetMetricsBatch(colorsJson) → JSON
-
-// Recommendations
+```javascript
+// Validation & recommendations
+agentValidatePair(fg, bg, standard, level) → JSON
 agentRecommendForeground(bgHex, context, target) → JSON
-agentImproveForeground(fgHex, bgHex, context, target) → JSON
 agentScorePair(fgHex, bgHex, context, target) → JSON
 
-// Materials
-agentGetMaterial(preset) → JSON
-agentListMaterials(category?) → JSON
-
 // Contracts
-new ContractBuilder()
-  .minContrastWcagAA('#07070e').inSrgb().lightnessRange(0.4, 0.9)
-  .build() → JSON
+const contract = new ContractBuilder()
+  .minContrastWcagAA('#07070e').lightnessRange(0.4, 0.9).inSrgb().build();
 agentValidate(colorHex, contractJson) → JSON { passes, violations }
 
 // Workflows
 executeWorkflow(workflowJson) → JSON
 // type: "brand_palette"|"accessibility_audit"|"theme_generation"
-createSession(configJson) → sessionId
-executeWithSession(sessionId, queryJson) → JSON
-generateReport(colorsJson, reportType) → JSON
-// reportType: "wcag"|"apca"|"cvd"|"full"
-listWorkflows() → JSON
-
-// Engine identity & certification
-getMomotoIdentity() → JSON { version:"7.0.0", buildId, specVersion }
+getMomotoIdentity() → JSON { version:"7.1.0", buildId, specVersion }
 selfCertify() → JSON { passed, tests, timestamp }
+```
+
+### Events & Streaming
+
+```javascript
+const bus = new MomotoEventBus();
+bus.subscribe(cb)
+bus.emitProgress('engine', 50, 'Computing palette…')
+bus.emitMetric('wcag', 'ratio', 4.5)
+
+const stream = MomotoEventStream.fromBus(bus);
+stream.poll() → { events, sequence, totalEvents, droppedEvents } | null
+stream.pause(), stream.resume(), stream.close()
 ```
 
 ---
@@ -637,27 +515,48 @@ selfCertify() → JSON { passed, tests, timestamp }
 | WCAG AA (large text) | 3.0:1 |
 | APCA body text | Lc ≥ 75 |
 | APCA heading | Lc ≥ 60 |
-| APCA MAIN_TRC | 2.4 |
-| APCA sRco/sGco/sBco | 0.2126 / 0.7152 / 0.0722 |
-| APCA BLK_THRS / BLK_CLMP | 0.022 / 1.414 |
-| CAM16 z formula | z = 1.48 + 0.29 × √n |
-| SIREN architecture | [9, 16, 16, 3], 483 params, ω₀=30, seed=421337 |
+| EBU R128 integrated | −23.0 LUFS ±1 |
+| EBU R128 LRA | ≤ 18 LU |
+| ITU-R BS.1770-4 gate | −70 LUFS absolute |
+| LRA resonance (Lra) | ~150–200 Hz |
+| SIREN architecture | [9, 16, 16, 3], 483 params, ω₀=30 |
 | Constraint solver | penalty method, max_iter=500, convergence=1e-4 |
+| CAM16 z formula | z = 1.48 + 0.29 × √n |
 
 ---
 
-## Flat Array Conventions
+## Design Principles
 
-| Type | Layout |
-|------|--------|
-| OKLCH | `[L, C, H]` — L∈[0,1], C≥0, H∈[0,360) |
-| HCT | `[hue, chroma, tone]` — tone∈[0,100] |
-| RGB | `[r, g, b]` — ∈[0,1] |
-| BSDF | `[reflectance, transmittance, absorption]` — sums to 1.0 |
-| Tonal palette | 13 HCT triples → 39 values |
-| Distortion map | `[offsetX, offsetY, hueShift, brightness × N²]` |
-| Complex IOR batch | `[n₀, k₀, n₁, k₁, …]` |
-| Spectral | 33 wavelengths: 380, 390, …, 700 nm |
+1. **Physics first** — Fresnel, K-weighting, Weber's law; no magic numbers
+2. **Deterministic** — same input → same output across all platforms (IEEE 754 f32)
+3. **Energy-conserving** — `output + absorbed + scattered = input` enforced at runtime
+4. **No unsafe Rust** — zero `unsafe` in all crates
+5. **No dynamic dispatch in hot paths** — `DomainVariant` enum, not `Box<dyn Domain>`
+6. **No heap in loops** — `Box<[f32]>` allocated once per call; inner loops zero-alloc
+7. **f32 throughout** — WASM compatibility and SIMD alignment
+
+---
+
+## Testing
+
+```bash
+cd momoto
+
+# Full suite
+cargo test --workspace          # 2 104 tests, 0 failures
+
+# Per domain
+cargo test --package momoto-audio    # 70 tests
+cargo test --package momoto-haptics  # 36 tests
+cargo test --package momoto-engine   # 24 tests
+cargo test --package momoto-core     # 290 tests
+cargo test --package momoto-materials # 1 616 tests
+
+# Examples
+cargo run --example 05_audio_lufs --package momoto-audio
+cargo run --example 06_haptics_feedback --package momoto-haptics
+cargo run --example 07_multimodal_engine --package momoto-engine
+```
 
 ---
 
@@ -665,44 +564,45 @@ selfCertify() → JSON { passed, tests, timestamp }
 
 | Doc | Description |
 |-----|-------------|
-| [Interactive API Explorer](https://zuclubit.github.io/momoto-ui/) | Live search across 188 documented entries |
-| [docs/API.md](docs/API.md) | Complete WASM API reference (all 9 modules) |
-| [docs/API_REFERENCE.md](docs/API_REFERENCE.md) | TypeScript design system layer |
-| [docs/mcp/](docs/mcp/README.md) | MCP stdio server for AI assistants |
-| [momoto/crates/momoto-wasm/README.md](momoto/crates/momoto-wasm/README.md) | WASM crate README |
+| [momoto/docs/GETTING_STARTED.md](momoto/docs/GETTING_STARTED.md) | Instalación, quick start por dominio, WASM |
+| [momoto/docs/ARCHITECTURE.md](momoto/docs/ARCHITECTURE.md) | System design, multimodal diagram, enum dispatch |
+| [momoto/PUBLIC_API_CATALOG.md](momoto/PUBLIC_API_CATALOG.md) | API completa de todos los crates |
+| [momoto/SCIENTIFIC_VALIDATION.md](momoto/SCIENTIFIC_VALIDATION.md) | Golden vectors, algoritmo↔estándar |
+| [momoto/BENCHMARKS.md](momoto/BENCHMARKS.md) | Performance por dominio |
+| [Interactive API Explorer](https://zuclubit.github.io/momoto/) | Live search — 188 documented entries |
+| [docs/mcp/](docs/mcp/README.md) | MCP stdio server para AI assistants |
 
 ---
 
-## Engine Internals
+## Why Momoto
 
-<table>
-<tr>
-<td align="center" width="50%">
-<img src="docs/momoto-ui-geno1.png" alt="SIREN Neural Correction Flow" width="420"/>
-<br/>
-<strong>SIREN Neural Correction Flow</strong><br/>
-<sub>483-param network · ω₀=30 · [9,16,16,3] · seed=421337</sub>
-</td>
-<td align="center" width="50%">
-<img src="docs/momoto-ui-geno2.png" alt="AI Visual Generator Pipeline" width="420"/>
-<br/>
-<strong>AI Visual Generator Pipeline</strong><br/>
-<sub>Physics · OKLCH · WCAG + APCA · Token export</sub>
-</td>
-</tr>
-</table>
+Los sistemas UI actuales tratan color, audio y haptics como capas independientes
+sin base física, generando resultados inconsistentes y no reproducibles:
+
+| Problema | Consecuencia |
+|----------|-------------|
+| Colores en sRGB únicamente | Sin HDR, wide gamut ni exactitud perceptual |
+| Loudness de audio por intuición | No-cumplimiento EBU R128, UX inconsistente |
+| Haptics por prueba y error | Daño al actuador, fallas de accesibilidad |
+| Magic numbers por todos lados | No reproducible, no determinístico |
+
+**Momoto separa la física del rendering y unifica los tres dominios sensoriales.**
 
 ---
 
-## Philosophy
+## References
 
-> Color is not styling.
-> Color is responsibility.
-
-**Momoto decides. Momoto UI renders.**
+- [Oklab Color Space](https://bottosson.github.io/posts/oklab/) — Björn Ottosson
+- [APCA Contrast Algorithm](https://github.com/Myndex/SAPC-APCA) — Myndex
+- [ITU-R BS.1770-4](https://www.itu.int/rec/R-REC-BS.1770/) — LUFS loudness measurement
+- [EBU R128](https://tech.ebu.ch/docs/r/r128.pdf) — Broadcast loudness standard
+- [Weber–Fechner Law](https://en.wikipedia.org/wiki/Weber%E2%80%93Fechner_law) — Haptic perception
+- [Fresnel Equations](https://en.wikipedia.org/wiki/Fresnel_equations) — Optical physics
+- [HCT Color Space](https://material.io/blog/science-of-color-design) — Google Material You
+- [Viénot 1999](https://www.sciencedirect.com/science/article/pii/S0042698999000423) — CVD simulation matrices
 
 ---
 
-## License
+> Physics over pixels. Behavior over appearance.
 
 MIT © 2026 Zuclubit
