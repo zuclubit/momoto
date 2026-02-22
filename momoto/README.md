@@ -8,439 +8,327 @@ and WASM-ready.
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│                 MomotoEngine  (v7.1.0)                         │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐ │
-│  │  Color       │  │  Audio       │  │  Haptics             │ │
-│  │  OKLCH · HCT │  │  LUFS · FFT  │  │  LRA · ERM · Piezo   │ │
-│  │  APCA · CVD  │  │  Mel · EBU   │  │  Energy budget       │ │
-│  │  Harmony     │  │  R128        │  │  Waveform gen        │ │
-│  └──────────────┘  └──────────────┘  └──────────────────────┘ │
-│  Energy invariant: output + absorbed + scattered = input       │
-│  No dynamic dispatch · No heap in hot loops · No unsafe Rust   │
+│                    MomotoEngine  (v7.1.0)                      │
+│  ┌──────────────┐   ┌──────────────┐   ┌─────────────────────┐ │
+│  │  Color       │   │  Audio       │   │  Haptics            │ │
+│  │  OKLCH · HCT │   │  LUFS · FFT  │   │  LRA · ERM · Piezo  │ │
+│  │  APCA · CVD  │   │  Mel · EBU   │   │  Energy budget      │ │
+│  │  Harmony     │   │  R128        │   │  Waveform gen       │ │
+│  └──────────────┘   └──────────────┘   └─────────────────────┘ │
+│  Energy invariant: output + absorbed + scattered = input        │
+│  No dynamic dispatch · No heap in hot loops · No unsafe Rust    │
 └────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Domain Comparison
+## Crates
+
+| Crate | Dominio | Descripción | Tests |
+|-------|---------|-------------|-------|
+| [`momoto-core`](./crates/momoto-core) | Foundation | OKLCH · traits · domains · zero deps | 137+ |
+| [`momoto-metrics`](./crates/momoto-metrics) | Color | WCAG 2.1 + APCA-W3 contrast | 43 |
+| [`momoto-intelligence`](./crates/momoto-intelligence) | Color | Harmony · CVD simulation · constraint solver | 15+ |
+| [`momoto-materials`](./crates/momoto-materials) | Color | Glass physics · PBR · thin-film interference | 1 511 |
+| [`momoto-audio`](./crates/momoto-audio) | Audio | ITU-R BS.1770-4 · EBU R128 · FFT · Mel filterbank | 70 |
+| [`momoto-haptics`](./crates/momoto-haptics) | Haptics | Weber's law · LRA/ERM/Piezo · energy budget · waveforms | 34+ |
+| [`momoto-engine`](./crates/momoto-engine) | Orchestration | MomotoEngine · DomainVariant · cross-domain normalization | 22+ |
+| [`momoto-events`](./crates/momoto-events) | Infrastructure | PubSub · EventBroadcaster · EventStream | — |
+| [`momoto-agent`](./crates/momoto-agent) | Orchestration | Workflow · session · visual generation | — |
+| [`momoto-wasm`](./crates/momoto-wasm) | WASM | Bindings JS/TS: color + audio + haptics | — |
+
+---
+
+## Domain Overview
 
 | Domain | Physical quantity | Standard | WASM exports |
 |--------|------------------|----------|-------------|
-| **Color** | Photon wavelength (380–780 nm) | WCAG 2.1, APCA-W3, CIE | 180+ |
-| **Audio** | Sound pressure (20 Hz–20 kHz) | ITU-R BS.1770-4, EBU R128 | 13 |
-| **Haptics** | Vibrotactile force (Hz, N) | IEEE 1451.4, Weber's law | planned |
-
----
-
-## Energy Invariants
-
-All three domains satisfy `output + absorbed + scattered = input` (± tolerance):
-
-| Domain | Energy model | Absorption |
-|--------|-------------|------------|
-| Color | Lossless optical (R+T=1) | 0 in base model |
-| Audio | K-weighting is Parseval-conserving | 0 |
-| Haptics | budget: delivered + remaining = capacity | 0 |
-
----
-
-## Feature Flags
-
-```toml
-# Minimal — color domain only (<350 KB WASM)
-momoto-wasm = { features = ["color"] }
-
-# Default — color + audio (<500 KB WASM)
-momoto-wasm = { features = ["color", "audio"] }
-
-# Full multimodal (<550 KB WASM)
-momoto-wasm = { features = ["multimodal"] }
-```
-
----
-
-## Why Momoto Exists
-
-Current UI systems conflate **physics** with **rendering** and ignore non-visual senses:
-
-| Problem | Consequence |
-|---------|-------------|
-| Colors in sRGB only | No HDR, wide gamut, or perceptual accuracy |
-| Audio loudness by feel | EBU R128 non-compliance, inconsistent UX |
-| Haptics by trial and error | Actuator damage, accessibility failures |
-| Magic numbers everywhere | Non-reproducible, non-deterministic |
-
-**Momoto separates physics from rendering and unifies all three sensory domains.**
-
----
-
-## Design Principles
-
-1. **Physics first** — Fresnel equations, K-weighting, Weber's law, not hacks
-2. **Deterministic** — Same input → same output across all platforms
-3. **Energy-conserving** — `R + T + A + S = 1` enforced at runtime
-4. **No unsafe Rust** — Zero unsafe throughout all crates
-5. **No dynamic dispatch in hot paths** — `DomainVariant` enum, not `Box<dyn Domain>`
-6. **No heap in loops** — `Box<[f32]>` allocated once per call; inner loops are zero-alloc
-7. **Backend-agnostic** — WASM, native Rust, or direct Cargo dependency
-
-See [`SCIENTIFIC_VALIDATION.md`](./SCIENTIFIC_VALIDATION.md) for algorithm-to-standard mappings.
+| **Color** | Photon wavelength 380–780 nm | WCAG 2.1, APCA-W3, CIE | 180+ |
+| **Audio** | Sound pressure 20 Hz–20 kHz | ITU-R BS.1770-4, EBU R128 | 13 |
+| **Haptics** | Vibrotactile force (Hz, N, J) | IEEE 1451.4, Weber's law | planned |
 
 ---
 
 ## Quick Start
 
-### Rust (Core Library)
+### Instalación (Rust)
 
-```rust
-use momoto_core::{
-    material::GlassMaterial,
-    evaluated::{Evaluable, MaterialContext},
-    backend::CssBackend,
-    render::{RenderBackend, RenderContext},
-};
-
-// 1. Define material with physical parameters
-let glass = GlassMaterial {
-    ior: 1.5,                          // Index of refraction
-    roughness: 0.6,                    // 0.0 = mirror, 1.0 = frosted
-    thickness: 8.0,                    // Millimeters
-    noise_scale: 0.4,                  // Frosting intensity
-    base_color: OKLCH::new(0.95, 0.01, 240.0), // Slight blue tint
-    edge_power: 2.0,                   // Fresnel edge sharpness
-};
-
-// 2. Evaluate physics (Fresnel, Beer-Lambert, scattering)
-let context = MaterialContext::default();
-let evaluated = glass.evaluate(&context);
-
-// Physics-based properties (backend-agnostic)
-println!("Scattering: {}mm", evaluated.scattering_radius_mm);
-println!("Fresnel F0: {}", evaluated.fresnel_f0);
-println!("Opacity: {}", evaluated.opacity);
-
-// 3. Render to target backend
-let backend = CssBackend::new();
-let css = backend.render(&evaluated, &RenderContext::desktop())?;
-
-// Result: backdrop-filter: blur(23px); background: oklch(0.85 0.02 240 / 0.65);
+```toml
+[dependencies]
+momoto-core        = "7.1"
+momoto-metrics     = "7.1"   # WCAG 2.1 + APCA contrast
+momoto-intelligence = "7.1"  # Harmony, CVD, constraint solver
+momoto-materials   = "7.1"   # Glass physics, PBR, thin-film
+momoto-audio       = "7.1"   # LUFS, FFT, Mel, EBU R128
+momoto-haptics     = "7.1"   # Energy budget, waveforms
+momoto-engine      = "7.1"   # Cross-domain orchestrator
 ```
 
-### WebAssembly (JavaScript/TypeScript)
+### Color (OKLCH + APCA)
+
+```rust
+use momoto_core::color::Color;
+use momoto_metrics::{APCAMetric, WCAGMetric};
+
+let fg = Color::from_hex("#FFFFFF").unwrap();
+let bg = Color::from_hex("#3B82F6").unwrap();
+
+let wcag = WCAGMetric::new().evaluate(fg, bg).contrast;
+let apca = APCAMetric::new().evaluate(fg, bg).contrast;
+
+println!("WCAG: {:.2}:1  APCA Lc: {:.1}", wcag, apca);
+```
+
+### Audio (ITU-R BS.1770-4 / EBU R128)
+
+```rust
+use momoto_audio::AudioDomain;
+
+let domain = AudioDomain::at_48khz();
+let mut analyzer = domain.lufs_analyzer(1).unwrap();
+
+let samples: Vec<f32> = /* your audio blocks */;
+analyzer.add_mono_block(&samples);
+
+println!("Integrated: {:.1} LUFS", analyzer.integrated());
+println!("EBU R128 passes: {}", domain.validate_broadcast(analyzer.integrated()).passes);
+```
+
+### Haptics (Weber's law / Energy budget)
+
+```rust
+use momoto_haptics::{ActuatorModel, EnergyBudget, HapticWaveform, WaveformKind};
+use momoto_haptics::mapping::FrequencyForceMapper;
+
+let mut budget = EnergyBudget::with_recharge(0.050, 0.010); // 50 mJ LRA
+budget.try_consume(0.005).expect("tap ok");
+budget.tick(0.1); // 100 ms elapsed
+
+let mapper = FrequencyForceMapper::new(ActuatorModel::Lra);
+let spec = mapper.map(0.7, 100.0); // intensity=0.7, 100 ms
+println!("{:.0} Hz  {:.4} N  {:.4} J", spec.freq_hz, spec.force_n, spec.energy_j());
+```
+
+### Engine (Cross-domain orchestration)
+
+```rust
+use momoto_engine::MomotoEngine;
+use momoto_core::traits::domain::DomainId;
+
+let engine = MomotoEngine::new();
+
+let color_norm = engine.normalize_perceptual_energy(DomainId::Color, 0.72);
+let alignment  = engine.perceptual_alignment(DomainId::Color, DomainId::Color, 0.72, 0.68);
+let report     = engine.validate_system_energy();
+
+println!("Alignment: {:.3}  Conserved: {}", alignment, report.system_conserved);
+```
+
+### WASM (JavaScript)
 
 ```javascript
 import init, {
-    GlassMaterial,
-    EvalMaterialContext,
-    RenderContext,
-    CssBackend,
-    evaluateAndRenderCss
-} from './momoto_wasm';
+    wcagContrastRatio, wcagPasses,
+    audioLufs, audioFftPowerSpectrum, audioValidateEbuR128,
+} from 'momoto-wasm';
 
 await init();
 
-// Simple API (one call)
-const glass = GlassMaterial.frosted();
-const css = evaluateAndRenderCss(
-    glass,
-    EvalMaterialContext.new(),
-    RenderContext.desktop()
-);
+// Color
+const ratio = wcagContrastRatio('#FFFFFF', '#3B82F6');
+console.log(`WCAG: ${ratio.toFixed(2)}:1`);
 
-// Advanced API (inspect physics)
-const evaluated = glass.evaluate(EvalMaterialContext.new());
-console.log(`Scattering: ${evaluated.scatteringRadiusMm}mm`);
-console.log(`Fresnel: ${evaluated.fresnelF0}`);
+// Audio
+const samples = new Float32Array(48000); // 1 s sine
+for (let i = 0; i < 48000; i++)
+    samples[i] = Math.sin(2 * Math.PI * 1000 * i / 48000);
 
-const backend = new CssBackend();
-const css = backend.render(evaluated, RenderContext.desktop());
+const lufs = audioLufs(samples, 48000, 1);
+console.log(`Integrated: ${lufs.toFixed(2)} LUFS`);
 ```
+
+---
+
+## WASM Feature Flags
+
+```bash
+# Color only (<350 KB)
+wasm-pack build --target web -- --no-default-features --features color
+
+# Color + Audio (<500 KB)
+wasm-pack build --target web -- --features audio
+
+# Full multimodal (<550 KB)
+wasm-pack build --target web -- --features multimodal
+```
+
+| Feature | Adds |
+|---------|------|
+| `color` | OKLCH, HCT, APCA, materials — always compiled |
+| `audio` | LUFS, FFT, Mel, EBU R128 |
+| `haptics` | Energy budget, waveforms |
+| `multimodal` | audio + haptics |
+| `panic_hook` | Browser panic messages |
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  Application Layer (React, Vue, Solid, Native)              │
-└─────────────────────┬───────────────────────────────────────┘
-                      │
-┌─────────────────────▼───────────────────────────────────────┐
-│  Momoto Engine (Evaluation, Batch, Cache)                   │
-│  - MaterialContext (lighting, viewing angle, background)    │
-│  - Batch evaluation for 1000+ materials                     │
-│  - LUT-based fast paths (Fresnel, Beer-Lambert)             │
-└─────────────────────┬───────────────────────────────────────┘
-                      │
-┌─────────────────────▼───────────────────────────────────────┐
-│  Momoto Materials (Glass, Liquid, Acrylic, Metal)           │
-│  - GlassMaterial::evaluate() → EvaluatedMaterial            │
-│  - Pure functions: no side effects, deterministic           │
-└─────────────────────┬───────────────────────────────────────┘
-                      │
-┌─────────────────────▼───────────────────────────────────────┐
-│  Momoto Core (Physics, Math, Color Science)                 │
-│  - Fresnel equations (Schlick approximation)                │
-│  - Beer-Lambert absorption                                  │
-│  - OKLCH / OKLab color spaces                               │
-│  - No external dependencies                                 │
-└─────────────────────┬───────────────────────────────────────┘
-                      │
-        ┌─────────────┼─────────────┬─────────────┐
-        │             │             │             │
-┌───────▼──────┐ ┌────▼──────┐ ┌───▼──────┐ ┌────▼─────┐
-│ CSS Backend  │ │ WebGPU    │ │  Print   │ │  Native  │
-│ (String)     │ │ (Commands)│ │  (PDF)   │ │ (Skia)   │
-└──────────────┘ └───────────┘ └──────────┘ └──────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                  momoto-wasm (WASM bindings)                     │
+│  feature: color ──── feature: audio ──── feature: haptics        │
+└────────┬────────────────────┬────────────────────┬───────────────┘
+         │                    │                    │
+   ┌─────▼──────┐     ┌───────▼─────┐     ┌───────▼─────┐
+   │momoto-     │     │momoto-audio │     │momoto-      │
+   │intelligence│     │(LUFS/FFT/   │     │haptics      │
+   │materials   │     │Mel/EBU R128)│     │(energy/wave)│
+   │metrics     │     └───────┬─────┘     └───────┬─────┘
+   └─────┬──────┘             │                    │
+         │                    └──────────┬──────────┘
+         └───────────────────────────────┤
+                                  ┌──────▼──────┐
+                                  │momoto-engine│
+                                  │(orchestrator│
+                                  │enum dispatch│
+                                  └──────┬──────┘
+                                         │
+                                  ┌──────▼──────┐
+                                  │momoto-core  │
+                                  │(OKLCH/traits│
+                                  │ zero deps)  │
+                                  └─────────────┘
 ```
 
-**Key Insight:** `EvaluatedMaterial` contains only physical properties (scattering radius in mm, absorption coefficients, Fresnel reflectance). Backends convert these to rendering units (CSS pixels, WebGPU kernel sizes, PDF points).
-
-See [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) for detailed diagrams.
+**Dispatch sin vtable:** `DomainVariant` enum en lugar de `Box<dyn Domain>` — LLVM
+inlinea todos los match arms, cero overhead de dynamic dispatch en hot paths.
 
 ---
 
-## Core Concepts
+## Energy Invariants
 
-### Materials are Functions
+Todos los dominios satisfacen `output + absorbed + scattered = input` (± 1e-4):
 
-Materials are **deterministic transformations** of physical parameters into optical properties:
-
-```rust
-Material = f(IOR, roughness, thickness, color, ...)
-EvaluatedMaterial = Material::evaluate(context: MaterialContext)
-```
-
-**Not this:**
-```rust
-// ❌ Side effects, platform-dependent
-let glass = Glass::new();
-glass.set_blur(20);  // What unit? Pixels? Points?
-let css = glass.to_css();  // Locks us into CSS
-```
-
-**This:**
-```rust
-// ✅ Pure function, backend-agnostic
-let glass = GlassMaterial { ior: 1.5, roughness: 0.6, ... };
-let evaluated = glass.evaluate(&context);  // Physics
-let css = CssBackend.render(&evaluated, &render_ctx);  // Rendering
-let webgpu = WebGpuBackend.render(&evaluated, &render_ctx);  // Same physics!
-```
-
-### Physical Units
-
-All properties in `EvaluatedMaterial` use **physical units**:
-
-| Property | Unit | Example | Backend Conversion |
-|----------|------|---------|-------------------|
-| `scattering_radius_mm` | Millimeters | 6.2mm | CSS: × 3.78 = 23px (96 DPI) |
-| `absorption` | mm⁻¹ | [0.1, 0.1, 0.1] | RGB attenuation |
-| `fresnel_f0` | Dimensionless | 0.04 | Reflectance at 0° |
-| `thickness_mm` | Millimeters | 8.0mm | Beer-Lambert path length |
-
-**Why mm?** Universal, device-independent, works for print/vector/AR natively.
-
-### Context-Dependent Evaluation
-
-Same material behaves differently based on **physical context**:
-
-```rust
-let glass = GlassMaterial::regular();
-
-// Outdoor (bright, direct light)
-let outdoor = MaterialContext {
-    background: OKLCH::new(0.98, 0.01, 100.0),
-    viewing_angle_deg: 0.0,
-    ambient_light: 0.9,
-    key_light: 0.8,
-    ..Default::default()
-};
-
-// Studio (neutral, soft light)
-let studio = MaterialContext::default();
-
-let eval_outdoor = glass.evaluate(&outdoor);
-let eval_studio = glass.evaluate(&studio);
-
-// Same glass, different optical properties based on physics
-assert_ne!(eval_outdoor.opacity, eval_studio.opacity);
-```
-
-See [docs/CONCEPTS.md](./docs/CONCEPTS.md) for deep dive.
+| Domain | Energy model | Tolerance |
+|--------|-------------|-----------|
+| Color | Lossless optical (R + T = 1) | 1e-4 |
+| Audio | K-weighting Parseval-conserving | 1e-4 |
+| Haptics | `delivered + remaining = capacity` | 1e-12 |
 
 ---
 
-## Performance
+## Runnable Examples
 
-Momoto is designed for **batch processing** and **real-time performance**:
+```bash
+cd momoto
 
-```rust
-// Evaluate 1000 materials in parallel
-let materials: Vec<GlassMaterial> = /* ... */;
-let contexts: Vec<MaterialContext> = /* ... */;
+# Color + materials
+cargo run --example 01_liquid_glass_benchmark
+cargo run --example 02_context_aware_material
+cargo run --example 03_batch_vs_single
+cargo run --example 04_backend_swap
 
-let evaluated: Vec<EvaluatedMaterial> = materials
-    .par_iter()
-    .zip(contexts.par_iter())
-    .map(|(mat, ctx)| mat.evaluate(ctx))
-    .collect();
+# Audio — LUFS, EBU R128, FFT, Mel, spectral
+cargo run --example 05_audio_lufs --package momoto-audio
 
-// Render batch to CSS (1 allocation)
-let backend = CssBackend::new();
-let css_strings = backend.render_batch(&evaluated, &RenderContext::desktop())?;
-```
+# Haptics — energy budget, Weber mapping, waveforms
+cargo run --example 06_haptics_feedback --package momoto-haptics
 
-**Benchmarks (Apple M2 Pro):**
-- Single evaluation: ~200ns
-- Batch 1000 materials: ~180µs (1.8× faster than naive loop)
-- LUT-accelerated Fresnel: 5× faster than direct calculation
-
-See [docs/PERFORMANCE.md](./docs/PERFORMANCE.md) for tuning guide.
-
----
-
-## Examples
-
-### 1. Frosted Glass Panel
-
-```rust
-let glass = GlassMaterial::frosted();
-let context = MaterialContext::default();
-let evaluated = glass.evaluate(&context);
-
-let css = CssBackend::new().render(&evaluated, &RenderContext::desktop())?;
-// backdrop-filter: blur(23px); background: oklch(0.80 0.02 220 / 0.68);
-```
-
-### 2. Context-Aware Material
-
-```rust
-let glass = GlassMaterial::regular();
-
-// Light background → darker glass
-let light_bg = MaterialContext::with_background(OKLCH::new(0.95, 0.01, 100.0));
-let eval_light = glass.evaluate(&light_bg);
-
-// Dark background → lighter glass
-let dark_bg = MaterialContext::with_background(OKLCH::new(0.15, 0.02, 240.0));
-let eval_dark = glass.evaluate(&dark_bg);
-
-// Opacity adapts to ensure visibility
-assert!(eval_light.opacity > eval_dark.opacity);
-```
-
-### 3. Multi-Backend Rendering
-
-```rust
-let glass = GlassMaterial::frosted();
-let evaluated = glass.evaluate(&MaterialContext::default());
-
-// Same physics, different outputs
-let css = CssBackend::new().render(&evaluated, &RenderContext::desktop())?;
-let webgpu = WebGpuBackend::new().render(&evaluated, &RenderContext::desktop())?;
-
-// Future: Print backend renders to PDF natively in mm
-// let pdf = PrintBackend::new().render(&evaluated, &RenderContext::print_300dpi())?;
+# Engine — cross-domain orchestration, alignment, energy report
+cargo run --example 07_multimodal_engine --package momoto-engine
 ```
 
 ---
 
-## Migration from v5.x to v6.0
+## Project Status — v7.1.0
 
-**Breaking Changes in v6.0.0:**
+| Crate | Status | Tests |
+|-------|--------|-------|
+| momoto-core | STABLE | 137+ |
+| momoto-metrics | STABLE | 43 |
+| momoto-intelligence | STABLE | 15+ |
+| momoto-materials | STABLE | 1 511 |
+| momoto-audio | STABLE | 70 |
+| momoto-haptics | STABLE | 34+ |
+| momoto-engine | STABLE | 22+ |
+| momoto-events | STABLE | — |
+| momoto-agent | BETA | — |
+| momoto-wasm | STABLE | — |
 
-| Removed | Replacement |
-|---------|-------------|
-| `blur_amount()` | `scattering_radius_mm()` |
-| `has_blur()` | `has_scattering()` |
+---
 
-**Migration:**
-```rust
-// v5.x (removed)
-let blur_px = glass.blur_amount();
+## Design Principles
 
-// v6.0
-let scatter_mm = glass.scattering_radius_mm();
-let blur_px = scatter_mm * (96.0 / 25.4); // Convert to pixels
-```
+1. **Physics first** — Fresnel equations, K-weighting, Weber's law; no hacks
+2. **Deterministic** — mismo input → mismo output en todas las plataformas
+3. **Energy-conserving** — `output + absorbed + scattered = input` en runtime
+4. **No unsafe Rust** — cero `unsafe` en todos los crates
+5. **No dynamic dispatch en hot paths** — `DomainVariant` enum, no `Box<dyn Domain>`
+6. **No heap en loops** — `Box<[f32]>` allocado una vez por call; inner loops zero-alloc
+7. **Backend-agnostic** — WASM, native Rust, o Cargo dependency directo
 
-See [docs/MIGRATION.md](./docs/MIGRATION.md) for complete migration guide.
+---
+
+## Documentation
+
+| Documento | Propósito |
+|-----------|-----------|
+| [docs/GETTING_STARTED.md](./docs/GETTING_STARTED.md) | Instalación, quick start por dominio, WASM |
+| [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | System design, diagrama multimodal, enum dispatch |
+| [PUBLIC_API_CATALOG.md](./PUBLIC_API_CATALOG.md) | Catálogo completo de API pública (todos los crates) |
+| [SCIENTIFIC_VALIDATION.md](./SCIENTIFIC_VALIDATION.md) | Golden vectors, mapeo algoritmo↔estándar |
+| [BENCHMARKS.md](./BENCHMARKS.md) | Números de performance por dominio |
+| [docs/wasm_memory_layout.md](./docs/wasm_memory_layout.md) | Zero-copy buffer design para WASM |
+| [CHANGELOG.md](./CHANGELOG.md) | Historial de versiones |
 
 ---
 
 ## Testing
 
 ```bash
-# Core library tests
-cargo test --workspace --all-features
+# Todos los crates
+cargo test --workspace
 
-# WASM tests
+# Por dominio
+cargo test --package momoto-audio
+cargo test --package momoto-haptics
+cargo test --package momoto-engine
+
+# WASM
 cd crates/momoto-wasm && wasm-pack test --headless --chrome
 
 # Benchmarks
 cargo bench --workspace
-
-# Lint
-cargo clippy --workspace --all-features
 ```
 
 ---
 
-## Project Status
+## Why Momoto
 
-**Version 6.0.0** - Production Ready
+Los sistemas UI actuales tratan color, audio y haptics como capas independientes
+sin base física, generando resultados inconsistentes y no reproducibles:
 
-| Component | Status | Tests |
-|-----------|--------|-------|
-| momoto-core | STABLE | 100+ |
-| momoto-metrics | STABLE | 43 |
-| momoto-intelligence | STABLE | 15 |
-| momoto-materials | STABLE | 1,511 |
-| momoto-wasm | STABLE | N/A |
+| Problema | Consecuencia |
+|----------|-------------|
+| Colores en sRGB únicamente | Sin HDR, wide gamut ni exactitud perceptual |
+| Loudness de audio por intuición | No-cumplimiento EBU R128, UX inconsistente |
+| Haptics por prueba y error | Daño al actuador, fallas de accesibilidad |
+| Magic numbers por todos lados | No reproducible, no determinístico |
 
-See [API_STABILITY.md](./API_STABILITY.md) for detailed stability levels.
-
-See [ROADMAP.md](./ROADMAP.md) for detailed plan.
-
----
-
-## Documentation
-
-| Document | Purpose |
-|----------|---------|
-| [ARCHITECTURE.md](./docs/ARCHITECTURE.md) | System design, crate structure, data flow |
-| [CONCEPTS.md](./docs/CONCEPTS.md) | Core concepts (Materials, Context, Evaluation) |
-| [MIGRATION.md](./docs/MIGRATION.md) | Upgrading from blur_px to scattering_radius_mm |
-| [PERFORMANCE.md](./docs/PERFORMANCE.md) | Tuning, benchmarks, optimization guide |
-| [MANIFESTO.md](./docs/architecture/manifesto-alignment-post-corrections.md) | Design philosophy and principles |
-
----
-
-## Contributing
-
-Contributions must maintain manifesto alignment:
-- Physics first (no visual hacks without documentation)
-- Backend-agnostic (no CSS/rendering concepts in core)
-- Deterministic (reproducible results)
-- Performance-aware (batch APIs, SIMD-friendly)
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
-
----
-
-## License
-
-MIT © 2026 Momoto Contributors
+**Momoto separa la física del rendering y unifica los tres dominios sensoriales.**
 
 ---
 
 ## References
 
-- [Oklab Color Space](https://bottosson.github.io/posts/oklab/) - Björn Ottosson
-- [APCA Contrast Algorithm](https://github.com/Myndex/SAPC-APCA) - Myndex
-- [Fresnel Equations](https://en.wikipedia.org/wiki/Fresnel_equations) - Physics foundation
-- [Beer-Lambert Law](https://en.wikipedia.org/wiki/Beer%E2%80%93Lambert_law) - Absorption model
+- [Oklab Color Space](https://bottosson.github.io/posts/oklab/) — Björn Ottosson
+- [APCA Contrast Algorithm](https://github.com/Myndex/SAPC-APCA) — Myndex
+- [ITU-R BS.1770-4](https://www.itu.int/rec/R-REC-BS.1770/) — LUFS loudness measurement
+- [EBU R128](https://tech.ebu.ch/docs/r/r128.pdf) — Broadcast loudness standard
+- [Weber's Law](https://en.wikipedia.org/wiki/Weber%E2%80%93Fechner_law) — Haptic perception model
+- [Fresnel Equations](https://en.wikipedia.org/wiki/Fresnel_equations) — Optical physics
+- [HCT Color Space](https://material.io/blog/science-of-color-design) — Google Material You
 
 ---
 
